@@ -25,6 +25,16 @@ status: draft
 ## UI/UX states and flows
 
 
+## Interface evidence
+
+- Applicability: new evidence required / existing evidence sufficient / not user-facing
+- Evidence location:
+- Surface used: existing frontend / ASCII flow or wireframe / isolated interactive frontend / other
+- What was learned:
+- Changes reconciled into this specification:
+- Reason no new evidence is needed, if skipped:
+
+
 ## Behaviour and rules
 
 
@@ -38,9 +48,6 @@ status: draft
 
 
 ## Acceptance criteria
-
-
-## Prototype evidence
 
 
 ## Open questions
