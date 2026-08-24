@@ -16,6 +16,14 @@ product-specification:
 ## Proposed system behaviour
 
 
+## Interface evidence and system consequences
+
+- Approved Product Specification evidence:
+- User-observable states and flows that constrain the system:
+- Existing frontend or backend contracts reused:
+- New backend boundaries justified by the evidence:
+
+
 ## Architecture overview
 
 
