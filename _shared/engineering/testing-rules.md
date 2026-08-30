@@ -1,69 +1,173 @@
 # Testing rules
 
-Shared rules for proving behaviour efficiently.
+This file owns the repeatable method for proving repository behavior
+efficiently. Mandatory guarantees live under Validation in
+[`safeguards.md`](safeguards.md); Project specifications own outcome-specific
+acceptance and may require stricter proof.
 
-## A test is earned when it protects
+## Earn each test
 
-- an acceptance criterion;
+A test or coherent parameterized group is earned when it protects:
+
+- an accepted Project criterion;
 - a defect that could return; or
-- a material technical or product risk.
+- a material technical or product risk with a credible occurrence path.
 
-Do not use test count as a measure of confidence.
+Check existing proof first. Do not add a test merely to enumerate every happy
+or unhappy path, increase a count, or protect a theoretical state that the
+product workflow and its actual boundaries cannot reach.
 
-## Stable proof
+Name the protected guarantee, the distinguishing state, and the primary seam:
+workflow, public service, canonical rule, migration, adapter, or operation. One
+parameterized group should own repeated cases that protect the same guarantee.
 
-- Test the public behaviour or observable consequence, not how it happens internally.
-- A test should fail when its protected guarantee is broken, but stay green when the implementation is safely refactored.
-- Do not pin incidental wording, JSON shape, database query text, private interface structure, snapshots, helper output, or mock call order unless that detail is the contract.
-- Lower-level tests may supplement public proof when they isolate a meaningful rule, risk, or failure.
-- Update a test when the protected contract changes or the test was wrong—not merely because the implementation changed.
+## Prove the right cause at a stable boundary
 
-## Efficient sequence
+- Test public behavior or the next observable consequence, not only how the
+  implementation produces it.
+- Make the fixture distinguish the protected defect or risk. The test must fail
+  for the intended reason when that guarantee is broken.
+- For a regression or high-risk behavioral change, prove the failure first and
+  then the fix. Removing or bypassing the fix must make the proof fail.
+- For an ordinary feature addition, fail-before evidence is optional unless the
+  Project specification requires it.
+- Use focused rule, migration, race, failure-injection, or adapter tests when
+  that seam proves the guarantee more directly than a browser workflow.
+- Let helper, query-shape, private-interface, snapshot, and mock-only assertions
+  supplement consequence proof unless that detail is itself the contract.
+- Keep security, isolation, ownership, destructive-action, and persistence
+  proof at the service boundary that owns the consequence.
 
-1. Check whether existing tests already prove the behaviour.
-2. Name the guarantee and the primary boundary that proves it.
+A valuable test stays green through a safe refactor and turns red when its named
+guarantee is broken. Update it when the contract changes or the test was wrong,
+not merely because the implementation changed.
+
+## Use the efficient proof sequence
+
+1. Read the acceptance criterion and identify the exact candidate being tested.
+2. Check whether current tests already protect the guarantee and lifecycle
+   state.
 3. Choose the narrowest meaningful boundary that proves the observable result.
-4. For defects and high-risk changes, prove the failure for the intended reason before applying the fix.
-5. Run focused tests first, then the wider required checks.
-6. Record exact commands, results, failures, and skipped checks.
+4. For a regression or high-risk change, run the discriminating failure before
+   implementation.
+5. Run focused proof first, then the wider checks required by the Project and
+   risk.
+6. Record exact commands, candidate identity, results, failures, and skipped
+   proof.
 
-Avoid duplicate proof. Reuse shared test infrastructure when it has one canonical owner, while keeping scenario-specific data local to the test.
+Documentation-only, formatting-only, and behavior-preserving mechanical work
+may record behavioral testing as not applicable. Structural checks should still
+prove the intended document, link, or migration relationship.
 
-## Environment progression
+## Reuse test infrastructure without centralizing scenarios
 
-Use this default evidence path unless an approved Technical Specification defines a stricter one:
+Before adding a database double, application-environment builder, account or
+tenant factory, server harness, or other reusable infrastructure behavior:
 
-1. Test the exact candidate locally with the narrowest meaningful proof, then the wider required checks.
-2. Deploy that candidate to the configured non-production environment named in the Technical Specification and validate the applicable integration and user flows there.
-3. If the evidence requires a code or specification change, return to the appropriate workflow stage, create a new candidate, and repeat the necessary local and non-production proof.
-4. Treat non-production success as readiness evidence, not production authorization.
-5. Release to production only after Assess Readiness approves the exact candidate and the human explicitly authorizes the external change; then verify the production result and remaining monitoring or rollback obligations.
+1. search the test tree and nearby specifications for an existing shared owner;
+2. name the infrastructure contract that owner represents;
+3. reuse it and keep the distinguishing scenario data local; and
+4. record a deliberate override where the test makes it.
 
-Name the actual environments in each Project's Technical Specification. Do not assume that labels such as dev, preview, or staging refer to equivalent infrastructure or proof.
+A helper inside another collected test is not automatically shared. If several
+tests would otherwise implement the same infrastructure decision differently,
+create one repository-level owner with named extension points. Do not force
+unrelated scenario data into a universal fixture merely to remove repetition.
 
-## Test data and environment evidence
+Named repository scripts own repeatable command composition. Documentation,
+CI, tickets, and agents invoke those scripts rather than create a second set of
+runner flags or lane definitions.
 
-- Identify the environment, data source and type, and dataset version or baseline used for material proof.
-- Prefer deterministic, resettable fixtures or generators when repeatability matters.
-- Keep Project-specific scenarios with the tests or Project that owns them. Extract shared data infrastructure only when several Projects genuinely need one maintained owner.
-- Synthetic, fixture, mock, or anonymized data proves only the behaviours and relationships it represents. Record important differences from production rather than presenting proxy evidence as real-world evidence.
-- Do not copy production secrets or personal data into non-production environments without an explicit, approved privacy and security design.
-- Keep mock or seed data compatible with the schema it exercises and make drift detectable.
+## Consider lifecycle states only when relevant
 
-## States to consider when relevant
+Choose the states needed by the criterion and credible risk, which may include:
 
 - create or first use;
-- existing data or returning use;
-- change;
-- reverse or undo;
+- existing persisted data or returning use;
+- change, reverse, or undo;
 - disable, remove, or retire;
 - reload or restart;
+- divergence between linked records;
+- corruption with valid neighboring state;
+- isolation between accounts, tenants, or owners; or
 - partial failure and recovery.
 
-## Repository commands
+This is a prompt for specification and review, not a requirement to test every
+state for every feature. An empty-state fixture does not prove a criterion about
+existing incompatible data, and identical linked records do not prove data
+provenance.
 
-These commands are intentionally deferred until the Technical Specification selects the stack and executable test configuration exists. Record stable repository entry commands here before the first build candidate is handed to Validate. Keep Project-specific proof requirements in the owning Technical Specification.
+## Progress evidence through environments
 
-Focused tests: Deferred until executable test configuration exists.
+Use this default sequence unless an approved Technical Specification defines a
+stricter path:
 
-Full required checks: Deferred until executable test and CI configuration exist.
+1. Test the exact candidate locally with focused proof, then run the wider
+   required checks.
+2. When the Project requires non-production proof, deploy that exact candidate
+   to the named environment and validate the applicable integration and user
+   flows there.
+3. If evidence requires a code or specification change, create a new candidate
+   and repeat the affected proof.
+4. Treat non-production success as readiness evidence, not production
+   authorization.
+5. Release only after readiness approves the exact candidate and the human
+   authorizes the external change; then verify production and the remaining
+   monitoring or rollback obligations.
+
+Name real environments in the Project Technical Specification. Labels such as
+development, preview, and staging do not prove equivalent infrastructure.
+
+For material evidence, identify the environment, data source and type, and
+dataset version or baseline. Prefer deterministic, resettable fixtures when
+repeatability matters. Synthetic, mock, fixture, or anonymized data proves only
+the relationships it represents; report important differences from production.
+Never copy production secrets or personal data into non-production without an
+explicit approved privacy and security design.
+
+## Local browser-test safety
+
+When a browser test is part of the selected proof, follow the canonical
+[local browser-test environment procedure](local-browser-test-environment.md).
+Load it only for browser testing; it owns candidate-server provenance and safe
+reuse of existing servers.
+
+## Repository entry commands
+
+Executable commands are intentionally deferred until the Technical
+Specification selects the stack and working test configuration exists. Before
+the first candidate is handed to Validate, record stable repository-owned entry
+commands here for:
+
+- focused proof;
+- full required checks;
+- build or packaging; and
+- the exact-candidate integration gate, when one exists.
+
+Keep Project-specific proof requirements in the owning Technical Specification.
+Do not copy runner flags into several workflow files.
+
+Focused proof: Deferred until executable test configuration exists.
+
+Full required checks: Deferred until executable test and CI configuration
+exists.
+
+Build or packaging: Deferred until executable build configuration exists.
+
+Exact-candidate gate: Deferred until the repository defines one canonical
+command.
+
+## Exact-candidate integration gate
+
+Validate the assembled candidate with the repository's one canonical complete
+gate after independent review, focused criterion proof, and correction or human
+disposition of candidate-invalidating findings.
+
+The gate identifies the exact commit or immutable tree, refuses ambiguous dirty
+state, and records every phase, failure, omission, and relevant environment. A
+changed candidate invalidates the result. Do not describe the gate as complete
+when a required phase did not run or failed.
+
+Hosted checks may execute the same proof in separate phases, but their terminal
+results must still identify the same candidate and must not be replaced by a
+pasted or manually asserted success.

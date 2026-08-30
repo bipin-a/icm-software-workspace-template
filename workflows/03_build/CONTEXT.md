@@ -1,57 +1,49 @@
-# 03_build — implement the approved change
+---
+type: workflow-router
+---
 
-One job: implement the selected Project's approved specifications and delivery assessment.
+# 03_build — route approved delivery work
+
+One job: route one approved Build action in a fresh context. This parent does
+not prepare delivery objects, implement code, publish a slice, or assemble the
+Project candidate itself.
 
 ## Inputs
 
 - Working: `../../projects/<project-slug>/PROJECT.md`
-- Working: `../../projects/<project-slug>/specs/product-spec.md`
-- Working: `../../projects/<project-slug>/specs/technical-spec.md`
 - Working: `../../projects/<project-slug>/delivery-assessment.md`
-- Reference when relevant: `../../_shared/principles/engineering-principles.md`
-- Reference when Python is in scope: `../../_shared/engineering/python-tooling.md`
-- Reference: `../../_shared/engineering/testing-rules.md`
-- Reference when creating commits or pull requests: `../../_shared/engineering/github-delivery-rules.md`
-- Reference only when `delivery_profile: multi-pr`: `../../_shared/engineering/multi-pr-delivery.md`
+  - Read only `Delivery profile`, `Architecture dependencies and human
+    checkpoints`, and `Human decision` to confirm approval, selected profile,
+    and required decisions.
+- Conditional: when the assessment requires an Architecture Investigation,
+  read only its `Human decision and routing` through the Project link.
+- Live external state: follow only the delivery links in the selected Project.
+- Capability routing: `../CONTEXT.md`
 
-Do not load brainstorms or unrelated Project histories unless an approved artifact links to them.
+Do not load specifications, issue bodies, implementation files, another
+stage's references, or the complete engineering library while routing.
 
-Conversation may select the Project, surface a concern, or request a route change. It is not authoritative product or technical intent. Every implemented behaviour must trace to the approved Product or Technical Specification. Existing code, tests, dependencies, and repository state remain implementation evidence.
+## Routes
 
-If requested behaviour has no specification owner, stop and return to Spec & Design. The Delivery Assessment may shape sequencing and trade-offs but cannot define behaviour.
-
-If an applicable `architecture_hold` is unresolved, stop. Build must not work around the blocked boundary.
-
-If implementation reveals a material data, interface, ownership, migration, or third-party uncertainty that the approved specifications and Delivery Assessment did not address, stop and route to the architecture-spike workflow when evidence is needed. Otherwise return to Spec & Design or Assess Delivery. Do not add speculative abstractions during Build.
-
-## Process
-
-1. Confirm the specifications and delivery assessment are approved and the delivery profile is decided.
-2. For multi-PR delivery, select an approved, unblocked child issue.
-3. Check what existing tests already prove.
-4. Implement the smallest complete change.
-5. Add only the focused tests earned by the behaviour or risk.
-6. Increment the Project iteration and assign an exact commit, build, or artifact identifier to `current_build`.
-7. Clear Project links to validation and readiness summaries from the prior candidate; their compact decision history must already be in the iteration log.
-8. Record what changed, its specification trace, exact test commands and results, skipped checks, and what remains.
-
-## Outputs
-
-- Application code in the path selected by the Technical Specification
-- `../../projects/<project-slug>/summaries/build-summary.md`
-- For multi-PR delivery: child pull request evidence and the updated draft integration pull request
-
-Use `../../_templates/summaries/build-summary.md`. Replace stale candidate summaries only after their decisions and evidence links are represented in `iteration-log.md`.
-
-## Human check
-
-Inspect the implemented change and build summary. Accept it for validation or route the Project back to Spec & Design, Assess Delivery, Build, or an architecture spike.
-
-## Skill routing
-
-- Use `incremental-implementation` for changes across several files or boundaries.
-- Use `test-driven-development` for new behaviour or a defect fix.
-- Use `frontend-ui-engineering` for a user interface implementation.
-- Use `api-and-interface-design` for a public API or module boundary.
-
-Invoke a skill only when its condition is present.
+1. Verify that the exact Delivery Assessment is approved and that no unresolved
+   investigation or human decision blocks the selected work.
+2. For multi-pull-request delivery, if the approved issue and branch topology
+   is absent, enter [`01_prepare-delivery/`](01_prepare-delivery/CONTEXT.md). A
+   single-pull-request profile skips that step and targets the configured base
+   branch directly.
+3. Select exactly one unblocked delivery slice from live state. While an
+   accepted criterion remains unimplemented, enter
+   [`02_implement-increment/`](02_implement-increment/CONTEXT.md) for one
+   proof-driven increment.
+4. When that slice's implementation branch satisfies its accepted criteria,
+   enter [`03_publish-slice/`](03_publish-slice/CONTEXT.md) to create or update
+   its exact pull request.
+5. For multi-pull-request delivery, repeat steps 3–4 as the frontier advances.
+   Once all required slices are assembled—or once a single-pull-request
+   candidate is complete—enter
+   [`04_assemble-candidate/`](04_assemble-candidate/CONTEXT.md) to pin the exact
+   candidate and route it to Validate.
+6. Route backward to Design when requested behavior lacks a specification
+   owner, implementation contradicts an accepted artifact, the live delivery
+   shape contradicts the assessment, or material uncertainty blocks a boundary.
+   Do not work around the contradiction or add a speculative abstraction.

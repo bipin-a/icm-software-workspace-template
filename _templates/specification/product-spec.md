@@ -2,9 +2,15 @@
 type: product-specification
 project:
 status: draft
+decision_mode: single-track
+selected_product_option:
 ---
 
 # Product Specification
+
+This specification owns product intent, scope, and acceptance. Use the
+repository's canonical product, domain, and UX language. Link proposed changes
+to their reviewed owners instead of redefining shared rules here.
 
 ## Summary
 
@@ -18,24 +24,48 @@ status: draft
 - Important assumptions:
 - Why now:
 
-
 ## Product experience
 
 
-## UI/UX states and flows
+## Product behavior options
 
+Use `options` only when the outcome creates or changes a source of truth, or
+when more than one defensible user-visible shape exists. Record two or three
+credible behaviors; otherwise leave this table empty and stay `single-track`.
+
+| ID | Candidate behavior | Product benefit | Accepted sacrifice or weakness | Status |
+|---|---|---|---|---|
+|  |  |  |  |  |
+
+## Product workflow and reachable states
+
+### Primary flow
+
+
+### Relevant alternate, failure, and lifecycle states
+
+Include a state only when an acceptance criterion, observed defect, or credible
+product or operational path makes it relevant.
+
+### Explicitly excluded states
+
+Record exclusions whose omission could otherwise be mistaken for an oversight.
 
 ## Interface evidence
 
-- Applicability: new evidence required / existing evidence sufficient / not user-facing
-- Evidence location:
-- Surface used: existing frontend / ASCII flow or wireframe / isolated interactive frontend / other
+- Applicability: our UI / provider UI in customer flow / no product UI
+- Current interface surface and owning code or components:
+- Proposed mockup or interactive prototype:
+- Provider handoff and return evidence, when applicable:
+- Existing UI owners reused:
+- Fidelity and reason it is sufficient:
+- Relevant states shown:
+- Applicable product or UX principles and reviewed exceptions:
 - What was learned:
 - Changes reconciled into this specification:
-- Reason no new evidence is needed, if skipped:
+- Reason no product UI is involved, when applicable:
 
-
-## Behaviour and rules
+## Product behavior and rules
 
 
 ## Scope and non-goals
@@ -46,8 +76,16 @@ status: draft
 - Pre-release validation signals:
 - Later real-world signals, when relevant:
 
-
 ## Acceptance criteria
+
+Use stable criterion IDs. State observable outcomes rather than implementation
+steps.
+
+| ID | Observable criterion | Relevant states or data | Required evidence |
+|---|---|---|---|
+|  |  |  |  |
+
+## Approved decisions
 
 
 ## Open questions

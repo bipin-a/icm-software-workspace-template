@@ -1,49 +1,40 @@
-# 04_validate — report evidence about the candidate
+---
+type: workflow-router
+---
 
-One job: compare the exact candidate against the approved specifications and report the evidence. Validate does not fix code or specifications and does not decide whether to release.
+# 04_validate — route exact-candidate evidence work
+
+One job: route one validation action for the exact candidate. This parent does
+not review code, run proof, dispose findings, or approve readiness.
 
 ## Inputs
 
 - Working: `../../projects/<project-slug>/PROJECT.md`
-- Working: `../../projects/<project-slug>/specs/product-spec.md`
-- Working: `../../projects/<project-slug>/specs/technical-spec.md`
-- Working: `../../projects/<project-slug>/delivery-assessment.md`
-- Working: `../../projects/<project-slug>/summaries/build-summary.md`
-- Working: the exact code or build identified by the build summary
-- Reference: `../../_shared/engineering/testing-rules.md`
-- Reference: `references/review-rules.md`
-- Reference only when `delivery_profile: multi-pr`: `../../_shared/engineering/multi-pr-delivery.md`
-- Template: `../../_templates/summaries/validation-summary.md`
+- Live working input: exact candidate pull request or commit admitted by Build
+- Working: approved Delivery Assessment `Human decision`
+- Capability routing: `../CONTEXT.md`
 
-Do not assume current code, test, or environment state from an old summary. Verify it again when needed.
+Do not load specifications, candidate code or diff, test logs, engineering
+references, another stage, or prior Project runs while routing.
 
-## Process
+## Routes
 
-1. Identify the exact candidate. For a pull request, obtain live metadata, changed files, head SHA, and exact diff; verify the local checkout matches and has no overlapping dirty changes.
-2. Identify each evidence environment and its data source, type, version or baseline, reset state, and important differences from production.
-3. Map each acceptance criterion and material risk to observable proof.
-4. Perform the mandatory baseline review, then select only the conditional review angles earned by the change.
-5. Test the relevant lifecycle states, including change, reversal, reload, and partial failure.
-6. For multi-PR delivery, validate the assembled integration branch rather than relying only on child pull request results.
-7. Perform human-in-the-loop UI/UX review when relevant. If browser behaviour is part of the contract, use the Project-defined real-browser proof method.
-8. Record what each class of evidence establishes and does not establish. Do not present controlled local, mock-data, or staging evidence as proof of real-world adoption.
-9. Record each observation, evidence, specification relationship, why it may matter, a concrete example, possible responses and costs, and the decision owner.
-10. Separate facts, interpretation, recommendations, and skipped checks.
-
-## Outputs
-
-- `../../projects/<project-slug>/summaries/validation-summary.md`
-
-## Human check
-
-Confirm that the evidence and finding descriptions are complete, then continue to Assess Readiness. This check does not approve release or choose fixes.
-
-## Skill routing
-
-- Use `code-review-and-quality` before readiness assessment.
-- Use `doubt-driven-development` for non-trivial or high-stakes claims.
-- Use `code-simplification` when unnecessary complexity is a material concern.
-- Use `security-and-hardening` when security or privacy is in scope.
-- Use `performance-optimization` when performance is part of the contract or risk.
-
-Use right-sized review agents and angles; do not run every reviewer by default. Delegated findings are evidence, not authority.
+1. Verify the candidate identity and approved artifacts named by the Project.
+2. When baseline candidate review is absent or invalidated, enter
+   [`01_review-candidate/`](01_review-candidate/CONTEXT.md).
+3. When review has a material finding without an approved disposition that
+   permits this exact candidate to continue unchanged, enter Assess Readiness
+   before running more proof.
+4. For each accepted Product criterion without terminal evidence on this
+   candidate, enter
+   [`02_validate-criterion/`](02_validate-criterion/CONTEXT.md) in a fresh
+   context.
+5. Route any new material failure or finding through Assess Readiness before
+   the full gate unless its approved disposition permits this candidate
+   unchanged.
+6. When review and every required criterion result are terminal, enter
+   [`03_verify-candidate-gate/`](03_verify-candidate-gate/CONTEXT.md).
+7. When the exact-candidate gate result is terminal, enter
+   [`04_complete-validation/`](04_complete-validation/CONTEXT.md).
+8. A changed candidate returns to Build assembly; a specification or assessment
+   contradiction returns to its canonical owner.

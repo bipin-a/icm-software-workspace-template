@@ -1,41 +1,35 @@
-# 05_assess-readiness — decide the next route
+---
+type: workflow-router
+---
 
-One job: decide how to dispose of validation findings and whether the exact candidate is ready for Release. This stage does not change code or specifications.
+# 05_assess-readiness — route finding disposition and candidate decision
+
+One job: route one human readiness action for the exact validated candidate.
+This parent does not dispose a finding, accept risk, merge, or authorize an
+environment promotion.
 
 ## Inputs
 
 - Working: `../../projects/<project-slug>/PROJECT.md`
-- Working: `../../projects/<project-slug>/specs/product-spec.md`
-- Working: `../../projects/<project-slug>/specs/technical-spec.md`
-- Working: `../../projects/<project-slug>/delivery-assessment.md`
-- Working: `../../projects/<project-slug>/summaries/build-summary.md`
-- Working: `../../projects/<project-slug>/summaries/validation-summary.md`
-- Reference: `references/readiness-rules.md`
-- Reference: `../../_shared/voice.md`
-- Template: `../../_templates/summaries/readiness-decision.md`
+- Live working input: exact candidate identity, terminal validation evidence,
+  material findings, and existing disposition links
+- Working: approved Delivery Assessment `Human decision`
+- Capability routing: `../CONTEXT.md`
 
-The build identifier in all current artifacts must match. If it does not, stop and return to Validate with the correct candidate.
+Do not load specifications, code, complete diffs or logs, engineering
+references, another stage, or prior Project runs while routing.
 
-## Process
+## Routes
 
-1. Review each finding's evidence, contract relationship, and impact.
-2. Choose a disposition and explain its local cost and relationship to the Project intention.
-3. Decide one route: Build, Spec & Design, Architecture Spike, Assess Delivery, Validate, Roadmap, Defer, or Release.
-4. Record the exact candidate, decision owner, rationale, accepted risks, and approval.
-5. Update `PROJECT.md` to show the selected stage. Do not edit a specification merely to make it match the implementation.
-
-## Outputs
-
-- `../../projects/<project-slug>/summaries/readiness-decision.md`
-- One compact row in `../../projects/<project-slug>/summaries/iteration-log.md`
-
-## Human check
-
-Approve the dispositions and route. Release is allowed only when the exact candidate is approved and no applicable architecture hold remains. A code fix returns to Build and creates a new candidate iteration. Changed intent returns to Spec & Design and invalidates the downstream assessment, build, validation, and readiness decision. Material unresolved architecture uncertainty routes to an architecture spike.
-
-## Skill routing
-
-- Use `doubt-driven-development` for contested or high-stakes readiness claims.
-- Use `documentation-and-adrs` when accepting a material, durable architecture decision.
-
-Invoke a skill only when its condition is present.
+1. Verify the candidate and validation evidence identify the same exact head.
+2. For each material finding without an approved disposition, enter
+   [`01_dispose-finding/`](01_dispose-finding/CONTEXT.md) in a fresh context.
+3. When no complete validation handoff exists yet, route an approved finding
+   disposition back to Validate. Do not infer final readiness from partial
+   evidence.
+4. After every material finding has a disposition and validation has a complete
+   exact-candidate handoff, enter
+   [`02_choose-route/`](02_choose-route/CONTEXT.md).
+5. A changed candidate returns to Validate. A correction, specification change,
+   delivery reassessment, or architecture investigation returns to its
+   canonical owner.

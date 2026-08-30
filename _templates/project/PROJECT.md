@@ -1,21 +1,21 @@
 ---
+type: project
 id:
 title:
-status: proposed
-workflow_stage: 01_spec-design
-iteration: 0
-current_build:
-architecture_hold: none
-active_spike:
-affected_by_spikes: []
-delivery_profile: undecided
-delivery_assessment:
+workflow: project-delivery
 parent_issue:
-integration_branch:
-integration_pr:
+approval_contract: artifact-receipts
 ---
 
 # Project
+
+Create a Project by copying the `_templates/project/` folder to
+`projects/<project-slug>/`. Add and link artifacts only when the workflow
+produces them. `PROJECT.md` is the stable record and router; GitHub owns
+changing issue, pull-request, and check status.
+
+The `workflow` field selects a repository workflow. It is not live Project or
+delivery status.
 
 ## Intent
 
@@ -31,35 +31,33 @@ integration_pr:
 
 ## Completion
 
+State any Project-specific completion requirement beyond the shared factory
+definition at `_shared/definition-of-done.md`.
 
 ## Canonical artifacts
 
+Add a link only after the artifact exists.
+
 - Product Specification:
 - Technical Specification:
-- Active Architecture Spike:
-- Architecture Decisions:
 - Delivery Assessment:
-- Current Build Summary:
-- Current Validation Summary:
-- Current Readiness Decision:
-- Iteration Log:
-- Release Summary:
+- Prototype Evidence:
+- Architecture Investigations:
+- Architecture Decision Records:
 - Lessons:
+- Approval receipts: `approvals/`
 
-## Delivery
+## GitHub delivery and release evidence
 
-Complete and approve `delivery-assessment.md` before Build. Record its path and selected delivery profile above. For `multi-pr`, follow [`multi-pr-delivery.md`](../../_shared/engineering/multi-pr-delivery.md).
+Link durable delivery and release evidence without copying live status or
+provider-owned records here.
 
-## Workflow
-
-- [Shared workflow](../../CONTEXT.md)
-- [Start or revise specifications](../../workflows/01_spec-design/CONTEXT.md)
-- [Run an architecture spike](../../workflows/architecture-spike/CONTEXT.md)
-- [Assess delivery](../../workflows/02_assess-delivery/CONTEXT.md)
-- [Build](../../workflows/03_build/CONTEXT.md)
-- [Validate](../../workflows/04_validate/CONTEXT.md)
-- [Assess readiness](../../workflows/05_assess-readiness/CONTEXT.md)
-- [Release](../../workflows/06_release/CONTEXT.md)
-- [Learn](../../workflows/07_learn/CONTEXT.md)
+- Parent issue: use `parent_issue` in frontmatter
+- Child issues:
+- Implementation pull requests:
+- Integration branch and pull request, when applicable:
+- Validation checks and review findings:
+- Production authorization, deployment, and verification evidence, when
+  applicable:
 
 ## Open questions

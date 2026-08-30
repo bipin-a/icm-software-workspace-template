@@ -1,43 +1,78 @@
-# 07_learn — update the right source
+---
+type: workflow-step
+context:
+  profile:
+    path: _shared/engineering/profiles/release-learn.md
+    heading: 07_learn
+  inputs:
+    - path: projects/<project-slug>/PROJECT.md
+      headings: [Intent, Desired outcome, Scope, Non-goals, Completion, Canonical artifacts]
+  selectors:
+    - path: roadmap/future-features.md
+      when: the accepted lesson identifies plausible future direction outside current scope
+    - path: _templates/prototype-evidence.md
+      when: Project-local prototype evidence supports the named lesson
+    - path: _templates/architecture-investigation.md
+      when: Project-local architecture evidence supports the named lesson
+  references:
+    - path: workflows/07_learn/references/learning-rules.md
+  output_templates:
+    - path: _templates/lesson.md
+---
 
-One job: preserve a meaningful lesson and update the source that should change future work.
+# 07_learn — apply an earned lesson to the right owner
 
-Learn may run after Release or as an in-flight detour from any stage. After an in-flight lesson is applied, resume at the earliest stage invalidated by the change.
+One job: preserve meaningful evidence and correct the single source that should
+change future work. Learn is optional after Release and may be entered as an
+in-flight detour from any stage.
 
-Learn is not active containment or recovery. When users, data, or a live system remain at risk, stabilize the situation before using this stage to preserve the lesson and correct its canonical owner.
+Learn is not containment, rollback, recovery, or incident response. Stabilize
+users, data, and live systems before preserving the lesson.
 
 ## Inputs
 
-- Working: the selected Project's specifications and current summaries
-- Working: relevant prototype findings
-- Working when relevant: `../../roadmap/future-features.md`
-- Reference: `references/learning-rules.md`
-- Reference: the relevant file under `../../_shared/principles/`
-- Reference: the workflow contract affected by the lesson, when applicable
-- Template: `../../_templates/lesson.md`
+- Repository input, profile, reference, and output template are declared by
+  `context` above.
+- Working: the Project artifacts and exact implementation, validation, or
+  release evidence that revealed the lesson.
+- Conditional repository inputs are declared by `context.selectors` above.
+- Conditional reference: the specification, workflow contract, template,
+  safeguard, principle, or routing file that may own the correction.
+- Capability routing: `../CONTEXT.md`.
 
-Do not retain chat transcripts or routine progress narration.
+Do not create a lesson for routine progress, a successful release with no new
+understanding, chat narration, or an unsupported impression. Do not load
+unrelated Projects, the complete shared factory, or evidence that does not
+support the named lesson.
 
 ## Process
 
-1. Classify the lesson as Project, Factory, Input contract, Execution, or External change.
-2. Record expected behaviour, what happened, evidence, and why the existing control failed.
-3. Choose the single canonical owner that should change future work.
-4. Update that source when the lesson is accepted.
-5. Record how a future run will detect or prevent recurrence and any remaining risk.
-6. If the lesson occurred in flight, record it in the iteration log and route to the earliest invalidated stage.
+1. Confirm that evidence establishes a meaningful Project-local or cross-
+   Project lesson and that active harm is already stabilized.
+2. Record expected behavior, what happened, exact evidence, why the existing
+   control failed, recurrence credibility, and remaining risk.
+3. Classify the cause as Project, Factory, Input contract, Execution, or
+   External change.
+4. Choose one canonical owner using `references/learning-rules.md`.
+5. Apply an accepted correction to that owner. Keep the Lesson as evidence, not
+   a second instruction source. If no source should change, record why.
+6. Have the human approve the evidence, scope, owner, correction, and remaining
+   risk. Cross-Project promotion requires credible recurrence beyond one local
+   execution.
+7. Link the Lesson from `PROJECT.md`. When the correction invalidates an earlier
+   artifact or proof, return to the earliest affected stage.
 
 ## Outputs
 
-- `../../projects/<project-slug>/lessons.md`
-- Updates to the specification, workflow, template, routing file, roadmap, or shared principle that owns an accepted lesson
+- `../../projects/<project-slug>/lessons/<lesson-slug>.md`, only when earned
+- An accepted update to one canonical source, when appropriate
+- A durable Lesson link in `../../projects/<project-slug>/PROJECT.md`
+
+Do not maintain a central live lesson catalog, copy lessons into stage folders,
+or create an Iteration Log.
 
 ## Human check
 
-Confirm that each lesson is accurate, has the correct owner, and changes the factory only when the failure could recur across Projects.
-
-## Skill routing
-
-- Use `documentation-and-adrs` when a durable architecture decision must be recorded.
-
-Invoke a skill only when its condition is present.
+Confirm that the Lesson is evidence-backed, has one correct owner, changes the
+shared factory only when recurrence is credible across Projects, and routes
+back to every stage invalidated by the accepted correction.

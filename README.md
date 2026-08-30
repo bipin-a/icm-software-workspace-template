@@ -1,101 +1,130 @@
 # ICM Software Workspace Template
 
-A reusable software-delivery profile built on [Interpretable Context Methodology](https://arxiv.org/abs/2603.16021). It combines a sequential, human-gated Pipeline with lightweight Project records, an architecture-spike interrupt, shared factory rules, and blank working-artifact templates.
+A reusable software-delivery profile built on
+[Interpretable Context Methodology](https://arxiv.org/abs/2603.16021). This is
+the first formal profile release: one human-gated Project workflow, durable
+artifact ownership, scoped shared context, and explicit boundaries for live
+delivery and deployment state.
 
-This repository is a factory starter, not a finished product repository. Instantiate it, configure it once, and let each Project carry its own product and technical intent.
+See [`CHANGELOG.md`](CHANGELOG.md) for version history and
+[`MIGRATION.md`](MIGRATION.md) when updating an unversioned instance.
 
-## Why this exists
+This repository is a factory starter, not a finished product repository.
+Instantiate it, complete the setup questionnaire once, and let each Project
+carry its own product and technical intent.
 
-The ICM paper defines a general method for sequential, human-reviewed work, and [`icm-architect`](https://github.com/RinDig/icm-architect) can derive many kinds of ICM workspace from a described or existing process. Software repositories still need a concrete lifecycle, durable decision owners, delivery controls, and evidence requirements. Re-deriving those choices for every repository wastes setup effort and makes similar repositories behave differently.
+## Core model
 
-This template packages one opinionated software-delivery profile. It is more specific than the general method and skill, but remains product-, stack-, provider-, and deployment-neutral until its setup questionnaire is completed.
+[`workflows/`](workflows/CONTEXT.md) holds one shared Pipeline.
+[`projects/`](projects/CONTEXT.md) holds stable Project records that move through
+that Pipeline without moving folders or copying workflow instructions.
 
-## The core design: one Pipeline over Project records
+A Project is the smallest durable unit that owns one product outcome. It is not
+the same as a conversation, issue, pull request, prototype, investigation, or
+release. One Project may use several of those and may return to an earlier stage
+when evidence invalidates an accepted artifact.
 
-`icm-architect` defines both Pipeline and Record library forms and allows forms to compose. This template makes one specific composition the default for software work: [`workflows/`](workflows/) holds one shared Pipeline, while [`projects/`](projects/CONTEXT.md) holds durable Project records that move through it.
+The normal path is:
 
-A Project is the smallest durable unit that owns a product outcome. It is not synonymous with a conversation, task, issue, pull request, prototype, or architecture spike. One Project may require several of those, repeat Build and validation, and route back when evidence changes the intended result.
+1. **Understand** — approve the problem, product behavior, scope, acceptance,
+   and applicable interface evidence.
+2. **Design** — choose the technical design and its proportionate delivery
+   shape.
+3. **Build** — implement the accepted artifacts.
+4. **Validate** — review and prove the exact candidate.
+5. **Assess Readiness** — dispose findings and choose the next route.
+6. **Release** — promote and verify one approved candidate by environment.
+7. **Learn** — apply an earned lesson to its canonical owner.
 
-Each Project stays at one stable path. Its [`PROJECT.md`](_templates/project/PROJECT.md) records identity, intent, current workflow stage, candidate iteration, delivery shape, architecture holds, and links to the canonical artifacts. Shared workflow stages read and update that record; Projects do not copy the workflow or move between stage folders.
+Stage order is a default, not permission to infer state. The selected Project's
+exact artifacts, approval evidence, and current external delivery owners decide
+the next valid action.
 
-A Project folder grows only as its work earns artifacts:
+## Durable context and live state
 
-```text
-projects/<project-slug>/
-├── PROJECT.md
-├── specs/
-├── prototypes/
-├── spikes/
-├── decisions/
-├── delivery-assessment.md
-├── summaries/
-└── lessons.md
+Repository files own durable intent, contracts, decisions, and links. Git and
+pull-request systems own implementation history and changing delivery state;
+configured approval surfaces own approval events; CI owns check results; and
+deployment providers own live environment state.
+
+Project records link those systems without copying their status. Approval and
+candidate evidence bind to exact artifact or Git identities so a changed input
+cannot silently reuse stale evidence.
+
+## Workspace boundaries
+
+| Path | Responsibility |
+|---|---|
+| [`setup/`](setup/CONTEXT.md) | Configure the stable factory and its executable approval and candidate controls. |
+| [`workflows/`](workflows/CONTEXT.md) | Define the shared lifecycle, stage contracts, and human gates. |
+| [`projects/`](projects/CONTEXT.md) | Hold one stable record and earned artifacts for each product outcome. |
+| [`architecture/`](architecture/CONTEXT.md) | Hold cross-Project investigation evidence only when no Project is its natural owner. |
+| [`roadmap/`](roadmap/CONTEXT.md) | Hold future product directions that are not accepted Projects. |
+| [`_shared/`](_shared/CONTEXT.md) | Own stable cross-Project references, profiles, principles, and safeguards. |
+| `_templates/` | Provide blank artifact shapes; templates do not prove an artifact exists or is approved. |
+| [`app/`](app/README.md) | Reserve the application boundary until setup or an accepted Technical Specification selects the real source layout. |
+
+Context stays scoped. Root and parent `CONTEXT.md` files route; working contracts
+name exact Project inputs, templates, and shared profile sections. Do not load
+the whole workspace merely because it is available.
+
+## Configure a new instance
+
+1. Create a repository from this template or copy it into an empty repository.
+2. Open [`setup/questionnaire.md`](setup/questionnaire.md).
+3. Follow [`setup/CONTEXT.md`](setup/CONTEXT.md) and write each accepted answer
+   to its named canonical owner.
+4. Configure and verify the artifact-approval mechanism, existing repository
+   commands, GitHub policy, and any live settings. When an executable candidate
+   gate depends on a later Technical Specification, record its exact pre-Build
+   trigger and owner instead of inventing a command during setup.
+5. Create the first Project only after the human approves the consolidated
+   factory configuration.
+
+The factory controls have stable entry commands:
+
+```sh
+node tools/icm/check-workspace.mjs
+npm --prefix tools/icm test
+node tools/icm/candidate-gate.mjs
+node tools/icm/verify-candidate-receipt.mjs
 ```
 
-This stable entity gives product intent, technical intent, delivery evidence, and decision history one durable custodian across multiple implementation attempts and pull requests.
+[`icm.config.json`](icm.config.json) owns context bounds and candidate-gate
+configuration. The source template leaves the candidate gate disabled because
+it has no application proof commands. Enable it only after setup or an accepted
+Technical Specification names complete phases and evidence; Build cannot hand a
+candidate to Validate before then.
 
-## Purpose-built workspace boundaries
+For an existing repository, inventory and classify the current tree first.
+Treat this profile as a target reference, not a directory to copy wholesale
+over working code. Existing code, history, product intent, commands,
+infrastructure, and live settings remain authoritative until an approved
+migration names their successors.
 
-[`AGENTS.md`](AGENTS.md) is the canonical directory and agent-routing map. The folders are separated for these architectural reasons:
+## Product and stack neutrality
 
-| Folder | Boundary it protects |
-|---|---|
-| [`setup/`](setup/CONTEXT.md) | Configures the stable repository factory once without inventing Project-specific answers. |
-| [`workflows/`](CONTEXT.md) | Defines shared lifecycle transitions once instead of copying a process into every Project. |
-| [`projects/`](projects/CONTEXT.md) | Gives each durable product outcome one record and one home for its working artifacts. |
-| [`architecture/`](architecture/CONTEXT.md) | Holds cross-Project architecture evidence only when no Project is its natural custodian. |
-| [`roadmap/`](roadmap/CONTEXT.md) | Keeps plausible future directions visible without treating them as approved specifications. |
-| `_shared/` | Owns stable cross-Project factory rules and knowledge so Projects link instead of duplicate. |
-| `_templates/` | Defines blank, copyable shapes for records and artifacts without mixing method with instance data. |
-| [`app/`](app/README.md) | Keeps production code separate from workflow records while allowing the chosen technical structure to replace this placeholder. |
+The source template contains no sample Project, provider credentials, live
+setting claims, or selected application stack. `app/`, `roadmap/`, and
+`architecture/` are intentional instantiation surfaces. Optional stack shelves
+remain conditional and never override a Project Technical Specification.
 
-## What this profile adds beyond `icm-architect`
+Product and UX principles stay in their shared owners when they are broadly
+applicable. Project-specific behavior, brand voice, technology, hosting, data,
+interfaces, and deployment choices belong to setup outputs or the applicable
+Project artifacts.
 
-Compared with the generic `icm-architect` skill, this template supplies:
+## Maintain the template
 
-- The Project-centered Pipeline and folder boundaries described above.
-- A fixed, reversible lifecycle from aligned specifications through delivery assessment, Build, Validate, readiness, Release, and Learn.
-- A one-time factory questionnaire that writes accepted decisions to canonical owners and leaves evidence-dependent choices to be earned later.
-- A Spec & Design contract that uses the least expensive faithful interface evidence before new backend boundaries are committed for human-facing behavior. It can reuse an existing frontend or create isolated prototype evidence.
-- An architecture-spike interrupt with explicit holds, evidence custody, decision records, and routing back to the earliest invalidated stage.
-- Delivery-shape assessment, pull-request hygiene, environment and test-data planning, exact-candidate validation, readiness disposition, release evidence, and source-level learning rules.
-- Explicit routing for discussions, diagnosis, and research so they remain conversational until they create a durable consequence.
-
-These are profile choices built on ICM, not additions to or replacements for the underlying methodology.
-
-## How the layers relate
-
-| Layer | Responsibility |
-|---|---|
-| [ICM paper](https://arxiv.org/abs/2603.16021) | Foundational principles for folder structure as agent architecture. |
-| [`icm-architect`](https://github.com/RinDig/icm-architect) | Generic Build and Restructure modes, six composable forms, starter contracts, and the walk test. |
-| This template | A reusable, opinionated ICM profile for software Project delivery. |
-| An instantiated repository | One product's configured rules, specifications, code, evidence, and delivery history. |
-
-## Choose the adoption route
-
-Build and Restructure are adoption-time modes supplied by `icm-architect`; they are not permanent stages in an instantiated repository. After setup, agents use only the Project lifecycle routed by `CONTEXT.md`.
-
-### New repository
-
-Create a new repository from this template or copy it into an empty local repository. Then follow [`setup/CONTEXT.md`](setup/CONTEXT.md) and complete the factory questionnaire before creating the first Project.
-
-Use the generic [`icm-architect`](https://github.com/RinDig/icm-architect) Build mode instead when the real workflow differs materially from this software-delivery profile. Do not force these stages onto a process with different human pauses or outputs.
-
-### Existing repository
-
-Use `icm-architect` Restructure mode. Inventory and classify the existing tree, propose a migration map for human approval, and only then adapt this profile on a branch. Treat this template as a target reference, not as a directory to copy wholesale over working code.
-
-The existing repository remains authoritative for code, history, product intent, executable commands, infrastructure, and live settings. Preserve its entry instructions and reconcile them into one routing source rather than maintaining competing files.
-
-## What setup must decide
-
-[`setup/questionnaire.md`](setup/questionnaire.md) is the canonical setup decision list and output map. It also identifies choices that must be earned later instead of invented during setup.
-
-## Maintaining the template
-
-Keep `setup/questionnaire.md` incomplete in this source repository so generated copies enter setup. Do not add a sample Project, product-specific identity, provider credentials, or live-setting claims. Validate the cold-agent walk, local links, stage contracts, and instance-data scan before publishing changes.
+Leave `setup/questionnaire.md` incomplete in this source repository. Before a
+release, verify the cold-agent setup walk, the Project selection walk, local
+links, workflow and profile routing, retired-path absence, context bounds, and
+the lack of instance data. Do not publish placeholder policy or a receipt
+template without its configured verifier.
 
 ## License and attribution
 
-Released under the [MIT License](LICENSE). The profile builds on [Interpretable Context Methodology](https://arxiv.org/abs/2603.16021) by Jake Van Clief and David McDermott and was informed by the MIT-licensed [`icm-architect`](https://github.com/RinDig/icm-architect) skill.
+Released under the [MIT License](LICENSE). The profile builds on
+[Interpretable Context Methodology](https://arxiv.org/abs/2603.16021) by Jake
+Van Clief and David McDermott and was informed by the MIT-licensed
+[`icm-architect`](https://github.com/RinDig/icm-architect) skill.

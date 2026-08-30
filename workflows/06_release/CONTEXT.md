@@ -1,42 +1,39 @@
-# 06_release — release an approved candidate
+---
+type: workflow-router
+---
 
-One job: release the exact candidate approved by Assess Readiness.
+# 06_release — route one environment action
+
+One job: route one release action for one environment and the exact candidate
+accepted by Assess Readiness. This parent does not plan, deploy, verify, or
+approve promotion.
 
 ## Inputs
 
 - Working: `../../projects/<project-slug>/PROJECT.md`
-- Working: `../../projects/<project-slug>/specs/technical-spec.md`
-- Working: `../../projects/<project-slug>/delivery-assessment.md`
-- Working: `../../projects/<project-slug>/summaries/validation-summary.md`
-- Working: `../../projects/<project-slug>/summaries/readiness-decision.md`
-- Working: the exact code or build identified by all current summaries
-- Reference: `../../_shared/engineering/github-delivery-rules.md`
-- Reference only when `delivery_profile: multi-pr`: `../../_shared/engineering/multi-pr-delivery.md`
-- Template: `../../_templates/summaries/release-summary.md`
+- Live working input: accepted candidate identity, current environment,
+  completed release evidence, and latest human release decision
+- Working: approved Delivery Assessment `Human decision`
+- Configuration: `../../icm.config.json` `release.allowedEnvironments`
+- Capability routing: `../CONTEXT.md`
 
-Do not copy live Git, CI, cloud, or database status from prior summaries. Re-check the system that owns each fact. Release cannot reinterpret findings or substitute a different candidate.
+Do not load specifications, deployment credentials, implementation code,
+release logs, engineering references, another stage, or prior Project runs
+while routing.
 
-## Process
+## Routes
 
-1. Confirm the candidate identifier matches the approved readiness decision and no applicable architecture hold remains.
-2. Re-check the target environment, live gates, rollout plan, and rollback path.
-3. For multi-PR delivery, confirm the integration pull request has satisfied its completion gates.
-4. Obtain human authorization before external changes.
-5. Release through staging and production as defined by the Technical Specification.
-6. Verify the released behaviour and record the evidence links and final iteration.
-
-## Outputs
-
-- `../../projects/<project-slug>/summaries/release-summary.md`
-
-## Human check
-
-Confirm the released result and any remaining monitoring or rollback obligations.
-
-## Skill routing
-
-- Use `shipping-and-launch` to prepare and verify a production launch.
-- Use `ci-cd-and-automation` when the delivery pipeline must change.
-- Use `git-workflow-and-versioning` for branch, integration, and merge work.
-
-Invoke a skill only when its condition is present.
+1. Verify the accepted candidate, current environment, and existing evidence.
+   Stop if the environment is not explicitly allowed by `icm.config.json`.
+2. Without a reviewed no-write plan, enter
+   [`01_plan-environment/`](01_plan-environment/CONTEXT.md).
+3. With explicit authorization for that unchanged plan, enter
+   [`02_deploy-environment/`](02_deploy-environment/CONTEXT.md).
+4. After an attempted deployment, enter
+   [`03_verify-environment/`](03_verify-environment/CONTEXT.md) in a fresh
+   context for each required deployed criterion or risk proof.
+5. With every required environment proof terminal, enter
+   [`04_decide-environment/`](04_decide-environment/CONTEXT.md).
+6. A source, target, or plan change invalidates authorization and returns to
+   planning. A rejected or failed action follows the recorded earlier-stage,
+   retry, rollback, or containment route.

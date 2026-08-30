@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "context": {
+    "commonPaths": [
+      "AGENTS.md",
+      "CONTEXT.md",
+      "_shared/voice.md"
+    ],
+    "limits": {
+      "hubTokens": 1000,
+      "routerTokens": 600,
+      "stepTokens": 1100,
+      "packetTokens": 6500,
+      "reserveTokens": 500
+    },
+    "budgetScenarios": [
+      {
+        "name": "understand-with-interface-evidence",
+        "contract": "workflows/01_understand/CONTEXT.md",
+        "selectors": [
+          "roadmap/future-features.md",
+          "_shared/principles/product-principles.md",
+          "_shared/principles/ux-principles.md",
+          "_shared/ux/ui-ux-rules.md",
+          "_templates/prototype-evidence.md"
+        ]
+      },
+      {
+        "name": "validate-user-interface",
+        "contract": "workflows/04_validate/01_review-candidate/CONTEXT.md",
+        "selectors": [
+          "_shared/principles/ux-principles.md",
+          "_shared/ux/ui-ux-rules.md"
+        ]
+      }
+    ]
+  },
+  "candidateGate": {
+    "enabled": false,
+    "requireLinkedWorktree": false,
+    "phases": [],
+    "evidence": [],
+    "environmentProbes": []
+  },
+  "release": {
+    "allowedEnvironments": []
+  }
+}

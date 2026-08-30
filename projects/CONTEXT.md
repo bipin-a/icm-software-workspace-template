@@ -1,44 +1,71 @@
+---
+type: project-library-router
+status: active
+---
+
 # Projects
 
-Each child folder is one lightweight Project record. Projects use the shared workflow under `../workflows/`; they do not copy it.
+One job: select one durable Project record and route its next action without
+copying live pull-request, check, approval, or deployment state into the
+repository.
 
-## Create a Project
+## Start
 
-1. Choose a unique kebab-case folder name.
-2. Copy `../_templates/project/PROJECT.md` into it.
-3. Keep the template's links to the shared workflow.
-4. Complete the Project intent before creating specifications.
-5. Let Spec & Design create the `specs/` files from the shared templates.
-6. Let Assess Delivery create `delivery-assessment.md` before Build.
+1. Confirm [`../setup/questionnaire.md`](../setup/questionnaire.md) is complete.
+2. If the user names a Project, open only
+   `projects/<project-slug>/PROJECT.md` first.
+3. If the Project does not exist, choose a unique kebab-case slug, copy the
+   [`PROJECT.md` template](../_templates/project/PROJECT.md) to that path, and
+   complete it before creating another artifact.
+4. Follow the `workflow` named by the Project record. Use
+   [`../workflows/CONTEXT.md`](../workflows/CONTEXT.md) for `project-delivery`.
 
-## Lifecycle
+Do not scan every Project or infer that an unlinked issue, pull request, branch,
+approval, or deployment belongs to the selected Project.
 
-Use one status in `PROJECT.md`: `proposed`, `active`, `paused`, `completed`, `cancelled`, or `superseded`.
+## Determine the next route
 
-Do not add a Project-local `CONTEXT.md` unless the Project becomes a genuine sub-workspace with its own repeating workflow.
+1. Report the durable repository handoff from `PROJECT.md` and the exact
+   artifact revisions it links.
+2. New Projects use `approval_contract: artifact-receipts`. Validate the exact
+   Product Specification, Technical Specification, and Delivery Assessment
+   receipts out of band with `node tools/icm/check-workspace.mjs`. A receipt
+   identifies evidence; it does not create or prove human approval merely by
+   existing.
+3. Select the earliest workflow stage whose required artifact is absent,
+   rejected, stale, or invalidated by a changed upstream identity.
+4. When the next stage is owned by Git, a pull-request or check system, an
+   approval surface, or a deployment provider, follow only the exact Project
+   link and read current state from that owner.
+5. Report `Repository handoff` separately from `Live external state`. Name the
+   owner checked and when, or state that live state was not checked.
+6. Never copy changing provider status into Project frontmatter or infer it from
+   a branch name, green check, or deployed resource.
 
-## Architecture spikes
+A Project may return to an earlier stage when an accepted input changes. It
+remains one Project at one stable path. Git and the configured delivery system
+own implementation chronology; Project artifacts retain only durable intent,
+decisions, links, and earned evidence.
 
-A spike answers a narrow uncertainty for a sponsoring Project. It does not own product intent, ship user value, or receive a copied Project workflow.
+Do not add a Project-local `CONTEXT.md` unless the Project becomes a genuine
+sub-workspace with its own repeating workflow and human gates.
 
-- Use `architecture_hold: none` when no unresolved spike blocks the Project.
-- The evidence-custodian Project links the unresolved spike in `active_spike`.
-- Other affected Projects list the unresolved spike under `affected_by_spikes`. If its hold blocks their current work, set their `workflow_stage` to the active architecture-spike substage.
-- After the decision is reconciled, clear the active spike fields. Preserve history through the decision summary, ADR or specification link, and iteration log rather than an ever-growing frontmatter list.
-- Pause only workstreams whose assumptions may be invalidated. A shared contract, data model, source of truth, or foundational dependency may justify a wider hold.
-- Project-local decisions live under `projects/<project-slug>/decisions/`. Cross-Project decisions live under `_shared/architecture/decisions/` when earned.
-- A spike that develops an independent product outcome, specification, priority, or release should be promoted to a Project.
+## Architecture investigations
 
-## Iterations
+Keep an investigation with its sponsoring Project when one Project naturally
+owns the evidence. Use [`../architecture/`](../architecture/CONTEXT.md) only
+when several Projects share the question and no Project is the natural owner.
+Findings are evidence; accepted specifications and earned ADRs own decisions.
 
-A Project may repeat Build → Validate → Assess Readiness several times before Release. This is one Project lifecycle, not a new Project or copied workflow.
+## Outputs
 
-- `PROJECT.md` shows the exact workflow folder in `workflow_stage`, the candidate `iteration`, and its `current_build` identifier. Update the stage whenever a gate chooses a route.
-- Increment `iteration` only when Build produces a new candidate for validation. Rechecking evidence for the same candidate does not create a new iteration.
-- Keep only the current build, validation, and readiness summaries under `summaries/`.
-- Append one compact row to `summaries/iteration-log.md` for each readiness decision, architecture-spike decision, or in-flight Learn detour. The same iteration may have several rows when the evidence is reassessed without a code change.
-- When Build creates a new candidate, clear the Project links to the prior validation and readiness summaries. Replace stale summaries only after their decision and evidence links are captured in the log.
-- Use an exact commit SHA when Git exists. Otherwise use an unambiguous build or artifact identifier.
-- Keep detailed historical diffs and discussion in pull requests and Git once they exist. Do not create per-iteration folders unless an audit or safety requirement earns them.
+- One selected `projects/<project-slug>/PROJECT.md`
+- The exact workflow contract for its next valid action
+- A status report separating durable repository evidence from current external
+  state
 
-No summary file is required before its stage has been reached.
+## Human check
+
+Confirm the selected Project, exact artifact identities, approval evidence,
+external owners, observed live state, and next route before changing an
+artifact or external system.

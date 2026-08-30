@@ -1,41 +1,45 @@
-# Software Project workflow
+---
+type: workspace-router
+status: active
+---
 
-One shared Pipeline updates lightweight Project records stored under `projects/`. Complete [`setup/questionnaire.md`](setup/questionnaire.md) before creating the first Project.
+# ICM software workspace
 
-| Stage | Job | Main output | Human check |
-|---|---|---|---|
-| `01_spec-design` | Define product and technical intent | Project specifications | Approve both specifications |
-| `02_assess-delivery` | Compare delivery trade-offs | Delivery assessment | Choose the delivery shape or route back |
-| `03_build` | Implement the approved specifications | Code and build summary | Review the change |
-| `04_validate` | Report evidence against the specifications | Validation summary | Confirm the evidence is complete |
-| `05_assess-readiness` | Decide how to handle validation findings | Readiness decision | Approve the disposition and route |
-| `06_release` | Release an approved build | Release summary | Confirm the released result |
-| `07_learn` | Capture and apply lessons | Lessons file and source updates | Confirm each lesson's owner |
+This repository contains a configurable software-delivery factory and the
+product workspace created from it. This file routes work; it does not own
+product intent, workflow procedure, or changing delivery state.
 
-## Factory references
+## Setup gate
 
-- Factory configuration: [`setup/questionnaire.md`](setup/questionnaire.md)
-- A finished workflow run: [`_shared/definition-of-done.md`](_shared/definition-of-done.md)
-- Approved reusable inputs: [`_shared/reusable-assets.md`](_shared/reusable-assets.md)
+Read [`setup/questionnaire.md`](setup/questionnaire.md) first. When its status
+is not `complete`, route to [`setup/CONTEXT.md`](setup/CONTEXT.md) before
+creating or advancing a Project. Maintaining the reusable template itself is
+the only exception; leave the questionnaire incomplete in the template source.
 
-## Routing
+## Route by task
 
-- Unconfigured factory → `setup/CONTEXT.md`
-- Discussion, diagnosis, or research with no durable consequence → remain in conversation; when it changes durable work, reconcile the evidence into its canonical Project, roadmap, workflow, or shared source
-- Future direction that is not ready to become a Project → `roadmap/future-features.md`
-- New idea or changed behaviour → `workflows/01_spec-design/CONTEXT.md`
-- Approved specifications → `workflows/02_assess-delivery/CONTEXT.md`
-- Approved delivery assessment → `workflows/03_build/CONTEXT.md`
-- Built change → `workflows/04_validate/CONTEXT.md`
-- Complete validation evidence → `workflows/05_assess-readiness/CONTEXT.md`
-- Approved release candidate → `workflows/06_release/CONTEXT.md`
-- Meaningful factory, Project, input, execution, or external lesson → `workflows/07_learn/CONTEXT.md` from any stage
-- Cross-cutting architecture uncertainty that blocks a decision → `workflows/architecture-spike/CONTEXT.md` from any stage
+| Need | Start here |
+|---|---|
+| Select, create, continue, or report a Project | [`projects/CONTEXT.md`](projects/CONTEXT.md) |
+| Follow the Project delivery stages | [`workflows/CONTEXT.md`](workflows/CONTEXT.md) |
+| Select stable shared rules or references | [`_shared/CONTEXT.md`](_shared/CONTEXT.md) |
+| Configure the factory | [`setup/CONTEXT.md`](setup/CONTEXT.md) |
+| Record a future direction that is not yet a Project | [`roadmap/CONTEXT.md`](roadmap/CONTEXT.md) |
+| Investigate cross-Project architecture with no natural Project owner | [`architecture/CONTEXT.md`](architecture/CONTEXT.md) |
+| Work in the application or selected source tree | [`app/README.md`](app/README.md) and the configured repository instructions |
+| Maintain this reusable profile | [`README.md`](README.md) and the [methodology reference](_shared/methodology/interpretable-context-methodology.md) |
 
-The user may route back to an earlier stage whenever evidence changes the Project. A Build → Validate → Assess Readiness loop may repeat several times before Release; it remains one Project lifecycle and uses numbered candidate iterations.
+Discussion, diagnosis, or research with no durable consequence may remain in
+conversation. When it changes accepted work, reconcile the evidence into its
+one canonical Project, roadmap, workflow, architecture, or shared owner.
 
-## Interrupt workflow
+For Project status, begin with its stable record and exact artifact links.
+Repository files own durable context and accepted decisions. Git, pull-request
+and check systems, configured approval surfaces, and deployment providers own
+their changing live state. Follow exact links and re-check those owners instead
+of copying or inferring current status.
 
-`architecture-spike` is a human-routed interrupt, not a numbered lifecycle stage. It frames one decision, gathers only the evidence needed, and returns the sponsoring and affected Projects to the earliest invalidated stage.
+## Human check
 
-Use a sponsoring Project's `spikes/` folder by default. Use `architecture/spikes/` only when no Project is the natural evidence custodian.
+Confirm the setup state, selected Project or direct repository task, canonical
+owner, and exact external system before changing a file or live system.

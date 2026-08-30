@@ -1,147 +1,140 @@
 <!--
 Documentation-only or mechanical pull request?
-Keep Current Behavior, Commits Included, Validation, and any material Risks or
-Follow-ups. Replace the remaining sections with one scoped N/A explanation.
+Keep Current Behavior, Exact Inputs and Candidate, Validation, and any material
+Risks / Follow-ups. Replace irrelevant sections with one scoped N/A reason.
 -->
 
 ## Current Behavior
 
 ### What works today, or what scenario used to be acceptable?
 
-Describe the existing behavior in concrete product language. Do not start with implementation details.
+Describe the existing behavior in concrete product language. Do not begin with
+implementation details.
 
 ### What new scenario exposed the problem?
 
-Name the workflow, data shape, user action, or integration path that makes the old behavior insufficient.
+Name the workflow, data shape, user action, integration path, or operational
+condition that makes the old behavior insufficient.
 
-### What user-visible or product-correctness issue does this cause?
+### What consequence does this cause?
 
-Explain what breaks, disappears, becomes misleading, corrupts data, or violates a product rule. If the impact is only internal, say why it still matters.
+Explain what breaks, disappears, becomes misleading, corrupts data, or violates
+an accepted product or technical rule. If the effect is internal, explain why
+it still matters.
 
 ## Solution
 
 ### What changed?
 
-List the actual behavioral changes. Include interfaces, APIs, migrations, compatibility behavior, and operational changes when relevant.
+Include material behavior, interfaces, migrations, compatibility, operations,
+and removals.
 
 - TODO
 
-### Why solve it this way instead of another way?
+### Why this design?
 
-Name the decision owner and explain how this avoids fallback logic, duplicated rules, or future disagreement.
+Name the canonical owner and explain the selected trade-offs. State how the
+change avoids a competing fallback, alias, or duplicate decision path.
 
-### How does this improve the intended architecture rather than add fragile debt?
+### What remains intentionally out of scope?
 
-Tie the change to the source of truth it strengthens. Call out any legacy path removed, centralized module added, or invariant protected.
+- TODO
+
+## Exact Inputs and Candidate
+
+Link durable repository artifacts by exact revision. Link changing delivery and
+approval state to the external system that owns it; do not copy live status.
+
+- Project record: TODO
+- Product Specification revision: TODO
+- Technical Specification revision: TODO
+- Delivery Assessment revision and profile: TODO
+- Artifact approval evidence: TODO
+- Owning issue or parent delivery issue: TODO
+- Implementation pull request: TODO
+- Comparison base SHA: TODO
+- Candidate head SHA and Git tree: TODO
+- Integration branch and pull request, when applicable: TODO or N/A
+- Live external state checked at: TODO
 
 ## Review Focus
 
-### Delivery tracking
-
-For a multi-PR Project, link the Project specifications and parent issue, name the integration branch and draft integration pull request, and include the synchronized delivery view required by `_shared/engineering/multi-pr-delivery.md`.
-
-For a child or standalone pull request, write `N/A` where appropriate and link its owning issue.
-
-- Project:
-- Product Specification:
-- Technical Specification:
-- Parent issue or owning issue:
-- Integration branch: N/A
-- Draft integration pull request: N/A
-- Delivery-view synchronization evidence: N/A
-
 ### Acceptance coverage
 
-For behavioral work, map each acceptance criterion to its distinguishing state, action, observable consequence, and test. For documentation-only or mechanical work, write `N/A` and explain why.
+For behavioral work, map each accepted criterion to its distinguishing state,
+action, observable consequence, and proof.
 
-| Acceptance criterion | Initial state | Action or transition | Observable consequence | Discriminating test |
+| Criterion | Initial state | Action or transition | Observable consequence | Discriminating proof |
 |---|---|---|---|---|
 | TODO | TODO | TODO | TODO | TODO |
 
-For every added test or coherent parameterized group, name its distinct job. Write `N/A — no collected tests added` when applicable.
+For each added test or coherent parameterized group, name its distinct job.
 
-| Added test or coherent group | Protected guarantee | Primary seam | Why existing proof is insufficient |
+| Added proof | Protected guarantee | Primary seam | Why existing proof is insufficient |
 |---|---|---|---|
-| TODO or N/A | TODO or N/A | Workflow, public service, canonical rule, or operational | TODO or N/A |
+| TODO or N/A | TODO or N/A | Workflow, public service, canonical rule, migration, or operation | TODO or N/A |
 
 ### Lifecycle and integration coverage
 
-Mark each applicable scenario, or write `N/A — <reason>`. Do not check an irrelevant box merely to complete the template.
+Mark only applicable states, or write `N/A — <reason>`.
 
 - [ ] Fresh state
 - [ ] Pre-existing state
 - [ ] Later edit to the canonical owner
 - [ ] Intentionally divergent linked records
-- [ ] Disable, remove, or reverse the behavior
-- [ ] Subsequent independent read
-- [ ] Cross-child-PR producer and consumer seam
+- [ ] Disable, remove, reverse, or retire
+- [ ] Reload, restart, or subsequent independent read
+- [ ] Cross-slice producer and consumer seam
+- [ ] Partial failure and recovery
 - [ ] N/A — reason:
 
-### Main files to inspect
+### Main files and contracts to inspect
 
 - TODO
 
-### Anything intentionally out of scope
+### Data, migration, environment, and external-service context
 
-Say what this pull request does not do, especially if reviewers may expect it.
-
-- TODO
-
-### Data, schema, or environment context
-
-Call out defaults, migrations, configuration, seed assumptions, external services, or environment-specific behavior.
-
-- TODO
-
-### Commits included
-
-List every commit when the branch has more than one behavior-focused commit.
+Name applicable defaults, persisted-state assumptions, migration or rollback
+requirements, configuration, data sources, privacy limits, and environment
+differences.
 
 - TODO
 
 ## Validation
 
-### Validated head
+### Candidate identity and gate
 
-- Head SHA: TODO
-
-### Test scaffolding and suite inventory
-
-For documentation-only work with no test impact, write `N/A — <reason>`.
-
-- Shared test infrastructure reused: TODO or N/A
-- New test infrastructure introduced: No / Yes — explain why existing infrastructure could not serve the test, name its canonical owner and contract source, and identify any temporary implementation with its removal condition
-- Named project command used or added for repeatable tests: TODO or N/A
-- Collected test inventory changed: No / Yes — list expected additions, removals, or lane moves and the command that proves the inventory
+- Configured exact-candidate gate command: TODO or N/A — reason
+- Gate receipt for the current candidate: TODO or N/A — reason
+- Receipt verification result: TODO or N/A — reason
 
 ### Automated checks
 
-For behavioral fixes, cite the discriminating test: what failed before and passes now. Do not list only broad green suites.
+List exact commands and results. For a regression or high-risk change, identify
+what failed for the intended reason before the fix and passes now.
 
-- `command` — result and what it proves
+- `command` — result and protected guarantee
 
-### Manual checks
+### Manual and external checks
 
-List the exact user or operator flows checked, or say `Not run` and explain why.
-
-- TODO
-
-### Local application or API verification, if relevant
-
-Include local walkthroughs only when they add coverage beyond automated tests.
+List the exact user, operator, integration, or environment flow checked. State
+`Not run` and the reason when applicable.
 
 - TODO
+
+### Skipped proof and uncertainty
+
+- TODO or None
 
 ## Risks / Follow-ups
 
 ### Risk after merge
 
-State the blast radius and who can encounter it. Include compatibility breaks, schema migrations, configuration gates, and UX caveats.
+State the blast radius, affected users or operators, compatibility or migration
+risk, recovery path, and any remaining UX or operational caveat.
 
 - TODO
 
-### Follow-up work, context change, or known remaining defect
+### Follow-up or known remaining defect
 
-Track deferred work explicitly. If a future slice is intentionally out of scope, name it.
-
-- TODO
+- TODO or None

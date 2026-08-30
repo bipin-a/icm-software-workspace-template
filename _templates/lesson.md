@@ -1,10 +1,23 @@
+---
+type: lesson
+project:
+recorded_at:
+---
+
 # Lesson
 
-## Failure class
+Use this artifact for evidence that should improve a Project or the shared
+factory. It is not active incident response and does not become a second rule
+owner. Stabilize any live risk first.
 
-Project, Factory, Input contract, Execution, or External change.
+## Scope and classification
 
-## Expected behaviour
+- Scope: Project-local / cross-Project
+- Failure class: Project / Factory / Input contract / Execution / External
+  change
+- Why recurrence is credible:
+
+## Expected behavior
 
 
 ## What happened
@@ -16,14 +29,26 @@ Project, Factory, Input contract, Execution, or External change.
 ## Why the existing control failed
 
 
-## Correct owner
+## Canonical owner and correction
 
-- Project or specification, workflow, template, routing file, shared principle, roadmap, or external owner:
+- Canonical source that should change: Project specification / workflow /
+  template / routing file / shared principle or safeguard / roadmap / external
+  owner
+- Accepted source change:
+- Reason no source change is appropriate, when applicable:
 
-## Source updated
+If the correction creates or changes a live safeguard, put the complete rule
+and self-contained reason in `_shared/engineering/safeguards.md`. A live
+safeguard must not require this lesson file to explain or apply it.
 
-
-## How a future run detects or prevents this
+## Future detection or prevention
 
 
 ## Remaining risk
+
+
+## Human disposition
+
+- Decision:
+- Approved by:
+- Date:
