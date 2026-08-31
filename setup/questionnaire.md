@@ -21,14 +21,13 @@ retain a duplicate answer set.
    UX, format, migration, or operational safeguards apply to every Project?
 4. **Project artifact approval:** Who may approve Product Specifications,
    Technical Specifications, Delivery Assessments, candidate findings, and
-   releases? Which human-owned surface records each decision? How does the
-   verifier bind that evidence to the exact artifact identity?
+   releases? Which human-owned surface records each decision and its exact
+   artifact identity?
 5. **Candidate identity and proof:** If executable checks exist, which repository
    command is the complete candidate gate? What clean-worktree and dependency
-   preconditions apply? Where is the machine-written receipt stored, how is it
-   bound to the Git tree, and which command verifies it? If no executable system
-   exists yet, which Technical Specification and pre-Build gate must establish
-   these answers?
+   preconditions apply, and where is its durable evidence recorded? If no
+   executable system exists yet, which Technical Specification and pre-Build
+   gate must establish these answers?
 6. **Proof and environment path:** Which focused and repository-wide commands
    exist, which local and non-production environments are used, what data is
    allowed, and when must changed evidence create a new candidate?
@@ -55,8 +54,8 @@ retain a duplicate answer set.
 | Shared reference selection | `../_shared/CONTEXT.md` |
 | Cross-Project safeguards and principles | The narrowest applicable owner under `../_shared/` |
 | Engineering context selection and bounds | `../_shared/engineering/CONTEXT.md`, its profile shelves, and `../icm.config.json` |
-| Proof environments, commands, and candidate gate | `../icm.config.json` owns the allowed environment vocabulary and gate shape; `../_shared/engineering/testing-rules.md`, each Project's Technical Specification, and executable repository configuration select the applicable subset and proof |
-| Artifact approval shape | `../_templates/approval-receipt.md`, Project records, and `../tools/icm/check-workspace.mjs` |
+| Proof environments, commands, and candidate gate | `../_shared/engineering/testing-rules.md`, each Project's Technical Specification, and executable repository configuration |
+| Artifact approval shape | `../_templates/approval-receipt.md`, Project records, and the configured human-owned approval surface |
 | GitHub delivery and merge policy | `../_shared/engineering/github-delivery-rules.md` |
 | Reusable inputs | `../_shared/reusable-assets.md` and the exact stage contracts that consume them; `_shared/CONTEXT.md` routes the internal shared library |
 | Deployment and release policy | The provider-neutral Release contract plus a configured provider procedure when required |
@@ -64,22 +63,18 @@ retain a duplicate answer set.
 ## Verification required before completion
 
 - Root setup and Project-selection walks resolve without an unspecified path.
-- Every configured approval type identifies a human-owned source, exact artifact
-  identity, receipt shape, and passes
-  `node tools/icm/check-workspace.mjs` from the repository root.
-- When executable checks already exist,
-  `node tools/icm/candidate-gate.mjs` refuses an invalid candidate state and
-  produces evidence that `node tools/icm/verify-candidate-receipt.mjs` accepts
-  only for the current Git tree. Otherwise `candidateGate.enabled` remains
-  `false` in `../icm.config.json` and the pre-Build trigger and owner are
-  explicit.
+- Every configured approval type identifies a human-owned source and exact
+  artifact identity; a receipt shape does not replace the human decision.
+- When executable checks already exist, the configured complete candidate gate
+  fails on an invalid candidate and records evidence for the exact Git state.
+  Otherwise the pre-Build trigger and owner are explicit.
 - Existing focused and full proof commands run at the intended repository
   boundary. Commands that depend on a later Technical Specification remain
   deferred to its named pre-Build gate instead of being invented during setup.
 - Approved live repository and delivery settings were read back from their
   canonical systems.
-- Local links, profile selectors, and context bounds pass the repository's
-  structural checks.
+- Local links and profile selectors are reviewed, and
+  `node tools/icm/check-context-budget.mjs` passes.
 - No credentials, populated environment files, sample Project, instance data,
   or placeholder policy entered the factory.
 

@@ -14,7 +14,8 @@ approve promotion.
 - Live working input: accepted candidate identity, current environment,
   completed release evidence, and latest human release decision
 - Working: approved Delivery Assessment `Human decision`
-- Configuration: `../../icm.config.json` `release.allowedEnvironments`
+- Working: approved Technical Specification `Environments and test data` and
+  `Release, rollback, and monitoring`
 - Capability routing: `../CONTEXT.md`
 
 Do not load specifications, deployment credentials, implementation code,
@@ -24,7 +25,8 @@ while routing.
 ## Routes
 
 1. Verify the accepted candidate, current environment, and existing evidence.
-   Stop if the environment is not explicitly allowed by `icm.config.json`.
+   Stop if the environment is not named by the approved Technical
+   Specification.
 2. Without a reviewed no-write plan, enter
    [`01_plan-environment/`](01_plan-environment/CONTEXT.md).
 3. With explicit authorization for that unchanged plan, enter

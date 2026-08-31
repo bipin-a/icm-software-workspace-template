@@ -26,19 +26,14 @@ Project begins.
    Keep only ownership and completion state here.
 4. Configure the application source route, shared reference catalog, engineering
    profiles, safeguards, testing entry commands, GitHub delivery rules, and
-   [`../icm.config.json`](../icm.config.json).
-5. Configure the `artifact-receipts` approval contract that binds approval
-   evidence to an exact Git blob identity. Verify it with
-   `node tools/icm/check-workspace.mjs`; a receipt file alone is not approval or
-   enforcement.
-6. When executable repository checks already exist, configure one exact-
-   candidate gate command, its clean-worktree preconditions, receipt location,
-   and verifier. The stable entry commands are
-   `node tools/icm/candidate-gate.mjs` and
-   `node tools/icm/verify-candidate-receipt.mjs`. Otherwise keep the gate
-   disabled in `icm.config.json` and record the exact later trigger and owner;
-   Build must not begin until the selected Technical Specification configures
-   and verifies it.
+   context budgets in [`../icm.config.json`](../icm.config.json).
+5. Configure the human-owned approval surface and use the `artifact-receipts`
+   shape when exact artifact identity must be recorded. A receipt records
+   evidence; its existence alone does not create or prove approval.
+6. When executable repository checks already exist, name one complete candidate
+   gate command and its clean-worktree preconditions in the repository's normal
+   executable configuration. Otherwise record the exact later Technical
+   Specification and pre-Build trigger that must establish it.
 7. Leave stack, provider, environment, and product decisions with their named
    later trigger and owner when current evidence cannot decide them.
 8. Review one consolidated repository diff with the human.
@@ -52,13 +47,12 @@ Project begins.
 
 - Configured repository identity, root instructions, routing, and source layout
 - Configured shared catalogs, principles, safeguards, and engineering profiles
-- Executable artifact-approval controls and either a verified exact-candidate
-  gate or its named pre-Build trigger and owner
+- A human-owned approval surface and either a complete candidate gate or its
+  named pre-Build trigger and owner
 - Verified repository, GitHub, proof, and release policy
 - `status: complete` in `questionnaire.md`
 
 ## Human check
 
-Review the consolidated configuration, executable-control evidence, verified
-live settings, and deliberately later choices. Approve the factory before the
-first Project is created.
+Review the consolidated configuration, verified live settings, and deliberately
+later choices. Approve the factory before the first Project is created.

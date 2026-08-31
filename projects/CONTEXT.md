@@ -27,11 +27,10 @@ approval, or deployment belongs to the selected Project.
 
 1. Report the durable repository handoff from `PROJECT.md` and the exact
    artifact revisions it links.
-2. New Projects use `approval_contract: artifact-receipts`. Validate the exact
-   Product Specification, Technical Specification, and Delivery Assessment
-   receipts out of band with `node tools/icm/check-workspace.mjs`. A receipt
-   identifies evidence; it does not create or prove human approval merely by
-   existing.
+2. New Projects use `approval_contract: artifact-receipts`. Confirm Product
+   Specification, Technical Specification, and Delivery Assessment decisions
+   on the configured human-owned approval surface. A receipt identifies exact
+   evidence; it does not create or prove human approval merely by existing.
 3. Select the earliest workflow stage whose required artifact is absent,
    rejected, stale, or invalidated by a changed upstream identity.
 4. When the next stage is owned by Git, a pull-request or check system, an

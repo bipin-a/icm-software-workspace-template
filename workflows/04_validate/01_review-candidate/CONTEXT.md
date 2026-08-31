@@ -13,9 +13,23 @@ context:
       headings: [Approved decisions]
       tables:
         - heading: Acceptance criteria
-          columns: [ID, Observable criterion, Required evidence]
+          columns: [ID, Observable criterion, Relevant states or data, Required evidence]
     - path: projects/<project-slug>/specs/technical-spec.md
-      headings: [Approved decisions, Risks and open questions]
+      headings:
+        - Proposed system behavior
+        - Interface evidence and system consequences
+        - Architecture and canonical owners
+        - Domain and data model
+        - Interfaces and contracts
+        - Environments and test data
+        - Technology and third-party choices
+        - Analytics and observability
+        - Security, privacy, isolation, and destructive behavior
+        - Migration and compatibility
+        - Release, rollback, and monitoring
+        - Testing and acceptance proof
+        - Approved decisions
+        - Risks and open questions
   references:
     - path: workflows/04_validate/references/review-rules.md
   selectors:
@@ -37,8 +51,9 @@ on its canonical review surface. This step does not fix or dispose findings.
 - Live working input: exact candidate, base and head identities, commits, diff,
   checks, and existing review findings.
 
-Do not load full specifications, unrelated code, complete test-suite output,
-other pull requests, another stage's references, or the engineering library.
+Do not load unselected specification sections, unrelated code, complete
+test-suite output, other pull requests, another stage's references, or the
+engineering library.
 
 ## Process
 

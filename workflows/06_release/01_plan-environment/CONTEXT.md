@@ -20,7 +20,6 @@ context:
     - path: projects/<project-slug>/delivery-assessment.md
       headings: [Final proof and release shape, Human decision]
   references:
-    - path: icm.config.json
     - path: workflows/06_release/references/release-rules.md
       headings: [Authority and boundary, Plan before writes]
 ---
@@ -45,9 +44,9 @@ stage's references, or the engineering library.
 
 ## Process
 
-1. Confirm the environment is listed in `release.allowedEnvironments`, then pin
-   the accepted candidate, clean release context, approved artifacts, proof
-   obligations, rollback boundary, and monitoring obligations.
+1. Confirm the environment is named by the approved Technical Specification,
+   then pin the accepted candidate, clean release context, approved artifacts,
+   proof obligations, rollback boundary, and monitoring obligations.
 2. Use the repository's configured deployment procedure in no-write or plan
    mode. If it has no trustworthy no-write mode, stop and obtain an approved
    procedure rather than simulating success.

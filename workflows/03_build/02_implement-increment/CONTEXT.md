@@ -20,7 +20,20 @@ context:
           match: prefix
           values: ["{criteria}"]
     - path: projects/<project-slug>/specs/technical-spec.md
-      headings: [Architecture and canonical owners, Approved decisions, Risks and open questions]
+      headings:
+        - Proposed system behavior
+        - Interface evidence and system consequences
+        - Architecture and canonical owners
+        - Domain and data model
+        - Interfaces and contracts
+        - Environments and test data
+        - Technology and third-party choices
+        - Analytics and observability
+        - Security, privacy, isolation, and destructive behavior
+        - Migration and compatibility
+        - Release, rollback, and monitoring
+        - Approved decisions
+        - Risks and open questions
       tables:
         - heading: Testing and acceptance proof
           match: contains
@@ -44,10 +57,10 @@ request.
   files needed to trace, test, and change this increment's named public seams.
 - Capability routing: `../../CONTEXT.md`.
 
-Do not load full specifications, other issue bodies, another increment's code,
-pull-request publication rules, another stage's references, or the complete
-engineering library. Route backward if the delivery item and specifications
-disagree.
+Do not load unselected specification sections, other issue bodies, another
+increment's code, pull-request publication rules, another stage's references,
+or the complete engineering library. Route backward if the delivery item and
+specifications disagree.
 
 ## Process
 

@@ -10,7 +10,7 @@
       "hubTokens": 1000,
       "routerTokens": 600,
       "stepTokens": 1100,
-      "packetTokens": 6500,
+      "packetTokens": 7000,
       "reserveTokens": 500
     },
     "budgetScenarios": [
@@ -26,23 +26,40 @@
         ]
       },
       {
+        "name": "design-with-prototype-evidence",
+        "contract": "workflows/02_design/01_choose-technical-design/CONTEXT.md",
+        "selectors": [
+          "roadmap/future-features.md",
+          "_templates/prototype-evidence.md",
+          "_templates/adr.md"
+        ]
+      },
+      {
+        "name": "design-with-architecture-evidence",
+        "contract": "workflows/02_design/01_choose-technical-design/CONTEXT.md",
+        "selectors": [
+          "roadmap/future-features.md",
+          "_templates/architecture-investigation.md",
+          "_templates/adr.md"
+        ]
+      },
+      {
         "name": "validate-user-interface",
         "contract": "workflows/04_validate/01_review-candidate/CONTEXT.md",
         "selectors": [
           "_shared/principles/ux-principles.md",
           "_shared/ux/ui-ux-rules.md"
         ]
+      },
+      {
+        "name": "learn-with-project-evidence",
+        "contract": "workflows/07_learn/CONTEXT.md",
+        "selectors": [
+          "roadmap/future-features.md",
+          "_templates/prototype-evidence.md",
+          "_templates/architecture-investigation.md"
+        ]
       }
     ]
-  },
-  "candidateGate": {
-    "enabled": false,
-    "requireLinkedWorktree": false,
-    "phases": [],
-    "evidence": [],
-    "environmentProbes": []
-  },
-  "release": {
-    "allowedEnvironments": []
   }
 }

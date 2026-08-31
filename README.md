@@ -55,7 +55,7 @@ cannot silently reuse stale evidence.
 
 | Path | Responsibility |
 |---|---|
-| [`setup/`](setup/CONTEXT.md) | Configure the stable factory and its executable approval and candidate controls. |
+| [`setup/`](setup/CONTEXT.md) | Configure the stable factory, repository commands, and human approval owners. |
 | [`workflows/`](workflows/CONTEXT.md) | Define the shared lifecycle, stage contracts, and human gates. |
 | [`projects/`](projects/CONTEXT.md) | Hold one stable record and earned artifacts for each product outcome. |
 | [`architecture/`](architecture/CONTEXT.md) | Hold cross-Project investigation evidence only when no Project is its natural owner. |
@@ -74,27 +74,23 @@ the whole workspace merely because it is available.
 2. Open [`setup/questionnaire.md`](setup/questionnaire.md).
 3. Follow [`setup/CONTEXT.md`](setup/CONTEXT.md) and write each accepted answer
    to its named canonical owner.
-4. Configure and verify the artifact-approval mechanism, existing repository
-   commands, GitHub policy, and any live settings. When an executable candidate
-   gate depends on a later Technical Specification, record its exact pre-Build
-   trigger and owner instead of inventing a command during setup.
+4. Configure the artifact-approval owner, existing repository commands, GitHub
+   policy, and any live settings. When the complete candidate gate depends on a
+   later Technical Specification, record its exact pre-Build trigger and owner
+   instead of inventing a command during setup.
 5. Create the first Project only after the human approves the consolidated
    factory configuration.
 
-The factory controls have stable entry commands:
+The template has one optional maintenance check:
 
 ```sh
-node tools/icm/check-workspace.mjs
-npm --prefix tools/icm test
-node tools/icm/candidate-gate.mjs
-node tools/icm/verify-candidate-receipt.mjs
+node tools/icm/check-context-budget.mjs
 ```
 
-[`icm.config.json`](icm.config.json) owns context bounds and candidate-gate
-configuration. The source template leaves the candidate gate disabled because
-it has no application proof commands. Enable it only after setup or an accepted
-Technical Specification names complete phases and evidence; Build cannot hand a
-candidate to Validate before then.
+[`icm.config.json`](icm.config.json) owns only context bounds and representative
+budget scenarios. Each instantiated repository owns its actual test, approval,
+candidate-gate, and deployment commands. Build cannot hand a candidate to
+Validate until the applicable Technical Specification names complete proof.
 
 For an existing repository, inventory and classify the current tree first.
 Treat this profile as a target reference, not a directory to copy wholesale
@@ -117,10 +113,9 @@ Project artifacts.
 ## Maintain the template
 
 Leave `setup/questionnaire.md` incomplete in this source repository. Before a
-release, verify the cold-agent setup walk, the Project selection walk, local
-links, workflow and profile routing, retired-path absence, context bounds, and
-the lack of instance data. Do not publish placeholder policy or a receipt
-template without its configured verifier.
+release, verify the cold-agent setup walk, Project selection walk, local links,
+workflow and profile routing, retired-path absence, context budgets, and lack of
+instance data.
 
 ## License and attribution
 

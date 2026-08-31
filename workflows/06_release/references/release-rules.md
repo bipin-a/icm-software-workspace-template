@@ -3,11 +3,9 @@
 ## Authority and boundary
 
 - Release acts only on the exact candidate accepted by Assess Readiness.
-- `icm.config.json` owns the repository-wide vocabulary of allowed environment
-  names. The Technical Specification selects the Project's required subset and
-  owns migration, rollback, monitoring, and required proof. The configured
-  deployment procedure maps those allowed names to executable targets and
-  commands.
+- The Technical Specification names the Project's environments and owns
+  migration, rollback, monitoring, and required proof. The configured
+  deployment procedure maps those names to executable targets and commands.
 - Live deployment, environment, database, and monitoring state must be read
   from their current owners. Do not copy an old summary as current state.
 - Credentials and secret values remain outside Project artifacts and evidence.
