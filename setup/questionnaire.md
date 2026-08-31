@@ -56,7 +56,7 @@ retain a duplicate answer set.
 | Cross-Project safeguards and principles | The narrowest applicable owner under `../_shared/` |
 | Engineering context selection and bounds | `../_shared/engineering/CONTEXT.md`, its profile shelves, and `../icm.config.json` |
 | Proof environments, commands, and candidate gate | `../icm.config.json` owns the gate shape; `../_shared/engineering/testing-rules.md`, each Project's Technical Specification, and executable repository configuration own the applicable commands and environments |
-| Artifact approval shape | `../_templates/approval-receipt.md`, Project records, the configured human-owned approval surface, and `../tools/icm/check-workspace.mjs` |
+| Artifact approval shape | `../_templates/approval-receipt.md`, Project records, the configured human-owned approval surface, and `../tools/icm/workspace-check.mjs` |
 | GitHub delivery and merge policy | `../_shared/engineering/github-delivery-rules.md` |
 | Reusable inputs | `../_shared/reusable-assets.md` and the exact stage contracts that consume them; `_shared/CONTEXT.md` routes the internal shared library |
 | Deployment and release policy | The provider-neutral Release contract plus a configured provider procedure when required |

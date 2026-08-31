@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node check-workspace.mjs",
+    "check": "node workspace-check.mjs",
     "context": "node estimate-context.mjs",
     "test": "node --test test/*.test.mjs"
   }
