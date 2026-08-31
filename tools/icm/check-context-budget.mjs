@@ -305,6 +305,16 @@ export async function checkContextBudgets(root, options = {}) {
     }
     if (metadata.type !== 'workflow-step' || !metadata.context) continue;
 
+    const profile = metadata.context.profile;
+    if (profile?.path) {
+      const profileBody = await optionalRead(root, profile.path);
+      if (!profileBody) {
+        failures.push(`${scope} profile ${profile.path} does not exist`);
+      } else if (!headingSection(profileBody, profile.heading)) {
+        failures.push(`${scope} profile ${profile.path} does not define heading ${profile.heading}`);
+      }
+    }
+
     const declaredSelectors = new Set(
       (metadata.context.selectors ?? []).map((entry) => entry.path),
     );
