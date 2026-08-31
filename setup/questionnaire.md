@@ -25,10 +25,10 @@ retain a duplicate answer set.
    receipt bind that evidence to the exact artifact identity?
 5. **Candidate identity and proof:** If executable checks exist, which repository
    command is the complete candidate gate? What clean-worktree and dependency
-   preconditions apply? Which phases and evidence belong in `icm.config.json`,
-   and which command verifies the machine-written receipt for the current Git
-   tree? If no executable system exists yet, which Technical Specification and
-   pre-Build gate must establish these answers?
+   preconditions apply? Which named phases belong in `icm.config.json`, and
+   which command verifies the machine-written phase and runtime receipt for the
+   current Git tree? If no executable system exists yet, which Technical
+   Specification and pre-Build gate must establish these answers?
 6. **Proof and environment path:** Which focused and repository-wide commands
    exist, which local and non-production environments are used, what data is
    allowed, and when must changed evidence create a new candidate?

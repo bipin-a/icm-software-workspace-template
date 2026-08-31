@@ -15,7 +15,8 @@ Initial versioned release.
 - Combined Prototype Evidence and Architecture Investigation templates.
 - Stage-scoped engineering profiles, structural workspace validation, and a
   simple expected-context report with a 500-token reserve.
-- A configurable exact-candidate gate and current-tree receipt verifier.
+- A configurable exact-candidate gate with phase-aware runtime receipts and a
+  current-tree verifier.
 - Migration guidance from unversioned commit `7f500e7`.
 
 ### Changed

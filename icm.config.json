@@ -6,8 +6,6 @@
   },
   "candidateGate": {
     "enabled": false,
-    "phases": [],
-    "evidence": [],
-    "environmentProbes": []
+    "phases": []
   }
 }

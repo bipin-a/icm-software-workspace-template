@@ -308,6 +308,9 @@ async function approvalFailures(repositoryRoot) {
     if (project.id !== slug) {
       failures.push(`${projectPath} id ${project.id || 'missing'} must match directory ${slug}`);
     }
+    if (project.workflow !== 'project-delivery') {
+      failures.push(`${projectPath} must declare workflow: project-delivery`);
+    }
     if (project.approval_contract !== 'artifact-receipts') {
       continue;
     }

@@ -30,11 +30,12 @@ Project begins.
 5. Configure the human-owned approval surface and the `artifact-receipts`
    contract that binds approval evidence to an exact Git blob. Verify it with
    `npm --prefix tools/icm run check`; a receipt alone does not prove approval.
-6. When executable repository checks exist, configure candidate-gate phases and
-   evidence in `icm.config.json`. Verify that `node tools/icm/candidate-gate.mjs`
+6. When executable repository checks exist, configure named candidate-gate
+   phases in `icm.config.json`. Verify that `node tools/icm/candidate-gate.mjs`
    refuses the primary or dirty worktree and that
    `node tools/icm/verify-candidate-receipt.mjs` admits only the current clean
-   tree. Otherwise keep the gate disabled and name its pre-Build trigger.
+   tree. The machine-written receipt records phase results and runtime identity.
+   Otherwise keep the gate disabled and name its pre-Build trigger.
 7. Leave stack, provider, environment, and product decisions with their named
    later trigger and owner when current evidence cannot decide them.
 8. Review one consolidated repository diff with the human.

@@ -197,25 +197,19 @@ function successfulReceipt(receipt, tree, gate) {
     || receipt.result?.exitCode !== 0
   ) return false;
   const phases = new Map((receipt.phases ?? []).map((phase) => [phase.name, phase]));
-  if (!gate.phases.every((phase) => (
+  return gate.phases.every((phase) => (
     phases.get(phase.name)?.status === 'success' && phases.get(phase.name)?.exitCode === 0
-  ))) return false;
-  if (!(gate.evidence ?? []).every((item) => (
-    item.required === false || Object.hasOwn(receipt.evidence ?? {}, item.name)
-  ))) return false;
-  return (gate.environmentProbes ?? []).every((probe) => (
-    Object.hasOwn(receipt.environment ?? {}, probe)
   ));
 }
 
-function environmentProbeEvidence(probes) {
-  const values = {
-    'node-version': process.version,
+function gateEnvironment() {
+  return {
+    node: process.version,
     platform: process.platform,
     architecture: process.arch,
-    'os-release': osRelease(),
+    osRelease: osRelease(),
+    hostname: hostname(),
   };
-  return Object.fromEntries((probes ?? []).map((probe) => [probe, values[probe]]));
 }
 
 export async function runCandidateGate({ cwd = process.cwd(), now = () => new Date() } = {}) {
@@ -230,22 +224,14 @@ export async function runCandidateGate({ cwd = process.cwd(), now = () => new Da
   const receiptDirectory = join(state.commonGitDir, 'icm-gate-receipts');
   const receiptPath = join(receiptDirectory, `${state.tree}.json`);
   await mkdir(receiptDirectory, { recursive: true });
-  const prior = await readJson(receiptPath);
-  if (successfulReceipt(prior, state.tree, gate)) {
-    throw new Error(`Tree ${state.tree} already has a successful candidate-gate receipt at ${receiptPath}`);
-  }
-
   const lockPath = join(receiptDirectory, `${state.tree}.lock`);
   await acquireCandidateLock(lockPath, state);
 
-  const evidencePaths = Object.fromEntries((gate.evidence ?? []).map((item) => [
-    item.name,
-    join(receiptDirectory, `.${state.tree}.${process.pid}.${item.name}.json`),
-  ]));
-  const environment = { ...process.env };
-  for (const item of gate.evidence ?? []) environment[item.environmentVariable] = evidencePaths[item.name];
-
   try {
+    const prior = await readJson(receiptPath);
+    if (successfulReceipt(prior, state.tree, gate)) {
+      throw new Error(`Tree ${state.tree} already has a successful candidate-gate receipt at ${receiptPath}`);
+    }
     const startedAt = now();
     const phases = [];
     let exitCode = 0;
@@ -265,7 +251,7 @@ export async function runCandidateGate({ cwd = process.cwd(), now = () => new Da
       let phaseExitCode = 1;
       let errorMessage;
       try {
-        phaseExitCode = await runCommand(phase.command, state.worktree, environment);
+        phaseExitCode = await runCommand(phase.command, state.worktree, process.env);
       } catch (error) {
         errorMessage = error.message;
       }
@@ -286,30 +272,6 @@ export async function runCandidateGate({ cwd = process.cwd(), now = () => new Da
       }
     }
 
-    const evidence = {};
-    const evidenceErrors = {};
-    const evidenceOmissions = [];
-    for (const item of gate.evidence ?? []) {
-      try {
-        const value = await readJson(evidencePaths[item.name]);
-        if (value !== null) evidence[item.name] = value;
-        else {
-          evidenceOmissions.push({
-            name: item.name,
-            required: item.required !== false,
-            reason: exitCode === 0 ? 'not recorded' : 'not recorded after a gate failure',
-          });
-          if (item.required !== false && exitCode === 0) {
-            exitCode = 1;
-            reason = `required evidence ${item.name} was not recorded`;
-          }
-        }
-      } catch (error) {
-        exitCode = 1;
-        reason ??= `evidence ${item.name} is invalid JSON: ${error.message}`;
-        evidenceErrors[item.name] = error.message;
-      }
-    }
     try {
       const after = await candidateState(state.worktree);
       if (after.commit !== state.commit || after.tree !== state.tree || after.status) {
@@ -329,10 +291,7 @@ export async function runCandidateGate({ cwd = process.cwd(), now = () => new Da
       branch: state.branch,
       worktree: state.worktree,
       phases,
-      evidence,
-      ...(Object.keys(evidenceErrors).length > 0 ? { evidenceErrors } : {}),
-      ...(evidenceOmissions.length > 0 ? { evidenceOmissions } : {}),
-      environment: environmentProbeEvidence(gate.environmentProbes),
+      environment: gateEnvironment(),
       startedAt: startedAt.toISOString(),
       finishedAt: finishedAt.toISOString(),
       durationMs: Math.max(0, finishedAt - startedAt),
@@ -342,21 +301,14 @@ export async function runCandidateGate({ cwd = process.cwd(), now = () => new Da
         ...(reason ? { reason } : {}),
       },
     };
-    const attemptReceiptPath = join(
-      receiptDirectory,
-      `${state.tree}.attempt.${finishedAt.getTime()}.${process.pid}.${process.hrtime.bigint()}.json`,
-    );
-    await writeJsonAtomically(attemptReceiptPath, receipt);
     await writeJsonAtomically(receiptPath, receipt);
     return {
-      attemptReceiptPath,
       commit: state.commit,
       exitCode,
       receiptPath,
       tree: state.tree,
     };
   } finally {
-    await Promise.all(Object.values(evidencePaths).map((path) => rm(path, { force: true })));
     await rm(lockPath, { force: true });
   }
 }

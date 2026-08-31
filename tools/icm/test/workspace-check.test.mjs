@@ -30,8 +30,6 @@ async function writeMinimalConfig(root) {
     candidateGate: {
       enabled: false,
       phases: [],
-      evidence: [],
-      environmentProbes: [],
     },
   })}\n`);
 }
@@ -45,8 +43,6 @@ test('context limit and reserve cannot be omitted from configuration', async (t)
     candidateGate: {
       enabled: false,
       phases: [],
-      evidence: [],
-      environmentProbes: [],
     },
   })}\n`);
 
@@ -68,8 +64,6 @@ test('release environments remain owned by each Project Technical Specification'
     candidateGate: {
       enabled: false,
       phases: [],
-      evidence: [],
-      environmentProbes: [],
     },
   })}\n`);
 
@@ -90,8 +84,6 @@ test('linked-worktree safety cannot be configured off', async (t) => {
       enabled: false,
       requireLinkedWorktree: false,
       phases: [],
-      evidence: [],
-      environmentProbes: [],
     },
   })}\n`);
 
@@ -108,6 +100,7 @@ test('an approved downstream artifact requires its approved upstream artifact', 
     '---',
     'type: project',
     'id: example',
+    'workflow: project-delivery',
     'approval_contract: artifact-receipts',
     '---',
   ].join('\n'));
@@ -143,7 +136,7 @@ test('an approved downstream artifact rejects a non-approved upstream artifact',
   t.after(() => import('node:fs/promises').then(({ rm }) => rm(root, { recursive: true })));
   execFileSync('git', ['init', root], { stdio: 'ignore' });
   await write(root, 'projects/example/PROJECT.md', [
-    '---', 'type: project', 'id: example', 'approval_contract: artifact-receipts', '---',
+    '---', 'type: project', 'id: example', 'workflow: project-delivery', 'approval_contract: artifact-receipts', '---',
   ].join('\n'));
   const productBody = [
     '---', 'type: product-specification', 'project: example', 'status: draft',
@@ -175,7 +168,7 @@ test('approval receipts reject stale artifact bytes', async (t) => {
   t.after(() => import('node:fs/promises').then(({ rm }) => rm(root, { recursive: true })));
   execFileSync('git', ['init', root], { stdio: 'ignore' });
   await write(root, 'projects/example/PROJECT.md', [
-    '---', 'type: project', 'id: example', 'approval_contract: artifact-receipts', '---',
+    '---', 'type: project', 'id: example', 'workflow: project-delivery', 'approval_contract: artifact-receipts', '---',
   ].join('\n'));
   const productBody = [
     '---', 'type: product-specification', 'project: example', 'status: approved',
@@ -201,7 +194,7 @@ test('approved downstream artifacts bind the exact upstream bytes', async (t) =>
   t.after(() => import('node:fs/promises').then(({ rm }) => rm(root, { recursive: true })));
   execFileSync('git', ['init', root], { stdio: 'ignore' });
   await write(root, 'projects/example/PROJECT.md', [
-    '---', 'type: project', 'id: example', 'approval_contract: artifact-receipts', '---',
+    '---', 'type: project', 'id: example', 'workflow: project-delivery', 'approval_contract: artifact-receipts', '---',
   ].join('\n'));
   const productBody = [
     '---', 'type: product-specification', 'project: example', 'status: approved',
@@ -242,7 +235,7 @@ test('an approved technical design selects exactly one option row', async (t) =>
   t.after(() => import('node:fs/promises').then(({ rm }) => rm(root, { recursive: true })));
   execFileSync('git', ['init', root], { stdio: 'ignore' });
   await write(root, 'projects/example/PROJECT.md', [
-    '---', 'type: project', 'id: example', 'approval_contract: artifact-receipts', '---',
+    '---', 'type: project', 'id: example', 'workflow: project-delivery', 'approval_contract: artifact-receipts', '---',
   ].join('\n'));
   const productBody = [
     '---', 'type: product-specification', 'project: example', 'status: approved',
@@ -285,6 +278,7 @@ test('single-track product intent cannot retain Product option rows', async (t) 
     '---',
     'type: project',
     'id: example',
+    'workflow: project-delivery',
     'approval_contract: artifact-receipts',
     '---',
   ].join('\n'));
@@ -320,6 +314,7 @@ test('Projects without the artifact-receipts contract remain valid', async (t) =
     '---',
     'type: project',
     'id: example',
+    'workflow: project-delivery',
     '---',
   ].join('\n'));
   await write(root, 'projects/example/specs/product-spec.md', [
@@ -359,7 +354,7 @@ test('Project directory symlinks cannot escape approval verification', async (t)
   await mkdir(join(root, 'projects'), { recursive: true });
   await mkdir(outside, { recursive: true });
   await write(outside, 'PROJECT.md', [
-    '---', 'type: project', 'id: example', 'approval_contract: artifact-receipts', '---',
+    '---', 'type: project', 'id: example', 'workflow: project-delivery', 'approval_contract: artifact-receipts', '---',
   ].join('\n'));
   await symlink(
     outside,
@@ -379,6 +374,7 @@ test('Project and artifact identities must match their canonical paths', async (
     '---',
     'type: project',
     'id: beta',
+    'workflow: other',
     'approval_contract: artifact-receipts',
     '---',
   ].join('\n'));
@@ -402,6 +398,7 @@ test('Project and artifact identities must match their canonical paths', async (
   const result = await checkWorkspace(root, { checkWorkflowContracts: false });
   const failures = result.failures.join('\n');
   assert.match(failures, /PROJECT\.md id beta must match directory alpha/);
+  assert.match(failures, /PROJECT\.md must declare workflow: project-delivery/);
   assert.match(failures, /product-spec\.md must declare type: product-specification/);
   assert.match(failures, /product-spec\.md names Project beta, expected alpha/);
 });
@@ -416,6 +413,7 @@ test('approval receipts accept the repository Git object format', async (t) => {
     '---',
     'type: project',
     'id: example',
+    'workflow: project-delivery',
     'approval_contract: artifact-receipts',
     '---',
   ].join('\n'));

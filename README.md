@@ -105,8 +105,9 @@ node tools/icm/verify-candidate-receipt.mjs
 a conservative estimate for the exact files supplied; it does not reconstruct
 hypothetical packets. The source template leaves the gate disabled because it
 has no application proof commands. Enable it only after setup or an accepted
-Technical Specification names complete phases and evidence. Build cannot hand
-a candidate to Validate before then.
+Technical Specification names complete phases. The gate receipt records their
+terminal results and runtime identity. Build cannot hand a candidate to
+Validate before then.
 
 For an existing repository, inventory and classify the current tree first.
 Treat this profile as a target reference, not a directory to copy wholesale
