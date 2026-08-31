@@ -77,8 +77,10 @@ retain a duplicate answer set.
   deferred to its named pre-Build gate instead of being invented during setup.
 - Approved live repository and delivery settings were read back from their
   canonical systems.
-- Local links, profile selectors, and context bounds pass
-  `npm --prefix tools/icm run check`.
+- Local links and profile selectors pass `npm --prefix tools/icm run check`;
+  representative context files are reported with
+  `npm --prefix tools/icm run context -- <files...>` and retain the configured
+  500-token reserve.
 - No credentials, populated environment files, sample Project, instance data,
   or placeholder policy entered the factory.
 

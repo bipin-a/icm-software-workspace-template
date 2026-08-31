@@ -6,8 +6,11 @@ the first formal profile release: one human-gated Project workflow, durable
 artifact ownership, scoped shared context, and explicit boundaries for live
 delivery and deployment state.
 
-`icm.config.json` identifies profile `0.1.0` as an ICM 2.2 implementation.
-Treat its product-option trigger as experimental: calibrate it on two
+This profile applies ICM 2.2 and is being prepared for release as `0.1.0`.
+The Git tag and [`CHANGELOG.md`](CHANGELOG.md) own template release identity;
+`profile_version` in [`setup/questionnaire.md`](setup/questionnaire.md) records
+the snapshot copied into an instance. Treat the product-option trigger as
+experimental: calibrate it on two
 product-choice-heavy Projects and one expected single-track Project. Any false
 negative reopens the trigger; two false positives require simplification. Do
 not report percentages from this small sample.
@@ -92,15 +95,18 @@ The factory controls have stable entry commands:
 ```sh
 npm --prefix tools/icm run check
 npm --prefix tools/icm test
+npm --prefix tools/icm run context -- AGENTS.md CONTEXT.md _shared/voice.md
 node tools/icm/candidate-gate.mjs
 node tools/icm/verify-candidate-receipt.mjs
 ```
 
-[`icm.config.json`](icm.config.json) owns context bounds and candidate-gate
-configuration. The source template leaves the gate disabled because it has no
-application proof commands. Enable it only after setup or an accepted Technical
-Specification names complete phases and evidence. Build cannot hand a candidate
-to Validate before then.
+[`icm.config.json`](icm.config.json) owns the context packet limit, its required
+500-token reserve, and candidate-gate configuration. The context command gives
+a conservative estimate for the exact files supplied; it does not reconstruct
+hypothetical packets. The source template leaves the gate disabled because it
+has no application proof commands. Enable it only after setup or an accepted
+Technical Specification names complete phases and evidence. Build cannot hand
+a candidate to Validate before then.
 
 For an existing repository, inventory and classify the current tree first.
 Treat this profile as a target reference, not a directory to copy wholesale
@@ -124,9 +130,9 @@ Project artifacts.
 
 Leave `setup/questionnaire.md` incomplete in this source repository. Before a
 release, verify the cold-agent setup walk, Project selection walk, local links,
-workflow and profile routing, retired-path absence, context budgets, and lack of
-instance data. Do not publish an approval-receipt shape without its configured
-verifier.
+workflow and profile routing, retired-path absence, representative context
+estimates with the 500-token reserve, and lack of instance data. Do not publish
+an approval-receipt shape without its configured verifier.
 
 ## License and attribution
 

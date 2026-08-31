@@ -24,15 +24,8 @@ async function writeMinimalConfig(root) {
   await write(root, 'icm.config.json', `${JSON.stringify({
     schemaVersion: 1,
     context: {
-      commonPaths: [],
-      limits: {
-        hubTokens: 10000,
-        routerTokens: 10000,
-        stepTokens: 10000,
-        packetTokens: 10000,
-        reserveTokens: 0,
-      },
-      budgetScenarios: [],
+      packetTokens: 10000,
+      reserveTokens: 0,
     },
     candidateGate: {
       enabled: false,
@@ -43,7 +36,7 @@ async function writeMinimalConfig(root) {
   })}\n`);
 }
 
-test('context budgets and reserve cannot be omitted from configuration', async (t) => {
+test('context limit and reserve cannot be omitted from configuration', async (t) => {
   const root = await mkdtemp(join(tmpdir(), 'icm-config-bounds-'));
   t.after(() => import('node:fs/promises').then(({ rm }) => rm(root, { recursive: true })));
   await write(root, 'icm.config.json', `${JSON.stringify({
@@ -59,15 +52,8 @@ test('context budgets and reserve cannot be omitted from configuration', async (
 
   const result = await checkWorkspace(root, { checkWorkflowContracts: false });
   const failures = result.failures.join('\n');
-  assert.match(failures, /context\.commonPaths must be a list/);
-  for (const limit of [
-    'hubTokens',
-    'routerTokens',
-    'stepTokens',
-    'packetTokens',
-    'reserveTokens',
-  ]) assert.match(failures, new RegExp(`context limit ${limit} is required`));
-  assert.match(failures, /context\.budgetScenarios must be a list/);
+  assert.match(failures, /context packetTokens must be a non-negative number/);
+  assert.match(failures, /context reserveTokens must be a non-negative number/);
 });
 
 test('release environments remain owned by each Project Technical Specification', async (t) => {
@@ -76,15 +62,8 @@ test('release environments remain owned by each Project Technical Specification'
   await write(root, 'icm.config.json', `${JSON.stringify({
     schemaVersion: 1,
     context: {
-      commonPaths: [],
-      limits: {
-        hubTokens: 10000,
-        routerTokens: 10000,
-        stepTokens: 10000,
-        packetTokens: 10000,
-        reserveTokens: 0,
-      },
-      budgetScenarios: [],
+      packetTokens: 10000,
+      reserveTokens: 0,
     },
     candidateGate: {
       enabled: false,
@@ -104,15 +83,8 @@ test('linked-worktree safety cannot be configured off', async (t) => {
   await write(root, 'icm.config.json', `${JSON.stringify({
     schemaVersion: 1,
     context: {
-      commonPaths: [],
-      limits: {
-        hubTokens: 10000,
-        routerTokens: 10000,
-        stepTokens: 10000,
-        packetTokens: 10000,
-        reserveTokens: 0,
-      },
-      budgetScenarios: [],
+      packetTokens: 10000,
+      reserveTokens: 0,
     },
     candidateGate: {
       enabled: false,
@@ -656,107 +628,4 @@ test('working contracts require explicit jobs, boundaries, outputs, and gates', 
   const failures = result.failures.join('\n');
   assert.match(failures, /missing required contract marker One job:/);
   assert.match(failures, /missing required contract marker ## Human check/);
-});
-
-test('context packets preserve the configured reserve', async (t) => {
-  const root = await mkdtemp(join(tmpdir(), 'icm-packet-budget-'));
-  t.after(() => import('node:fs/promises').then(({ rm }) => rm(root, { recursive: true })));
-  await write(root, 'icm.config.json', `${JSON.stringify({
-    schemaVersion: 1,
-    context: {
-      commonPaths: ['AGENTS.md'],
-      limits: { stepTokens: 1000, packetTokens: 30, reserveTokens: 10 },
-    },
-  })}\n`);
-  await write(root, 'AGENTS.md', '# Instructions\n\nThis common context deliberately consumes the small packet budget.\n');
-  await write(root, 'workflows/01_understand/CONTEXT.md', [
-    '---',
-    'type: workflow-step',
-    'context:',
-    '  profile:',
-    '    path: _shared/engineering/profiles/direct-repository.md',
-    '    heading: 01_understand',
-    '  inputs:',
-    '    - path: projects/<project-slug>/PROJECT.md',
-    '---',
-    '# Understand',
-    '',
-    'This working contract also consumes packet context.',
-  ].join('\n'));
-  await write(root, '_shared/engineering/profiles/direct-repository.md', '# Profiles\n\n## 01_understand\n\nSelected rules.\n');
-
-  const result = await checkWorkspace(root);
-  assert.match(result.failures.join('\n'), /context packet plus 10-token reserve exceeds 30 tokens/);
-});
-
-test('context budget scenarios include declared conditional selectors', async (t) => {
-  const root = await mkdtemp(join(tmpdir(), 'icm-selector-budget-'));
-  t.after(() => import('node:fs/promises').then(({ rm }) => rm(root, { recursive: true })));
-  await write(root, 'icm.config.json', `${JSON.stringify({
-    schemaVersion: 1,
-    context: {
-      commonPaths: [],
-      limits: {
-        hubTokens: 1000,
-        routerTokens: 1000,
-        stepTokens: 1000,
-        packetTokens: 900,
-        reserveTokens: 10,
-      },
-      budgetScenarios: [{
-        name: 'conditional-ui',
-        contract: 'workflows/01_understand/CONTEXT.md',
-        selectors: ['_shared/ux.md'],
-      }],
-    },
-    candidateGate: {
-      enabled: false,
-      phases: [],
-      evidence: [],
-      environmentProbes: [],
-    },
-  })}\n`);
-  await write(root, 'workflows/CONTEXT.md', [
-    '---', 'type: workflow-hub', '---', '# Hub', '',
-    '[Understand](01_understand/CONTEXT.md)',
-  ].join('\n'));
-  await write(root, 'workflows/01_understand/CONTEXT.md', [
-    '---',
-    'type: workflow-step',
-    'context:',
-    '  profile:',
-    '    path: _shared/profile.md',
-    '    heading: understand',
-    '  inputs:',
-    '    - path: projects/<project-slug>/PROJECT.md',
-    '  selectors:',
-    '    - path: _shared/ux.md',
-    '      when: interface work is in scope',
-    '---',
-    '# Understand',
-  ].join('\n'));
-  await write(root, '_shared/profile.md', '# Profile\n\n## understand\n\nRules.\n');
-  await write(root, '_shared/ux.md', `# UX\n\n${'Conditional interface evidence. '.repeat(80)}\n`);
-  await write(root, 'projects/example/PROJECT.md', [
-    '---',
-    'type: project',
-    'id: example',
-    'approval_contract: artifact-receipts',
-    '---',
-    '# Example Project',
-    '',
-    '## Context',
-    '',
-    'Project-specific accepted detail. '.repeat(80),
-  ].join('\n'));
-
-  const result = await checkWorkspace(root);
-  assert.doesNotMatch(
-    result.failures.join('\n'),
-    /budget scenario conditional-ui plus 10-token reserve exceeds 900 tokens/,
-  );
-  assert.match(
-    result.failures.join('\n'),
-    /budget scenario conditional-ui for Project example plus 10-token reserve exceeds 900 tokens/,
-  );
 });

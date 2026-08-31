@@ -3,7 +3,6 @@ import { readFile, readdir, realpath, stat } from 'node:fs/promises';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { estimateTokens } from './check-context-budget.mjs';
 import { candidateGateConfigurationErrors } from './config.mjs';
 
 const APPROVAL_ARTIFACTS = [
@@ -606,15 +605,6 @@ function manifestSourcePath(path) {
   return path;
 }
 
-function selectedSections(body, entry) {
-  const names = [
-    ...(Array.isArray(entry.headings) ? entry.headings : []),
-    ...(Array.isArray(entry.tables) ? entry.tables.map((table) => table.heading) : []),
-  ];
-  if (names.length === 0) return body;
-  return [...new Set(names)].map((heading) => headingSection(body, heading) ?? '').join('\n');
-}
-
 async function manifestTargetFailures(repositoryRoot, scope, metadata) {
   if (metadata.type !== 'workflow-step' || !metadata.context) return [];
   const failures = [];
@@ -686,101 +676,6 @@ async function manifestTargetFailures(repositoryRoot, scope, metadata) {
   return failures;
 }
 
-async function contextPacketFailures(repositoryRoot, scope, body, metadata, config) {
-  if (metadata.type !== 'workflow-step' || !metadata.context) return [];
-  const packetLimit = config?.context?.limits?.packetTokens;
-  const reserve = config?.context?.limits?.reserveTokens ?? 0;
-  if (!Number.isFinite(packetLimit) || !Number.isFinite(reserve)) return [];
-  const packetParts = async (projectSlug) => {
-    const parts = [body];
-    for (const commonPath of config?.context?.commonPaths ?? []) {
-      const commonBody = await optionalRead(repositoryRoot, commonPath);
-      if (commonBody) parts.push(commonBody);
-    }
-    const profilePath = metadata.context.profile?.path;
-    const profileBody = await optionalRead(repositoryRoot, profilePath);
-    if (profileBody) {
-      const profileSection = headingSection(profileBody, metadata.context.profile.heading) ?? '';
-      parts.push(profileSection);
-      for (const selection of profileRuleSelections(repositoryRoot, profilePath, profileSection)) {
-        const sourceBody = await optionalRead(repositoryRoot, selection.sourcePath);
-        if (!sourceBody) continue;
-        for (const heading of selection.headings) {
-          parts.push(headingSection(sourceBody, heading) ?? '');
-        }
-      }
-    }
-    const included = [
-      ...(metadata.context.inputs ?? []),
-      ...(metadata.context.references ?? []),
-      ...(metadata.context.output_templates ?? []),
-    ];
-    for (const entry of included) {
-      const sourcePath = projectSlug
-        ? entry?.path?.replace('<project-slug>', projectSlug)
-        : manifestSourcePath(entry?.path ?? '');
-      if (!sourcePath || sourcePath.includes('<') || sourcePath.includes('{')) continue;
-      const sourceBody = await optionalRead(repositoryRoot, sourcePath);
-      if (sourceBody) parts.push(selectedSections(sourceBody, entry));
-    }
-    return parts;
-  };
-  const failures = [];
-  const checkPacket = async (projectSlug, label) => {
-    const parts = await packetParts(projectSlug);
-    const tokens = estimateTokens(parts.filter(Boolean).join('\n'));
-    if (tokens + reserve > packetLimit) {
-      failures.push(
-        `${scope}${label} context packet plus ${reserve}-token reserve `
-        + `exceeds ${packetLimit} tokens (${tokens} + ${reserve})`,
-      );
-    }
-    return parts;
-  };
-  const packetVariants = [{
-    label: '',
-    parts: await checkPacket(null, ''),
-  }];
-  let projectEntries = [];
-  try {
-    projectEntries = await readdir(join(repositoryRoot, 'projects'), { withFileTypes: true });
-  } catch (error) {
-    if (error?.code !== 'ENOENT') throw error;
-  }
-  for (const entry of projectEntries.filter((candidate) => candidate.isDirectory())) {
-    packetVariants.push({
-      label: ` for Project ${entry.name}`,
-      parts: await checkPacket(entry.name, ` for Project ${entry.name}`),
-    });
-  }
-  const declaredSelectors = new Map((metadata.context.selectors ?? []).map((entry) => [entry.path, entry]));
-  for (const scenario of config?.context?.budgetScenarios ?? []) {
-    if (scenario.contract !== scope) continue;
-    const selectorBodies = [];
-    for (const selectorPath of scenario.selectors ?? []) {
-      if (!declaredSelectors.has(selectorPath)) {
-        failures.push(`${scope} budget scenario ${scenario.name} uses undeclared selector ${selectorPath}`);
-        continue;
-      }
-      const selectorBody = await optionalRead(repositoryRoot, selectorPath);
-      if (selectorBody) selectorBodies.push(selectorBody);
-    }
-    for (const variant of packetVariants) {
-      const scenarioTokens = estimateTokens(
-        [...variant.parts, ...selectorBodies].filter(Boolean).join('\n'),
-      );
-      if (scenarioTokens + reserve > packetLimit) {
-        failures.push(
-          `${scope} budget scenario ${scenario.name}${variant.label} `
-          + `plus ${reserve}-token reserve exceeds ${packetLimit} tokens `
-          + `(${scenarioTokens} + ${reserve})`,
-        );
-      }
-    }
-  }
-  return failures;
-}
-
 async function configurationFailures(repositoryRoot, config, configPresent) {
   if (!configPresent) return ['icm.config.json is required'];
   const failures = [];
@@ -793,52 +688,10 @@ async function configurationFailures(repositoryRoot, config, configPresent) {
     && !Array.isArray(config.context);
   if (!contextIsObject) failures.push('icm.config.json context must be an object');
   const context = contextIsObject ? config.context : {};
-  if (!Array.isArray(context.commonPaths)) {
-    failures.push('icm.config.json context.commonPaths must be a list');
-  }
-  for (const path of Array.isArray(context.commonPaths) ? context.commonPaths : []) {
-    if (!isSafeRepositoryPath(path) || !await optionalRead(repositoryRoot, path)) {
-      failures.push(`icm.config.json context common path ${path} does not exist inside the repository`);
+  for (const name of ['packetTokens', 'reserveTokens']) {
+    if (!Number.isFinite(context[name]) || context[name] < 0) {
+      failures.push(`icm.config.json context ${name} must be a non-negative number`);
     }
-  }
-  const requiredLimits = [
-    'hubTokens',
-    'routerTokens',
-    'stepTokens',
-    'packetTokens',
-    'reserveTokens',
-  ];
-  const limitsAreObject = context.limits
-    && typeof context.limits === 'object'
-    && !Array.isArray(context.limits);
-  if (!limitsAreObject) failures.push('icm.config.json context.limits must be an object');
-  const limits = limitsAreObject ? context.limits : {};
-  for (const name of requiredLimits) {
-    if (!Object.hasOwn(limits, name)) failures.push(`icm.config.json context limit ${name} is required`);
-  }
-  for (const [name, value] of Object.entries(limits)) {
-    if (!['hubTokens', 'routerTokens', 'stepTokens', 'packetTokens', 'reserveTokens'].includes(name)) {
-      failures.push(`icm.config.json context.limits has unknown key ${name}`);
-    } else if (!Number.isFinite(value) || value < 0) {
-      failures.push(`icm.config.json context limit ${name} must be a non-negative number`);
-    }
-  }
-  const scenarioNames = new Set();
-  if (!Array.isArray(context.budgetScenarios)) {
-    failures.push('icm.config.json context.budgetScenarios must be a list');
-  }
-  for (const scenario of Array.isArray(context.budgetScenarios) ? context.budgetScenarios : []) {
-    if (
-      typeof scenario?.name !== 'string'
-      || !isSafeRepositoryPath(scenario.contract ?? '')
-      || !Array.isArray(scenario.selectors)
-      || scenario.selectors.some((path) => !isSafeRepositoryPath(path))
-    ) {
-      failures.push('each context budget scenario requires a name, safe contract, and selector path list');
-      continue;
-    }
-    if (scenarioNames.has(scenario.name)) failures.push(`duplicate context budget scenario ${scenario.name}`);
-    scenarioNames.add(scenario.name);
   }
   for (const failure of candidateGateConfigurationErrors(config.candidateGate)) {
     failures.push(`icm.config.json candidateGate ${failure}`);
@@ -932,7 +785,7 @@ function workflowContractShapeFailures(scope, body, type) {
     .map((marker) => `${scope} is missing required contract marker ${marker}`);
 }
 
-async function workflowFailures(repositoryRoot, config) {
+async function workflowFailures(repositoryRoot) {
   const failures = [];
   const root = join(repositoryRoot, 'workflows');
   const contextPaths = await repositoryFiles(root, (name) => name === 'CONTEXT.md');
@@ -949,15 +802,6 @@ async function workflowFailures(repositoryRoot, config) {
     failures.push(...contextManifestFailures(relativePath, metadata));
     failures.push(...workflowContractShapeFailures(relativePath, body, metadata.type));
     failures.push(...await manifestTargetFailures(repositoryRoot, relativePath, metadata));
-    const limit = metadata.type === 'workflow-hub'
-      ? config?.context?.limits?.hubTokens
-      : metadata.type === 'workflow-router'
-        ? config?.context?.limits?.routerTokens
-        : config?.context?.limits?.stepTokens;
-    if (Number.isFinite(limit) && estimateTokens(body) > limit) {
-      failures.push(`${relativePath} exceeds its configured ${limit}-token context limit`);
-    }
-    failures.push(...await contextPacketFailures(repositoryRoot, relativePath, body, metadata, config));
   }
   failures.push(...await workflowReachabilityFailures(repositoryRoot, contextPaths));
   return failures;
@@ -981,7 +825,7 @@ async function checkWorkspaceInternal(
   failures.push(...await markdownLinkFailures(repositoryRoot));
   if (checkWorkflowContracts) {
     failures.push(...await rootRouteFailures(repositoryRoot));
-    failures.push(...await workflowFailures(repositoryRoot, config));
+    failures.push(...await workflowFailures(repositoryRoot));
   }
   return { failures };
 }

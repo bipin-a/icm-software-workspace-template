@@ -13,8 +13,8 @@ Initial versioned release.
   Learn contracts.
 - Exact-artifact approval receipts with opt-in stale-identity validation.
 - Combined Prototype Evidence and Architecture Investigation templates.
-- Stage-scoped engineering profiles, structural workspace validation, and
-  context-budget checks.
+- Stage-scoped engineering profiles, structural workspace validation, and a
+  simple expected-context report with a 500-token reserve.
 - A configurable exact-candidate gate and current-tree receipt verifier.
 - Migration guidance from unversioned commit `7f500e7`.
 
