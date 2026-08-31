@@ -6,6 +6,12 @@ the first formal profile release: one human-gated Project workflow, durable
 artifact ownership, scoped shared context, and explicit boundaries for live
 delivery and deployment state.
 
+`icm.config.json` identifies profile `0.1.0` as an ICM 2.2 implementation.
+Treat its product-option trigger as experimental: calibrate it on two
+product-choice-heavy Projects and one expected single-track Project. Any false
+negative reopens the trigger; two false positives require simplification. Do
+not report percentages from this small sample.
+
 See [`CHANGELOG.md`](CHANGELOG.md) for version history and
 [`MIGRATION.md`](MIGRATION.md) when updating an unversioned instance.
 

@@ -1,5 +1,7 @@
 {
   "schemaVersion": 1,
+  "icmVersion": "2.2",
+  "profileVersion": "0.1.0",
   "context": {
     "commonPaths": [
       "AGENTS.md",
