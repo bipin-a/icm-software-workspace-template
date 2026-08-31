@@ -195,5 +195,4 @@ After the complete update:
    the applicable external candidate and evidence owners.
 4. Confirm no populated historical artifact was deleted without a verified
    replacement and human approval.
-5. Run `node tools/icm/check-context-budget.mjs` and the instantiated
-   repository's normal documentation or link checks.
+5. Run `npm --prefix tools/icm test` and `npm --prefix tools/icm run check`.

@@ -11,10 +11,11 @@ Initial versioned release.
 - Thin workspace, workflow, shared-reference, and Project-library routing.
 - Bounded Understand, Design, Build, Validate, Assess Readiness, Release, and
   Learn contracts.
-- An exact-artifact approval-receipt shape for configured human approval
-  surfaces.
+- Exact-artifact approval receipts with opt-in stale-identity validation.
 - Combined Prototype Evidence and Architecture Investigation templates.
-- Stage-scoped engineering profiles and focused context-budget checks.
+- Stage-scoped engineering profiles, structural workspace validation, and
+  context-budget checks.
+- A configurable exact-candidate gate and current-tree receipt verifier.
 - Migration guidance from unversioned commit `7f500e7`.
 
 ### Changed

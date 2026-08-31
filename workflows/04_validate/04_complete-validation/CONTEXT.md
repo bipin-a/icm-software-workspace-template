@@ -9,6 +9,9 @@ context:
       headings: [Canonical artifacts, GitHub delivery and release evidence]
     - path: projects/<project-slug>/delivery-assessment.md
       headings: [Final proof and release shape, Human decision]
+  tools:
+    - path: tools/icm/verify-candidate-receipt.mjs
+      access: execute-only
 ---
 
 # 04_complete-validation — complete the validation handoff

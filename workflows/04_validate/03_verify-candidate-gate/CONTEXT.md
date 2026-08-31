@@ -10,6 +10,9 @@ context:
       headings: [Canonical artifacts, GitHub delivery and release evidence]
     - path: projects/<project-slug>/delivery-assessment.md
       headings: [Final proof and release shape, Human decision]
+  tools:
+    - path: tools/icm/candidate-gate.mjs
+      access: execute-only
 ---
 
 # 03_verify-candidate-gate — run the full gate once
@@ -41,15 +44,16 @@ tests, another stage's references, or the engineering library.
    internal phases, or substitute a different candidate.
 4. Record exact candidate, command or configured procedure, environment and
    dependency identity relevant to reproducibility, terminal phases, duration,
-   failures, and skipped phases on the canonical delivery surface. Link durable
-   evidence rather than copying changing check state into Project artifacts.
+   failures, and skipped phases on the canonical delivery surface. Keep the
+   machine-local receipt outside versioned Project artifacts and link durable
+   evidence instead.
 5. Treat a failed phase as terminal evidence and a candidate finding. Do not fix
    it in this step. A changed candidate invalidates the result and returns to
    Build assembly.
 
 ## Outputs
 
-- Exact-candidate terminal gate evidence
+- Exact-candidate terminal gate evidence and machine-local receipt
 - Stable evidence link for validation completion and finding disposition
 
 ## Human check

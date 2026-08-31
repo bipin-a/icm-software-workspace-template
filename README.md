@@ -74,23 +74,27 @@ the whole workspace merely because it is available.
 2. Open [`setup/questionnaire.md`](setup/questionnaire.md).
 3. Follow [`setup/CONTEXT.md`](setup/CONTEXT.md) and write each accepted answer
    to its named canonical owner.
-4. Configure the artifact-approval owner, existing repository commands, GitHub
-   policy, and any live settings. When the complete candidate gate depends on a
-   later Technical Specification, record its exact pre-Build trigger and owner
-   instead of inventing a command during setup.
+4. Configure and verify the artifact-approval mechanism, existing repository
+   commands, GitHub policy, and any live settings. When the candidate gate
+   depends on a later Technical Specification, record its exact pre-Build
+   trigger and owner instead of inventing a command during setup.
 5. Create the first Project only after the human approves the consolidated
    factory configuration.
 
-The template has one optional maintenance check:
+The factory controls have stable entry commands:
 
 ```sh
-node tools/icm/check-context-budget.mjs
+npm --prefix tools/icm run check
+npm --prefix tools/icm test
+node tools/icm/candidate-gate.mjs
+node tools/icm/verify-candidate-receipt.mjs
 ```
 
-[`icm.config.json`](icm.config.json) owns only context bounds and representative
-budget scenarios. Each instantiated repository owns its actual test, approval,
-candidate-gate, and deployment commands. Build cannot hand a candidate to
-Validate until the applicable Technical Specification names complete proof.
+[`icm.config.json`](icm.config.json) owns context bounds and candidate-gate
+configuration. The source template leaves the gate disabled because it has no
+application proof commands. Enable it only after setup or an accepted Technical
+Specification names complete phases and evidence. Build cannot hand a candidate
+to Validate before then.
 
 For an existing repository, inventory and classify the current tree first.
 Treat this profile as a target reference, not a directory to copy wholesale
@@ -115,7 +119,8 @@ Project artifacts.
 Leave `setup/questionnaire.md` incomplete in this source repository. Before a
 release, verify the cold-agent setup walk, Project selection walk, local links,
 workflow and profile routing, retired-path absence, context budgets, and lack of
-instance data.
+instance data. Do not publish an approval-receipt shape without its configured
+verifier.
 
 ## License and attribution
 
