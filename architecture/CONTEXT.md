@@ -21,10 +21,10 @@ material uncertainty and no Project is its natural evidence owner.
 
 An investigation is an optional artifact, not another Project or permanent
 workflow stage. It frames one decision, gathers only discriminating evidence,
-records limitations, and routes each affected Project to its earliest
-invalidated stage.
+records limitations, and routes each affected Project to its next
+unresolved decision.
 
-Findings remain evidence. Product and Technical Specifications own Project
+Findings remain evidence. Project brief and its linked decisions own Project
 intent; an earned ADR owns durable rationale. Link those owners instead of
 copying findings or changing implementation here.
 
@@ -35,6 +35,6 @@ release.
 
 ## Human check
 
-Approve the question, affected Projects, evidence threshold, scope, and any work
-that must pause before investigation. Approve the resulting decision and exact
-Project routes before affected work resumes.
+Apply the [shared investigation limit](../_shared/engineering/decision-work.md#investigation-limit).
+Reuse existing authority for the question and scope. Resolve material choices
+before dependent work; routine inspection requires no separate artifact or approval.

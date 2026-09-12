@@ -1,6 +1,6 @@
 # UI/UX review rules
 
-Use this rubric when drafting or reviewing a Product Specification, interface
+Use this rubric when drafting or reviewing a Project brief, interface
 evidence, prototype, or UI-affecting candidate. It evaluates the experience; a
 workflow contract owns the required artifact and approval procedure.
 
@@ -46,6 +46,6 @@ Do not enumerate states that the product and its real boundaries cannot reach.
 - Does the design avoid coercion, deceptive defaults, artificial urgency, and
   other dark patterns?
 
-Record material product decisions in the Product Specification and material
+Record material product decisions in the Project brief and material
 evidence in the workflow's owning artifact. This rubric is reusable guidance,
 not a substitute for Project-specific intent or real-browser proof.

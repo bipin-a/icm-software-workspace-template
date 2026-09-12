@@ -1,8 +1,8 @@
 # Testing rules
 
-This file owns the repeatable method for proving repository behavior
-efficiently. Mandatory guarantees live under Validation in
-[`safeguards.md`](safeguards.md); Project specifications own outcome-specific
+This file owns the repeatable method for proving the repository's behavior
+efficiently. The mandatory guarantees live under the Validation section of
+[`safeguards.md`](safeguards.md); Project decisions own outcome-specific
 acceptance and may require stricter proof.
 
 ## Earn each test
@@ -13,9 +13,13 @@ A test or coherent parameterized group is earned when it protects:
 - a defect that could return; or
 - a material technical or product risk with a credible occurrence path.
 
-Check existing proof first. Do not add a test merely to enumerate every happy
-or unhappy path, increase a count, or protect a theoretical state that the
-product workflow and its actual boundaries cannot reach.
+- Check existing proof first when adding, changing, or reviewing tests.
+- Extend the owning suite or parameterized group when it can prove the missing
+  guarantee.
+- Consolidate duplicate coverage while preserving distinct guarantees.
+- Do not add a test merely to enumerate every happy or unhappy path, increase a count,
+  or protect a theoretical state that the product workflow and its actual boundaries
+  cannot reach.
 
 Name the protected guarantee, the distinguishing state, and the primary seam:
 workflow, public service, canonical rule, migration, adapter, or operation. One
@@ -30,17 +34,19 @@ parameterized group should own repeated cases that protect the same guarantee.
 - For a regression or high-risk behavioral change, prove the failure first and
   then the fix. Removing or bypassing the fix must make the proof fail.
 - For an ordinary feature addition, fail-before evidence is optional unless the
-  Project specification requires it.
+  Project decision requires it.
 - Use focused rule, migration, race, failure-injection, or adapter tests when
   that seam proves the guarantee more directly than a browser workflow.
-- Let helper, query-shape, private-interface, snapshot, and mock-only assertions
-  supplement consequence proof unless that detail is itself the contract.
-- Keep security, isolation, ownership, destructive-action, and persistence
-  proof at the service boundary that owns the consequence.
+- Let helper, SQL-shape, private-DOM, snapshot, and mock-only assertions
+  supplement consequence proof unless that implementation detail is itself the
+  contract.
+- Keep security, account-boundary, ownership, destructive-action, and persistence
+  proof at the API or service boundary that owns the consequence.
 
-A valuable test stays green through a safe refactor and turns red when its named
-guarantee is broken. Update it when the contract changes or the test was wrong,
-not merely because the implementation changed.
+- A valuable test stays green through a safe refactor and turns red when its named
+  guarantee is broken.
+- Update it when the contract changes or the test was wrong, not merely because the
+  implementation changed.
 
 ## Use the efficient proof sequence
 
@@ -50,33 +56,59 @@ not merely because the implementation changed.
 3. Choose the narrowest meaningful boundary that proves the observable result.
 4. For a regression or high-risk change, run the discriminating failure before
    implementation.
-5. Run focused proof first, then the wider checks required by the Project and
-   risk.
+5. Run the focused proof first, then the wider repository checks required by the
+   Project and risk.
 6. Record exact commands, candidate identity, results, failures, and skipped
    proof.
 
 Documentation-only, formatting-only, and behavior-preserving mechanical work
 may record behavioral testing as not applicable. Structural checks should still
-prove the intended document, link, or migration relationship.
+prove the intended document or migration relationship.
+
+Choose proof from the actual diff, acceptance, and risk; record the commands and
+scope reason in the existing PR or validation handoff. No separate plan file.
+
+| Change | Required proof |
+|---|---|
+| Prose, artifact, or mechanical edit | Relevant structure/link/revision checks; behavioral proof may be N/A |
+| Workflow, checker, or test tooling | Focused contract/tool regression tests; no application browser gate by default |
+| Bounded application behavior | Affected behavior and integration seam; browser proof only for a browser obligation |
+| Broad runtime integration or an explicit full-gate obligation | Complete integration gate after focused proof |
+
+- On a later edit, inspect the diff from the tested revision and rerun affected proof
+  only.
+- Keep the original tested identity and state why other evidence still applies.
+- A new commit alone does not erase evidence.
+- Report unrelated baseline failures separately; do not repair them or repeat suites
+  without a demonstrated connection to this change.
 
 ## Reuse test infrastructure without centralizing scenarios
 
-Before adding a database double, application-environment builder, account or
-tenant factory, server harness, or other reusable infrastructure behavior:
+Before adding, changing, or reviewing tests:
 
-1. search the test tree and nearby specifications for an existing shared owner;
-2. name the infrastructure contract that owner represents;
-3. reuse it and keep the distinguishing scenario data local; and
-4. record a deliberate override where the test makes it.
+1. inspect nearby tests and `tests/` for the owning suite, existing coverage,
+   shared setup, assertion helpers, and execution conventions;
+2. reuse suitable database doubles, application-environment builders, account
+   factories, server harnesses, and assertion helpers through their existing
+   extension points;
+3. keep distinguishing scenario data local and deliberate overrides explicit
+   where the test makes them; and
+4. if an existing owner cannot prove the intended behavior, identify the concrete
+   mismatch and make the smallest necessary extension or separate setup. Explain
+   that choice in the test or existing PR, without a separate artifact.
 
-A helper inside another collected test is not automatically shared. If several
-tests would otherwise implement the same infrastructure decision differently,
-create one repository-level owner with named extension points. Do not force
-unrelated scenario data into a universal fixture merely to remove repetition.
+During review, check these relationships against the existing suite. A passing
+test does not justify duplicated infrastructure or a parallel test convention.
 
-Named repository scripts own repeatable command composition. Documentation,
-CI, tickets, and agents invoke those scripts rather than create a second set of
-runner flags or lane definitions.
+- A helper inside another collected spec is not automatically shared.
+- If several tests would otherwise implement the same infrastructure decision
+  differently, create one repository-level owner with named extension points.
+- Do not force unrelated scenario data into a universal fixture merely to remove
+  repetition.
+
+Named `package.json` scripts own repeatable command composition. Documentation,
+CI, tickets, and agents should invoke those scripts rather than create a second
+set of runner flags or lane definitions.
 
 ## Consider lifecycle states only when relevant
 
@@ -88,18 +120,18 @@ Choose the states needed by the criterion and credible risk, which may include:
 - disable, remove, or retire;
 - reload or restart;
 - divergence between linked records;
-- corruption with valid neighboring state;
-- isolation between accounts, tenants, or owners; or
+- corruption with valid neighboring rows;
+- account isolation; or
 - partial failure and recovery.
 
-This is a prompt for specification and review, not a requirement to test every
-state for every feature. An empty-state fixture does not prove a criterion about
-existing incompatible data, and identical linked records do not prove data
-provenance.
+- This is a prompt for specification and review, not a requirement to test every state
+  for every feature.
+- An empty-state fixture does not prove a criterion about existing incompatible data,
+  and identical linked records do not prove data provenance.
 
 ## Progress evidence through environments
 
-Use this default sequence unless an approved Technical Specification defines a
+Use this default sequence unless an approved Project brief defines a
 stricter path:
 
 1. Test the exact candidate locally with focused proof, then run the wider
@@ -115,59 +147,75 @@ stricter path:
    authorizes the external change; then verify production and the remaining
    monitoring or rollback obligations.
 
-Name real environments in the Project Technical Specification. Labels such as
-development, preview, and staging do not prove equivalent infrastructure.
+Name the real environments in the Project Project brief. Labels such
+as dev, preview, and staging do not prove equivalent infrastructure.
 
-For material evidence, identify the environment, data source and type, and
-dataset version or baseline. Prefer deterministic, resettable fixtures when
-repeatability matters. Synthetic, mock, fixture, or anonymized data proves only
-the relationships it represents; report important differences from production.
-Never copy production secrets or personal data into non-production without an
-explicit approved privacy and security design.
+- For material evidence, identify the environment, data source and type, and dataset
+  version or baseline.
+- Prefer deterministic, resettable fixtures when repeatability matters.
+- Synthetic, mock, fixture, or anonymized data proves only the relationships it
+  represents; report important differences from production.
+- Never copy production secrets or personal data into non-production without an explicit
+  approved privacy and security design.
 
 ## Local browser-test safety
 
-When a browser test is part of the selected proof, follow the canonical
-[local browser-test environment procedure](local-browser-test-environment.md).
-Load it only for browser testing; it owns candidate-server provenance and safe
-reuse of existing servers.
+- When Playwright or another browser test is part of the selected proof, follow the
+  canonical [local browser-test environment
+  procedure](local-browser-test-environment.md).
+- Load it only for browser testing; it owns candidate-server provenance and the safe
+  reuse of existing servers.
 
-## Repository entry commands
+## Focused repository commands
 
-Executable commands are intentionally deferred until the Technical
-Specification selects the stack and working test configuration exists. Before
-the first candidate is handed to Validate, record stable repository-owned entry
-commands here for:
+The application has no selected stack or proof commands in the source template.
+Before its first implementation needs executable proof, define and verify the
+focused and full commands in its native executable configuration. Record the
+command names and applicability here; do not invent an application gate during setup.
 
-- focused proof;
-- full required checks;
-- build or packaging; and
-- the exact-candidate integration gate, when one exists.
+ICM tooling uses the commands under `tools/icm/package.json`:
 
-Keep Project-specific proof requirements in the owning Technical Specification.
-Do not copy runner flags into several workflow files.
+- `npm --prefix tools/icm run check` — whole workspace structure and local links.
+- `npm --prefix tools/icm run check -- --project <slug>` — one living brief and
+  its declared decision documents.
+- `npm --prefix tools/icm test` — the workspace tooling's contract tests.
+- `npm --prefix tools/icm run context -- <files...>` — explicit-file size estimate.
 
-Focused proof: Deferred until executable test configuration exists.
+## ICM artifact validation
 
-Full required checks: Deferred until executable test and CI configuration
-exists.
+For a brief edit, use the selected-Project check. Follow
+[document review](document-review.md) when comparing a reviewed commit.
+For shared workflow, template, or checker changes, run the workspace check and
+relevant tooling tests. A structural pass cannot establish approval or judgment.
+Context-size overages warn; missing decisions and broken references fail.
 
-Build or packaging: Deferred until executable build configuration exists.
+## Worktree dependency bootstrap
 
-Exact-candidate gate: Deferred until the repository defines one canonical
-command.
+Use the active worktree's lockfile and native package manager's reproducible
+install command when dependency-backed proof needs an install. Do not borrow or
+symlink another worktree's installed dependencies. This template's ICM tools
+use Node.js built-ins and require no dependency installation.
 
 ## Exact-candidate integration gate
 
-Validate the assembled candidate with the repository's one canonical complete
-gate after independent review, focused criterion proof, and correction or human
-disposition of candidate-invalidating findings.
+A full gate is conditional on the accepted proof scope or an independently
+required repository/release obligation. Focused proof with a scope reason is a
+valid completion path when no full gate is required.
 
-The gate identifies the exact commit or immutable tree, refuses ambiguous dirty
-state, and records every phase, failure, omission, and relevant environment. A
-changed candidate invalidates the result. Do not describe the gate as complete
-when a required phase did not run or failed.
+`icm.config.json` owns the optional candidate gate and its named command phases.
+The source template leaves it disabled because it contains no application.
+Before relying on it, configure the complete real phases and enable it.
+A required full gate cannot be waived by leaving configuration disabled.
 
-Hosted checks may execute the same proof in separate phases, but their terminal
-results must still identify the same candidate and must not be replaced by a
-pasted or manually asserted success.
+- Run `node tools/icm/candidate-gate.mjs` once after focused proof and review,
+  from a committed, clean linked worktree.
+- It rejects primary or dirty worktrees, concurrent runs, and duplicate success
+  for the same Git tree; it records named terminal phase and runtime evidence
+  under the common Git directory.
+- Run `node tools/icm/verify-candidate-receipt.mjs` before relying on that receipt.
+  It accepts only complete success for the current clean tree.
+- This portable gate does not implement the source repository's special
+  cross-tree receipt reuse. For ordinary focused evidence, inspect the diff,
+  retain the tested revision, and rerun affected proof only. A new required
+  full-gate tree needs its own receipt.
+- Machine evidence cannot authorize merge, deployment, or a product decision.

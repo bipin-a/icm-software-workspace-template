@@ -1,36 +1,19 @@
----
-type: shared-reference-router
-status: active
----
+# Shared references
 
-# Shared factory references
+Load only the owner needed by the current question. The root agent route always
+selects voice, decision work, and reviewed engineering principles.
 
-This folder holds stable references that may constrain more than one Project.
-Load only the owner named by the current workflow or working contract.
-
-| Need | Canonical owner |
+| Need | Owner |
 |---|---|
-| Repository voice | [`voice.md`](voice.md) |
-| Shared completion baseline | [`definition-of-done.md`](definition-of-done.md) |
-| Architecture decision placement and criteria | [`architecture/CONTEXT.md`](architecture/CONTEXT.md) |
-| Stage-scoped engineering references | [`engineering/CONTEXT.md`](engineering/CONTEXT.md) |
-| Repository safeguards | [`engineering/safeguards.md`](engineering/safeguards.md) |
-| Testing method | [`engineering/testing-rules.md`](engineering/testing-rules.md) |
-| Local browser-test provenance | [`engineering/local-browser-test-environment.md`](engineering/local-browser-test-environment.md) |
-| GitHub delivery rules | [`engineering/github-delivery-rules.md`](engineering/github-delivery-rules.md) |
-| Multi-PR delivery rules | [`engineering/multi-pr-delivery.md`](engineering/multi-pr-delivery.md) |
-| Optional Python defaults | [`engineering/python-tooling.md`](engineering/python-tooling.md) |
-| Engineering principles | [`principles/engineering-principles.md`](principles/engineering-principles.md) |
-| Earned product principles | [`principles/product-principles.md`](principles/product-principles.md) |
-| UI/UX principles | [`principles/ux-principles.md`](principles/ux-principles.md) |
-| UI/UX review rubric | [`ux/ui-ux-rules.md`](ux/ui-ux-rules.md) |
-| Approved external reusable inputs | [`reusable-assets.md`](reusable-assets.md) |
-| ICM structural methodology | [`methodology/interpretable-context-methodology.md`](methodology/interpretable-context-methodology.md) |
-
-Templates live separately in [`../_templates/`](../_templates/). A workflow
-contract names the exact template and shared references it needs.
-
-## Human check
-
-Confirm that a new cross-Project rule has one narrow owner, is supported by
-accepted evidence, and is routed only to work that needs it.
+| Domain language and product meaning | [Domain catalog](domain/CONTEXT.md) |
+| Repository communication | [Voice](voice.md) |
+| Initiative, material choices, and investigation limits | [Decision work](engineering/decision-work.md) |
+| Shared preferences | [Engineering principles](principles/engineering-principles.md) |
+| Review authority and revision comparison | [Document review](engineering/document-review.md) |
+| Completion | [Definition of done](definition-of-done.md) |
+| Scoped engineering rules | [Engineering catalog](engineering/CONTEXT.md) |
+| Durable architecture rationale | [Architecture catalog](architecture/CONTEXT.md) |
+| Cross-Project product constraints | [Product principles](principles/product-principles.md) |
+| Interface choices | [UX principles](principles/ux-principles.md) and [UI rules](ux/ui-ux-rules.md) |
+| External reusable inputs | [Reusable assets](reusable-assets.md) |
+| ICM origins and adaptation | [Methodology](methodology/interpretable-context-methodology.md) |

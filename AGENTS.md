@@ -1,41 +1,34 @@
 # ICM software workspace
 
-Current human instructions and accepted Project artifacts take precedence. This
-repository is an unconfigured factory until `setup/questionnaire.md` is
-complete.
+Current human instructions and accepted decisions take precedence.
 
 ## Start here
 
-1. When maintaining the reusable template itself, read `README.md` and
-   `_shared/methodology/interpretable-context-methodology.md`; leave the setup
-   questionnaire incomplete.
-2. In an instantiated repository, read `setup/questionnaire.md`. If its status
-   is not `complete`, use only `setup/CONTEXT.md` until the factory is approved.
-3. Read `CONTEXT.md` and select one exact route.
-4. For Project work, select one `projects/<project-slug>/PROJECT.md`, then use
-   `workflows/CONTEXT.md` to identify the earliest applicable stage.
-5. Load only the selected working contract, its named Project artifacts, and
-   the exact shared references selected by that contract.
-
-Follow `_shared/voice.md` for human-facing and repository-facing communication.
-For workflow, routing, or workspace-structure changes, also read
-`_shared/methodology/interpretable-context-methodology.md`.
+1. For template maintenance, read `README.md` and the
+   `_shared/methodology/interpretable-context-methodology.md` adaptation notes;
+   leave `setup/questionnaire.md` incomplete.
+2. For a new instance, read `setup/questionnaire.md`. If incomplete, follow
+   `setup/CONTEXT.md` using existing answers and authority.
+3. Read `CONTEXT.md` and select the task's exact route and canonical owner.
+4. Follow `_shared/voice.md` and apply `_shared/engineering/decision-work.md`
+   with its reviewed principles on every route.
+5. For bounded work, use chat/PR context. When durable coordination needs a
+   Project, select its exact brief and the feature workflow.
 
 ## Always
 
-- Keep one canonical owner for each decision. Link to it instead of copying it.
-- Treat Project files as durable context and accepted intent. Read changing
-  pull-request, check, approval, and deployment state from the external system
-  that owns it.
-- Do not infer approval from a file, link, green check, branch name, or deployed
-  resource. Use the configured approval contract and exact artifact identity.
-- Preserve unrelated changes and inspect repository state before editing.
-- Do not commit secrets, placeholders, stubs, or half-finished policy.
-- Report contradictions and assumptions instead of silently choosing an answer.
-- Pause when authority is missing or a change is materially destructive,
-  public, security-sensitive, migration-sensitive, or deployment-affecting.
+- Inspect branch, worktree, and diff before edits; preserve unrelated changes.
+- Keep one canonical owner for each decision. Link instead of copying.
+- Read live delivery, approval, check, and deployment state from its owner.
+- Never infer human approval from metadata, a receipt, green checks, or a link.
+- Report contradictions and material assumptions.
+- Continue work within explicit authority. Resolve missing material decisions
+  and apply the shared investigation limit before substantial investigation.
+- Do not commit secrets or incomplete implementation or policy. Blank prompts
+  are confined to setup and optional artifact starters.
+- Follow applicable safeguards for destructive actions, public contracts,
+  security, migration, and deployment.
 
-For a selected Project, use the engineering profile named by its working
-contract. For bounded repository work with no Project, use only
-`_shared/engineering/profiles/direct-repository.md#direct-repository` and its
-triggered sections.
+Use only `_shared/engineering/profiles/direct-repository.md#direct-repository`
+and its triggered sections for both bounded work and feature briefs. Domain
+rules come from `_shared/domain/CONTEXT.md` when the task needs them.

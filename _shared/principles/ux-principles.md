@@ -2,7 +2,7 @@
 
 These are reviewed cross-Project preferences for user flows, interfaces,
 accessibility, and interaction design. Project-specific experience and behavior
-remain in the Product Specification.
+remain in the Project brief.
 
 ## Principles
 

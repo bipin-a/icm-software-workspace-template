@@ -3,59 +3,46 @@ type: factory-setup-contract
 status: active
 ---
 
-# Factory setup
+# Workspace setup
 
-One job: configure and verify the stable repository factory before the first
-Project begins.
+One job: establish enough shared context to begin useful work in a new instance.
+Template maintenance leaves the questionnaire incomplete.
 
 ## Inputs
 
-- Working: [`questionnaire.md`](questionnaire.md)
-- For an existing repository: the verified source tree, entry instructions,
-  executable commands, Git history, and live delivery and deployment settings
-- Reference: the [ICM methodology notes](../_shared/methodology/interpretable-context-methodology.md)
-- Reference: the [profile README](../README.md)
+- [Questionnaire](questionnaire.md) and existing human decisions
+- [README](../README.md), current source tree, entry instructions, and executable configuration
+- Existing repository and external settings when adapting an established project
 
 ## Process
 
-1. Confirm whether this is a new repository or an approved adaptation of an
-   existing repository. Inventory existing owners before proposing replacements.
-2. Ask the required questionnaire decisions one at a time. Offer a concrete
-   recommendation only when repository or live-system evidence supports it.
-3. Write each accepted answer to the canonical owner named in the questionnaire.
-   Keep only ownership and completion state here.
-4. Configure the application source route, shared reference catalog, engineering
-   profiles, safeguards, testing entry commands, GitHub delivery rules, and
-   [`../icm.config.json`](../icm.config.json).
-5. Configure the human-owned approval surface and the `artifact-receipts`
-   contract that binds approval evidence to an exact Git blob. Verify it with
-   `npm --prefix tools/icm run check`; a receipt alone does not prove approval.
-6. When executable repository checks exist, configure named candidate-gate
-   phases in `icm.config.json`. Verify that `node tools/icm/candidate-gate.mjs`
-   refuses the primary or dirty worktree and that
-   `node tools/icm/verify-candidate-receipt.mjs` admits only the current clean
-   tree. The machine-written receipt records phase results and runtime identity.
-   Otherwise keep the gate disabled and name its pre-Build trigger.
-7. Leave stack, provider, environment, and product decisions with their named
-   later trigger and owner when current evidence cannot decide them.
-8. Review one consolidated repository diff with the human.
-9. Apply approved live settings, read them back from their owning systems, and
-   record verification evidence without copying their changing status.
-10. Set the questionnaire status to `complete` only after the human approves the
-    factory, controls applicable during setup are verified, and every deferred
-    control has one named trigger and owner.
+1. Identify the workspace, intended outcome, and existing canonical owners.
+2. Reuse current answers. Ask only unresolved questions that change setup;
+   group related questions when practical. Routine inspection may proceed.
+3. Write accepted answers to the questionnaire's canonical output map. Keep
+   completion state here, without a duplicate answer set.
+4. Select real source paths, applicable constraints, decision owners, and
+   review surfaces. Keep the default bounded-task/feature-brief workflow.
+5. If executable work exists, verify its native dependency and proof commands.
+   Configure a full candidate gate only when the required proof needs it.
+6. Defer unavailable stack or provider decisions to the first feature that
+   requires them. Record the trigger and owner in the relevant canonical file;
+   do not invent commands, credentials, or application code.
+7. Run the workspace check and relevant tooling tests. Walk from the root to
+   setup, bounded work, and a selected Project without loading unrelated context.
+8. Present the concrete consolidated setup diff. Apply only authorized live
+   settings and read back the result. A local setup does not require deployment.
+9. Mark the questionnaire complete when the human accepts the setup and the
+   applicable verification is complete.
 
 ## Outputs
 
-- Configured repository identity, root instructions, routing, and source layout
-- Configured shared catalogs, principles, safeguards, and engineering profiles
-- Executable artifact validation and either a configured candidate gate or its
-  named pre-Build trigger and owner
-- Verified repository, GitHub, proof, and release policy
-- `status: complete` in `questionnaire.md`
+- Configured identity, source routes, decision owners, and shared constraints
+- Verified applicable commands and live settings, with evidence in chat/PR
+- Explicit triggers and owners for deferred choices
+- Questionnaire completion state
 
 ## Human check
 
-Review the consolidated configuration, executable-control evidence, verified
-live settings, and deliberately later choices. Approve the factory before the
-first Project is created.
+Review material unresolved choices and the consolidated result. Reuse existing
+explicit authority; do not require approval of each intermediate file.

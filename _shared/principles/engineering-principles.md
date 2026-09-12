@@ -9,8 +9,8 @@ authorities.
 
 - Let product concepts and invariants shape the domain model; do not let
   framework convenience define the domain.
-- Validate data at an actual external boundary when the Project reaches that
-  boundary. Do not invent speculative inputs merely to justify machinery.
+- Validate data at an actual external boundary when the Project workflow reaches
+  that boundary. Do not invent speculative inputs merely to justify machinery.
 
 ## Prefer reversible simplicity
 
@@ -29,6 +29,6 @@ authorities.
 
 ## Persist only reviewed memory
 
-A conversational preference is current context, not durable repository memory.
-An agent may propose a lasting rule or principle, but it becomes repository
-memory only after the human reviews it in its canonical Markdown owner.
+- A conversational preference is current context, not durable repository memory.
+- An agent may propose a lasting rule or principle, but it becomes repository memory
+  only after the human reviews it in its canonical Markdown owner.

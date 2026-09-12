@@ -1,122 +1,9 @@
-import { spawn } from 'node:child_process';
 import { readFile, readdir, realpath, stat } from 'node:fs/promises';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
 import { candidateGateConfigurationErrors } from './config.mjs';
-
-const APPROVAL_ARTIFACTS = [
-  {
-    role: 'product specification',
-    type: 'product-specification',
-    relativePath: 'specs/product-spec.md',
-    receiptPath: 'approvals/product-specification.md',
-    statuses: ['draft', 'feasibility-requested', 'rejected', 'approved'],
-  },
-  {
-    role: 'technical specification',
-    type: 'technical-specification',
-    relativePath: 'specs/technical-spec.md',
-    receiptPath: 'approvals/technical-specification.md',
-    statuses: ['draft', 'product-feedback', 'rejected', 'approved'],
-  },
-  {
-    role: 'delivery assessment',
-    type: 'delivery-assessment',
-    relativePath: 'delivery-assessment.md',
-    receiptPath: 'approvals/delivery-assessment.md',
-    statuses: ['proposed', 'rejected', 'approved'],
-  },
-];
-
-function parseScalar(value) {
-  const trimmed = value.trim();
-  if (trimmed === '') return '';
-  if (trimmed === 'true') return true;
-  if (trimmed === 'false') return false;
-  if (trimmed === 'null' || trimmed === '~') return null;
-  if (/^-?\d+$/.test(trimmed)) return Number(trimmed);
-  if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
-    const inside = trimmed.slice(1, -1).trim();
-    if (!inside) return [];
-    return inside.split(',').map((entry) => parseScalar(entry));
-  }
-  if (
-    (trimmed.startsWith('"') && trimmed.endsWith('"'))
-    || (trimmed.startsWith("'") && trimmed.endsWith("'"))
-  ) return trimmed.slice(1, -1);
-  return trimmed;
-}
-
-function parseYamlSubset(source) {
-  const lines = source.split(/\r?\n/).flatMap((line) => {
-    if (!line.trim() || /^\s*#/.test(line)) return [];
-    const indent = line.match(/^ */)[0].length;
-    if (indent % 2 !== 0) throw new Error('frontmatter indentation must use two-space levels');
-    return [{ indent, content: line.trim() }];
-  });
-
-  const parseNode = (start, indent) => {
-    if (lines[start]?.content.startsWith('- ')) return parseArray(start, indent);
-    return parseObject(start, indent);
-  };
-  const parseObject = (start, indent) => {
-    const value = {};
-    let index = start;
-    while (index < lines.length && lines[index].indent === indent && !lines[index].content.startsWith('- ')) {
-      const match = lines[index].content.match(/^([^:]+):(.*)$/);
-      if (!match) throw new Error(`invalid frontmatter entry: ${lines[index].content}`);
-      const key = match[1].trim();
-      const rest = match[2].trim();
-      if (rest) {
-        value[key] = parseScalar(rest);
-        index += 1;
-      } else if (lines[index + 1] && lines[index + 1].indent > indent) {
-        const nested = parseNode(index + 1, lines[index + 1].indent);
-        value[key] = nested.value;
-        index = nested.index;
-      } else {
-        value[key] = '';
-        index += 1;
-      }
-    }
-    return { value, index };
-  };
-  const parseArray = (start, indent) => {
-    const value = [];
-    let index = start;
-    while (index < lines.length && lines[index].indent === indent && lines[index].content.startsWith('- ')) {
-      const rest = lines[index].content.slice(2).trim();
-      const mapping = rest.match(/^([^:]+):(.*)$/);
-      if (!mapping) {
-        value.push(parseScalar(rest));
-        index += 1;
-        continue;
-      }
-      const item = { [mapping[1].trim()]: parseScalar(mapping[2].trim()) };
-      index += 1;
-      if (index < lines.length && lines[index].indent > indent) {
-        const nested = parseObject(index, lines[index].indent);
-        Object.assign(item, nested.value);
-        index = nested.index;
-      }
-      value.push(item);
-    }
-    return { value, index };
-  };
-
-  return lines.length === 0 ? {} : parseNode(0, lines[0].indent).value;
-}
-
-export function parseFrontmatter(path, body) {
-  const match = body.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/);
-  if (!match) throw new Error(`${path} is missing YAML frontmatter`);
-  try {
-    return parseYamlSubset(match[1]);
-  } catch (error) {
-    throw new Error(`${path} has invalid YAML frontmatter: ${error.message}`);
-  }
-}
+import { parseFrontmatter, headingSection } from './markdown.mjs';
+import { BRIEF_HEADINGS, FEATURE_WORKFLOW, featureProjectChecks } from './feature-review.mjs';
 
 async function optionalRead(root, path) {
   if (typeof path !== 'string' || path.length === 0) return null;
@@ -139,40 +26,6 @@ async function optionalRead(root, path) {
   }
 }
 
-async function gitObjectId(repositoryRoot, body) {
-  return new Promise((resolvePromise, rejectPromise) => {
-    const child = spawn('git', ['hash-object', '--stdin'], {
-      cwd: repositoryRoot,
-      stdio: ['pipe', 'pipe', 'pipe'],
-    });
-    let stdout = '';
-    let stderr = '';
-    child.stdout.setEncoding('utf8');
-    child.stderr.setEncoding('utf8');
-    child.stdout.on('data', (chunk) => { stdout += chunk; });
-    child.stderr.on('data', (chunk) => { stderr += chunk; });
-    child.once('error', rejectPromise);
-    child.once('exit', (code) => {
-      if (code === 0) resolvePromise(stdout.trim());
-      else rejectPromise(new Error(`git hash-object failed: ${stderr.trim()}`));
-    });
-    child.stdin.end(body);
-  });
-}
-
-function headingSection(body, wanted) {
-  const headings = [...body.matchAll(/^(#{1,6}) (.+)$/gm)];
-  const index = headings.findIndex((heading) => (
-    heading[2] === wanted || heading[2].startsWith(`${wanted} —`)
-  ));
-  if (index < 0) return null;
-  const current = headings[index];
-  const next = headings.slice(index + 1).find(
-    (heading) => heading[1].length <= current[1].length,
-  );
-  return body.slice(current.index, next?.index);
-}
-
 function profileRuleSelections(repositoryRoot, profilePath, profileSection) {
   return profileSection.split(/\r?\n/).flatMap((line) => {
     if (!line.trim().startsWith('|')) return [];
@@ -190,238 +43,12 @@ function profileRuleSelections(repositoryRoot, profilePath, profileSection) {
   });
 }
 
-function markdownTableRows(body, heading) {
-  const section = headingSection(body, heading);
-  if (!section) return [];
-  const lines = section.split(/\r?\n/).filter((line) => line.trim().startsWith('|'));
-  if (lines.length < 3) return [];
-  const cells = (line) => line.trim().replace(/^\||\|$/g, '').split('|').map((cell) => cell.trim());
-  const columns = cells(lines[0]);
-  return lines.slice(2).map((line) => Object.fromEntries(
-    columns.map((column, index) => [column, cells(line)[index] ?? '']),
-  ));
-}
-
 function markdownTableColumns(body, heading) {
   const section = headingSection(body, heading);
   if (!section) return null;
   const line = section.split(/\r?\n/).find((candidate) => candidate.trim().startsWith('|'));
   if (!line) return null;
   return line.trim().replace(/^\||\|$/g, '').split('|').map((cell) => cell.trim());
-}
-
-function productOptionFailures(product, technical) {
-  const failures = [];
-  const rows = markdownTableRows(product.body, 'Product behavior options')
-    .filter((row) => Object.values(row).some((value) => value !== ''));
-  const mode = product.metadata.decision_mode;
-  if (!['single-track', 'options'].includes(mode)) {
-    return [`${product.path} decision_mode must be single-track or options`];
-  }
-  if (mode === 'single-track') {
-    if (rows.length > 0) {
-      failures.push(`${product.path} has decision_mode: single-track but defines Product option rows`);
-    }
-    if (product.metadata.selected_product_option) {
-      failures.push(`${product.path} is single-track but selects ${product.metadata.selected_product_option}`);
-    }
-    return failures;
-  }
-
-  const ids = rows.map((row) => row.ID);
-  const uniqueIds = new Set(ids);
-  if (rows.length < 2 || rows.length > 3) {
-    failures.push(`${product.path} must define two or three Product option rows`);
-  }
-  if (ids.some((id) => !/^P[1-9]\d*$/.test(id ?? ''))) {
-    failures.push(`${product.path} has an invalid Product option ID`);
-  }
-  if (uniqueIds.size !== ids.length) failures.push(`${product.path} has duplicate Product option IDs`);
-  const selected = product.metadata.selected_product_option;
-  const selectionRequired = product.metadata.status === 'approved';
-  if ((selectionRequired || selected) && !uniqueIds.has(selected)) {
-    failures.push(`${product.path} selected_product_option ${selected || 'missing'} is not an option row`);
-  }
-  const selectedRows = rows.filter((row) => row.Status === 'Selected');
-  if (
-    (selectionRequired || selected)
-    && (selectedRows.length !== 1 || selectedRows[0]?.ID !== selected)
-  ) failures.push(`${product.path} must mark exactly ${selected || 'the selected option'} as Selected`);
-  if (!selectionRequired && !selected && selectedRows.length > 0) {
-    failures.push(`${product.path} marks an option Selected without selected_product_option`);
-  }
-
-  if (technical) {
-    const assessedIds = markdownTableRows(technical.body, 'Product behavior feasibility')
-      .filter((row) => Object.values(row).some((value) => value !== ''))
-      .map((row) => row['Product option']);
-    if (
-      assessedIds.length !== ids.length
-      || new Set(assessedIds).size !== assessedIds.length
-      || ids.some((id) => !assessedIds.includes(id))
-    ) failures.push(`${technical.path} must assess the exact Product option set ${ids.join(', ')}`);
-  }
-  return failures;
-}
-
-function technicalDesignSelectionFailures(technical) {
-  const rows = markdownTableRows(technical.body, 'Design options and decision')
-    .filter((row) => Object.values(row).some((value) => value !== ''));
-  const selected = rows.filter((row) => row.Decision === 'Selected');
-  return selected.length === 1
-    ? []
-    : [`${technical.path} must mark exactly one Design options and decision row Selected`];
-}
-
-async function approvalFailures(repositoryRoot) {
-  const failures = [];
-  let entries = [];
-  try {
-    entries = await readdir(join(repositoryRoot, 'projects'), { withFileTypes: true });
-  } catch (error) {
-    if (error?.code !== 'ENOENT') throw error;
-  }
-
-  for (const entry of entries) {
-    const slug = entry.name;
-    if (entry.isSymbolicLink()) {
-      failures.push(`projects/${slug} must be a real directory; Project symlinks are not allowed`);
-      continue;
-    }
-    if (!entry.isDirectory()) continue;
-    const projectPath = `projects/${slug}/PROJECT.md`;
-    const projectBody = await optionalRead(repositoryRoot, projectPath);
-    if (!projectBody) {
-      failures.push(`${projectPath} is required for Project directory ${slug}`);
-      continue;
-    }
-    let project;
-    try {
-      project = parseFrontmatter(projectPath, projectBody);
-    } catch (error) {
-      failures.push(error.message);
-      continue;
-    }
-    if (project.type !== 'project') {
-      failures.push(`${projectPath} must declare type: project`);
-    }
-    if (project.id !== slug) {
-      failures.push(`${projectPath} id ${project.id || 'missing'} must match directory ${slug}`);
-    }
-    if (project.workflow !== 'project-delivery') {
-      failures.push(`${projectPath} must declare workflow: project-delivery`);
-    }
-    if (project.approval_contract !== 'artifact-receipts') {
-      continue;
-    }
-
-    const artifacts = new Map();
-    for (const definition of APPROVAL_ARTIFACTS) {
-      const artifactPath = `projects/${slug}/${definition.relativePath}`;
-      const body = await optionalRead(repositoryRoot, artifactPath);
-      if (!body) continue;
-      let metadata;
-      try {
-        metadata = parseFrontmatter(artifactPath, body);
-      } catch (error) {
-        failures.push(error.message);
-        continue;
-      }
-      if (!definition.statuses.includes(metadata.status)) {
-        failures.push(`${artifactPath} has invalid status ${metadata.status || 'missing'}`);
-        continue;
-      }
-      if (metadata.type !== definition.type) {
-        failures.push(`${artifactPath} must declare type: ${definition.type}`);
-      }
-      if (metadata.project !== slug) {
-        failures.push(`${artifactPath} names Project ${metadata.project || 'missing'}, expected ${slug}`);
-      }
-      const artifact = {
-        ...definition,
-        path: artifactPath,
-        body,
-        metadata,
-        blob: await gitObjectId(repositoryRoot, body),
-      };
-      artifacts.set(definition.role, artifact);
-      if (metadata.status !== 'approved') continue;
-
-      const receiptPath = `projects/${slug}/${definition.receiptPath}`;
-      const receiptBody = await optionalRead(repositoryRoot, receiptPath);
-      if (!receiptBody) {
-        failures.push(`${artifactPath} is approved without ${receiptPath}`);
-        continue;
-      }
-      let receipt;
-      try {
-        receipt = parseFrontmatter(receiptPath, receiptBody);
-      } catch (error) {
-        failures.push(error.message);
-        continue;
-      }
-      const actualBlob = artifact.blob;
-      if (receipt.type !== 'approval-receipt') failures.push(`${receiptPath} must be an approval receipt`);
-      if (receipt.project !== slug) failures.push(`${receiptPath} names the wrong Project`);
-      if (receipt.artifact !== artifactPath) failures.push(`${receiptPath} names the wrong artifact`);
-      if (receipt.artifact_blob !== actualBlob) failures.push(`${artifactPath} does not match approved blob ${receipt.artifact_blob || 'missing'}`);
-      if (receipt.decision !== 'approved') failures.push(`${receiptPath} decision must be approved`);
-      if (typeof receipt.source !== 'string' || receipt.source.trim() === '') {
-        failures.push(`${receiptPath} must name the human approval source`);
-      }
-    }
-
-    const product = artifacts.get('product specification');
-    const technical = artifacts.get('technical specification');
-    const delivery = artifacts.get('delivery assessment');
-    const activeTechnicalAssessment = ['product-feedback', 'approved'].includes(technical?.metadata.status)
-      ? technical
-      : undefined;
-    if (product) {
-      failures.push(...productOptionFailures(product, activeTechnicalAssessment));
-    }
-    if (product?.metadata.status === 'feasibility-requested' && product.metadata.decision_mode !== 'options') {
-      failures.push(`${product.path} feasibility-requested requires decision_mode: options`);
-    }
-    if (technical?.metadata.status === 'product-feedback') {
-      if (product?.metadata.status !== 'feasibility-requested') {
-        failures.push(`${technical.path} product-feedback requires a feasibility-requested product specification`);
-      } else {
-        const expected = `${product.path}@${product.blob}`;
-        if (technical.metadata.product_specification !== expected) {
-          failures.push(`${technical.path} must reference ${expected}`);
-        }
-      }
-    }
-    if (technical?.metadata.status === 'approved' && product?.metadata.status !== 'approved') {
-      failures.push(`${technical.path} technical specification is approved without an approved product specification`);
-    } else if (technical?.metadata.status === 'approved') {
-      failures.push(...technicalDesignSelectionFailures(technical));
-      const expected = `${product.path}@${product.blob}`;
-      if (technical.metadata.product_specification !== expected) {
-        failures.push(`${technical.path} must reference ${expected}`);
-      }
-    }
-    if (delivery?.metadata.status === 'approved' && product?.metadata.status !== 'approved') {
-      failures.push(`${delivery.path} delivery assessment is approved without an approved product specification`);
-    }
-    if (delivery?.metadata.status === 'approved' && technical?.metadata.status !== 'approved') {
-      failures.push(`${delivery.path} delivery assessment is approved without an approved technical specification`);
-    }
-    if (delivery?.metadata.status === 'approved' && product?.metadata.status === 'approved') {
-      const expected = `${product.path}@${product.blob}`;
-      if (delivery.metadata.product_specification !== expected) {
-        failures.push(`${delivery.path} must reference ${expected}`);
-      }
-    }
-    if (delivery?.metadata.status === 'approved' && technical?.metadata.status === 'approved') {
-      const expected = `${technical.path}@${technical.blob}`;
-      if (delivery.metadata.technical_specification !== expected) {
-        failures.push(`${delivery.path} must reference ${expected}`);
-      }
-    }
-  }
-  return failures;
 }
 
 export function isSafeRepositoryPath(path) {
@@ -564,11 +191,11 @@ function markdownLinkTargets(path, body) {
   });
 }
 
-async function markdownLinkFailures(repositoryRoot) {
+async function markdownLinkFailures(repositoryRoot, scope = repositoryRoot) {
   const failures = [];
-  const files = await repositoryFiles(repositoryRoot, (name) => name.endsWith('.md'));
+  const files = await repositoryFiles(scope, (name) => name.endsWith('.md'));
   for (const path of files) {
-    const body = await readFile(path, 'utf8');
+    const body = await optionalRead(repositoryRoot, toRepositoryPath(repositoryRoot, path));
     for (const link of markdownLinkTargets(path, body)) {
       const target = resolve(dirname(path), link.target);
       const repositoryPath = toRepositoryPath(repositoryRoot, path);
@@ -597,9 +224,6 @@ async function markdownLinkFailures(repositoryRoot) {
 
 const PROJECT_TEMPLATE_PATHS = new Map([
   ['projects/<project-slug>/PROJECT.md', '_templates/project/PROJECT.md'],
-  ['projects/<project-slug>/specs/product-spec.md', '_templates/specification/product-spec.md'],
-  ['projects/<project-slug>/specs/technical-spec.md', '_templates/specification/technical-spec.md'],
-  ['projects/<project-slug>/delivery-assessment.md', '_templates/delivery-assessment.md'],
 ]);
 
 function manifestSourcePath(path) {
@@ -744,6 +368,7 @@ const ROOT_ROUTES = [
   'setup/CONTEXT.md',
   'projects/CONTEXT.md',
   'workflows/CONTEXT.md',
+  'workflows/feature/CONTEXT.md',
   '_shared/CONTEXT.md',
   'roadmap/CONTEXT.md',
   'architecture/CONTEXT.md',
@@ -781,7 +406,7 @@ function workflowContractShapeFailures(scope, body, type) {
   const markers = {
     'workflow-step': ['One job:', '## Inputs', 'Do not load', '## Process', '## Outputs', '## Human check'],
     'workflow-router': ['One job:', '## Inputs', 'Do not load', '## Routes'],
-    'workflow-hub': ['One job:', '## Project path binding', '## Stages', 'Do not infer approval', '## Capability routing', '## Human check'],
+    'workflow-hub': ['One job:', '## Project path binding', '## Human check'],
   }[type] ?? [];
   return markers
     .filter((marker) => !body.includes(marker))
@@ -810,25 +435,35 @@ async function workflowFailures(repositoryRoot) {
   return failures;
 }
 
-async function checkWorkspaceInternal(
-  repositoryRoot,
-  { checkWorkflowContracts = true } = {},
-) {
+async function checkWorkspaceInternal(repositoryRoot, { projectSlug, reviewedCommit } = {}) {
+  if (reviewedCommit && !projectSlug) throw new Error('--reviewed-commit requires --project');
+  if (projectSlug) {
+    const result = await featureProjectChecks(repositoryRoot, projectSlug, { reviewedCommit });
+    result.failures.push(...await markdownLinkFailures(repositoryRoot, join(repositoryRoot, 'projects', projectSlug)));
+    return result;
+  }
   const configBody = await optionalRead(repositoryRoot, 'icm.config.json');
-  let config = {};
-  if (configBody) {
-    try {
-      config = JSON.parse(configBody);
-    } catch (error) {
-      return { failures: [`icm.config.json is invalid JSON: ${error.message}`] };
+  const config = configBody ? JSON.parse(configBody) : {};
+  const failures = await configurationFailures(repositoryRoot, config, Boolean(configBody));
+  failures.push(...await markdownLinkFailures(repositoryRoot));
+  failures.push(...await rootRouteFailures(repositoryRoot));
+  failures.push(...await workflowFailures(repositoryRoot));
+  const templatePath = '_templates/project/PROJECT.md';
+  const template = await optionalRead(repositoryRoot, templatePath);
+  if (!template) failures.push(`${templatePath} is required`);
+  else {
+    const metadata = parseFrontmatter(templatePath, template);
+    if (metadata.type !== 'project' || metadata.workflow !== FEATURE_WORKFLOW) {
+      failures.push(`${templatePath} must declare type: project and workflow: feature-work`);
+    }
+    for (const heading of BRIEF_HEADINGS) {
+      if (!headingSection(template, heading)) failures.push(`${templatePath} is missing ## ${heading}`);
     }
   }
-  const failures = await configurationFailures(repositoryRoot, config, Boolean(configBody));
-  failures.push(...await approvalFailures(repositoryRoot));
-  failures.push(...await markdownLinkFailures(repositoryRoot));
-  if (checkWorkflowContracts) {
-    failures.push(...await rootRouteFailures(repositoryRoot));
-    failures.push(...await workflowFailures(repositoryRoot));
+  const briefs = await repositoryFiles(join(repositoryRoot, 'projects'), name => name === 'PROJECT.md');
+  for (const path of briefs) {
+    const slug = relative(join(repositoryRoot, 'projects'), dirname(path)).split(sep).join('/');
+    failures.push(...(await featureProjectChecks(repositoryRoot, slug)).failures);
   }
   return { failures };
 }
@@ -841,15 +476,33 @@ export async function checkWorkspace(repositoryRoot, options = {}) {
   }
 }
 
+function commandOptions(args) {
+  const result = {};
+  const keys = { '--project': 'projectSlug', '--reviewed-commit': 'reviewedCommit' };
+  for (let i = 0; i < args.length; i += 2) {
+    const key = keys[args[i]];
+    if (!key || result[key] || !args[i + 1] || args[i + 1].startsWith('--')) {
+      throw new Error('Usage: workspace-check.mjs [--project <slug> [--reviewed-commit <full-sha>]]');
+    }
+    result[key] = args[i + 1];
+  }
+  return result;
+}
+
 const invokedPath = process.argv[1] ? resolve(process.argv[1]) : '';
 if (invokedPath === fileURLToPath(import.meta.url)) {
-  const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-  const result = await checkWorkspace(repositoryRoot);
-  if (result.failures.length > 0) {
-    console.error('ICM workspace check failed:');
-    for (const failure of result.failures) console.error(`- ${failure}`);
+  try {
+    const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
+    const result = await checkWorkspace(repositoryRoot, commandOptions(process.argv.slice(2)));
+    if (result.failures.length) {
+      console.error('ICM workspace check failed:');
+      for (const failure of result.failures) console.error(`- ${failure}`);
+      process.exitCode = 1;
+    } else {
+      console.log('ICM workspace check passed (structure and requested revision comparison only; not approval).');
+    }
+  } catch (error) {
+    console.error(error.message);
     process.exitCode = 1;
-  } else {
-    console.log('ICM workspace check passed.');
   }
 }

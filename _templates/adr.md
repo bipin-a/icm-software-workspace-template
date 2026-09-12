@@ -1,7 +1,6 @@
 ---
 type: architecture-decision-record
 id:
-status: proposed
 date:
 scope:
 project:
@@ -15,7 +14,9 @@ supersedes:
 Use an ADR only for a material, durable architecture decision whose rationale
 must survive the current implementation. Project-local decisions live with the
 owning Project; cross-Project decisions live in `_shared/architecture/`.
-Specifications continue to own Project intent and acceptance.
+The brief owns Project intent and acceptance. If this ADR owns a Project decision,
+list its Project-relative path in the brief's `decision_documents`. Link the
+human review source and exact revision; do not store approval status here.
 
 ## Decision required
 

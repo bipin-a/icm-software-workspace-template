@@ -111,3 +111,12 @@ The paper presents traceability as unfinished work. Current ICM workspaces expos
 - Sections 4.5-4.6: practitioner observations and limitations.
 - Sections 5.1-5.4: appropriate and inappropriate use cases.
 - Sections 6.1-6.3: incremental reruns, semantic debugging, verification, and source integrity.
+
+## Software workspace adaptation
+
+The sections above describe the original paper, including numbered stages and
+intermediate outputs. This template adapts those ideas through one feature
+contract, scoped references, and optional living Project briefs. Folder numbers,
+separate specifications, approval receipts, and approval of every intermediate
+artifact are not requirements here. Current human authority and the shared
+[decision-work contract](../engineering/decision-work.md) govern execution.

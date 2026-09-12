@@ -1,143 +1,101 @@
 # ICM Software Workspace Template
 
-A reusable software-delivery profile built on
-[Interpretable Context Methodology](https://arxiv.org/abs/2603.16021). This is
-the first formal profile release: one human-gated Project workflow, durable
-artifact ownership, scoped shared context, and explicit boundaries for live
-delivery and deployment state.
+A reusable workspace for taking software work from intent through decisions,
+implementation, review, and proof. It generalizes the ICM 2.6 approach in
+[MyEventVision](https://github.com/myeventvision/myeventvision/tree/ab1241e366a0c30a1d49dc728cc751cec2ae8965):
+scoped context, useful initiative, one owner per decision, and proportionate work.
 
-This profile applies ICM 2.2 and is being prepared for release as `0.1.0`.
-The Git tag and [`CHANGELOG.md`](CHANGELOG.md) own template release identity;
-`profile_version` in [`setup/questionnaire.md`](setup/questionnaire.md) records
-the snapshot copied into an instance. Treat the product-option trigger as
-experimental: calibrate it on two
-product-choice-heavy Projects and one expected single-track Project. Any false
-negative reopens the trigger; two false positives require simplification. Do
-not report percentages from this small sample.
+The template has no release-version lifecycle, changelog, upgrade framework, or
+instance version field. The source link identifies this adaptation's provenance;
+it is not an ongoing synchronization requirement. Git continues to hold changes
+and the exact revisions used for review and proof.
 
-See [`CHANGELOG.md`](CHANGELOG.md) for version history and
-[`MIGRATION.md`](MIGRATION.md) when updating an unversioned instance.
+## How work runs
 
-This repository is a factory starter, not a finished product repository.
-Instantiate it, complete the setup questionnaire once, and let each Project
-carry its own product and technical intent.
+- **Bounded work:** keep the request, material choices, implementation, and proof
+  in chat and the PR. Clear intent and known owners do not need a Project.
+- **Coordinated work:** use one living
+  [`PROJECT.md`](_templates/project/PROJECT.md) when unresolved product,
+  architecture, ownership, or work-order decisions need durable planning.
+- **Evidence changes a decision:** revisit that decision and its dependent
+  proof. Continue authorized work; intermediate documents are not completion.
+- **Review:** chat or the PR owns human authority. Compare the current decision
+  documents with the exact reviewed revision before reusing that review.
+- **Proof:** use focused checks for the actual change and risk. A full integration
+  gate or release procedure applies when the work requires it.
 
-## Core model
+Start with [`AGENTS.md`](AGENTS.md), then select the exact route in
+[`CONTEXT.md`](CONTEXT.md). The [feature workflow](workflows/feature/CONTEXT.md)
+works with either chat/PR context or a selected Project brief.
 
-[`workflows/`](workflows/CONTEXT.md) holds one shared Pipeline.
-[`projects/`](projects/CONTEXT.md) holds stable Project records that move through
-that Pipeline without moving folders or copying workflow instructions.
+## Start a new repository
 
-A Project is the smallest durable unit that owns one product outcome. It is not
-the same as a conversation, issue, pull request, prototype, investigation, or
-release. One Project may use several of those and may return to an earlier stage
-when evidence invalidates an accepted artifact.
+1. Create a repository from this template.
+2. Follow [`setup/CONTEXT.md`](setup/CONTEXT.md) and complete the
+   [`questionnaire`](setup/questionnaire.md) using existing decisions first.
+3. Write each answer to its named owner. Establish only what is needed now;
+   leave stack, provider, and runtime choices with their explicit later trigger.
+4. Review the consolidated setup. Mark it complete after applicable checks and
+   authorized live-setting verification.
+5. Start with bounded work or create one Project when coordination needs it.
 
-The normal path is:
+No application stack, cloud provider, domain, sample Project, or external service
+has been selected. [`app/`](app/README.md) is a source-layout route, not an app
+scaffold. Existing repositories should preserve their code and owners and adapt
+only the relevant workspace contracts through a reviewed diff.
 
-1. **Understand** — approve the problem, product behavior, scope, acceptance,
-   and applicable interface evidence.
-2. **Design** — choose the technical design and its proportionate delivery
-   shape.
-3. **Build** — implement the accepted artifacts.
-4. **Validate** — review and prove the exact candidate.
-5. **Assess Readiness** — dispose findings and choose the next route.
-6. **Release** — promote and verify one approved candidate by environment.
-7. **Learn** — apply an earned lesson to its canonical owner.
+## Workspace map
 
-Stage order is a default, not permission to infer state. The selected Project's
-exact artifacts, approval evidence, and current external delivery owners decide
-the next valid action.
-
-## Durable context and live state
-
-Repository files own durable intent, contracts, decisions, and links. Git and
-pull-request systems own implementation history and changing delivery state;
-configured approval surfaces own approval events; CI owns check results; and
-deployment providers own live environment state.
-
-Project records link those systems without copying their status. Approval and
-candidate evidence bind to exact artifact or Git identities so a changed input
-cannot silently reuse stale evidence.
-
-## Workspace boundaries
-
-| Path | Responsibility |
+| Path | Owns |
 |---|---|
-| [`setup/`](setup/CONTEXT.md) | Configure the stable factory, repository commands, and human approval owners. |
-| [`workflows/`](workflows/CONTEXT.md) | Define the shared lifecycle, stage contracts, and human gates. |
-| [`projects/`](projects/CONTEXT.md) | Hold one stable record and earned artifacts for each product outcome. |
-| [`architecture/`](architecture/CONTEXT.md) | Hold cross-Project investigation evidence only when no Project is its natural owner. |
-| [`roadmap/`](roadmap/CONTEXT.md) | Hold future product directions that are not accepted Projects. |
-| [`_shared/`](_shared/CONTEXT.md) | Own stable cross-Project references, profiles, principles, and safeguards. |
-| `_templates/` | Provide blank artifact shapes; templates do not prove an artifact exists or is approved. |
-| [`app/`](app/README.md) | Reserve the application boundary until setup or an accepted Technical Specification selects the real source layout. |
+| [`setup/`](setup/CONTEXT.md) | One-time configuration and completion state |
+| [`workflows/`](workflows/CONTEXT.md) | Feature work and conditional evidence procedures |
+| [`projects/`](projects/CONTEXT.md) | Living briefs and earned decision documents |
+| [`_shared/`](_shared/CONTEXT.md) | Shared rules, principles, domain references, and context selection |
+| [`_templates/`](_templates/project/PROJECT.md) | Optional blank artifact shapes |
+| [`architecture/`](architecture/CONTEXT.md) | Investigation evidence with no natural Project owner |
+| [`roadmap/`](roadmap/CONTEXT.md) | Future directions outside accepted work |
+| [`app/`](app/README.md) | The application source-layout boundary |
 
-Context stays scoped. Root and parent `CONTEXT.md` files route; working contracts
-name exact Project inputs, templates, and shared profile sections. Do not load
-the whole workspace merely because it is available.
+Repository documents own durable intent and links. GitHub owns live delivery
+state; checks and deployment providers own their results. Do not copy live
+status into briefs or infer approval from a document, green check, or branch.
 
-## Configure a new instance
+## Workspace tools
 
-1. Create a repository from this template or copy it into an empty repository.
-2. Open [`setup/questionnaire.md`](setup/questionnaire.md).
-3. Follow [`setup/CONTEXT.md`](setup/CONTEXT.md) and write each accepted answer
-   to its named canonical owner.
-4. Configure and verify the artifact-approval mechanism, existing repository
-   commands, GitHub policy, and any live settings. When the candidate gate
-   depends on a later Technical Specification, record its exact pre-Build
-   trigger and owner instead of inventing a command during setup.
-5. Create the first Project only after the human approves the consolidated
-   factory configuration.
-
-The factory controls have stable entry commands:
+The tools use Node.js built-ins and require no package installation:
 
 ```sh
 npm --prefix tools/icm run check
 npm --prefix tools/icm test
+npm --prefix tools/icm run check -- --project <slug>
+npm --prefix tools/icm run check -- --project <slug> --reviewed-commit <full-sha>
 npm --prefix tools/icm run context -- AGENTS.md CONTEXT.md _shared/voice.md
-node tools/icm/candidate-gate.mjs
-node tools/icm/verify-candidate-receipt.mjs
 ```
 
-[`icm.config.json`](icm.config.json) owns the context packet limit, its required
-500-token reserve, and candidate-gate configuration. The context command gives
-a conservative estimate for the exact files supplied; it does not reconstruct
-hypothetical packets. The source template leaves the gate disabled because it
-has no application proof commands. Enable it only after setup or an accepted
-Technical Specification names complete phases. The gate receipt records their
-terminal results and runtime identity. Build cannot hand a candidate to
-Validate before then.
+The checker validates routes, profile headings, local links, and living briefs.
+Revision comparison includes working and staged decision documents. It detects
+change; it cannot establish human approval or classify editorial wording.
 
-For an existing repository, inventory and classify the current tree first.
-Treat this profile as a target reference, not a directory to copy wholesale
-over working code. Existing code, history, product intent, commands,
-infrastructure, and live settings remain authoritative until an approved
-migration names their successors.
+[`icm.config.json`](icm.config.json) owns the context-size estimate and optional
+full candidate gate. The size estimate is advisory. The gate is disabled until
+real application phases are configured; see
+[testing rules](_shared/engineering/testing-rules.md#exact-candidate-integration-gate).
+It is machine proof, separate from human review of decisions.
 
-## Product and stack neutrality
+## Maintain this template
 
-The source template contains no sample Project, provider credentials, live
-setting claims, or selected application stack. `app/`, `roadmap/`, and
-`architecture/` are intentional instantiation surfaces. Optional stack shelves
-remain conditional and never override a Project Technical Specification.
-
-Product and UX principles stay in their shared owners when they are broadly
-applicable. Project-specific behavior, brand voice, technology, hosting, data,
-interfaces, and deployment choices belong to setup outputs or the applicable
-Project artifacts.
-
-## Maintain the template
-
-Leave `setup/questionnaire.md` incomplete in this source repository. Before a
-release, verify the cold-agent setup walk, Project selection walk, local links,
-workflow and profile routing, retired-path absence, representative context
-estimates with the 500-token reserve, and lack of instance data. Do not publish
-an approval-receipt shape without its configured verifier.
+Leave the setup questionnaire incomplete. Check the setup and Project-selection
+routes, run the tooling tests and workspace check, and review the diff for
+product-specific commands, domain rules, credentials, data, or live-state claims.
+Template prompts belong only in setup or optional starters; remove them from
+instantiated decision documents. Structural checks do not evaluate agent judgment.
 
 ## License and attribution
 
-Released under the [MIT License](LICENSE). The profile builds on
+Released under the [MIT License](LICENSE). The workspace builds on
 [Interpretable Context Methodology](https://arxiv.org/abs/2603.16021) by Jake
 Van Clief and David McDermott and was informed by the MIT-licensed
 [`icm-architect`](https://github.com/RinDig/icm-architect) skill.
+The [methodology notes](_shared/methodology/interpretable-context-methodology.md)
+distinguish the original staged method from this software-work adaptation.

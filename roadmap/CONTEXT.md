@@ -30,7 +30,7 @@ One job: hold future product directions that may influence current decisions but
 
 - This is not a specification, priority system, shipped-feature list, or
   historical delivery log.
-- Detailed behaviour and implementation decisions belong in Project specifications.
+- Detailed behaviour and implementation decisions belong in Project decisions.
 - Do not treat a future direction as a current requirement unless an approved Project adopts it.
 - Read changing issue, delivery, and release state from its owning external
   system; do not copy it into a roadmap row.

@@ -1,6 +1,6 @@
 # Architecture decision rules
 
-The Technical Specification owns the current architecture for one Project. An
+The Project brief owns the current architecture for one Project. An
 ADR records why a material, durable architecture decision was accepted; it does
 not become a second specification.
 
@@ -25,14 +25,14 @@ Store a Project-local ADR at
 `projects/<project-slug>/decisions/ADR-NNN-<slug>.md`. Store an accepted
 cross-Project ADR at
 `_shared/architecture/decisions/ADR-NNN-<slug>.md` and link each affected
-Project specification to it.
+Project decision to it.
 
 ## Evidence and canonical ownership
 
 Investigation and prototype findings remain evidence. Link them from the ADR;
 do not copy their full contents into the decision or affected Projects. Record
 the decision, rationale, alternatives, consequences, and revisit conditions
-once. Describe each Project's application in its Technical Specification.
+once. Describe each Project's application in its Project brief.
 
 An accepted ADR names every canonical source that must change. If the decision
 is later replaced, preserve the old record, link its successor, and update the

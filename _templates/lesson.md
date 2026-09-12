@@ -31,7 +31,7 @@ owner. Stabilize any live risk first.
 
 ## Canonical owner and correction
 
-- Canonical source that should change: Project specification / workflow /
+- Canonical source that should change: Project decision / workflow /
   template / routing file / shared principle or safeguard / roadmap / external
   owner
 - Accepted source change:
