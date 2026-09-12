@@ -26,7 +26,7 @@ Do not load unrelated Projects, other substeps, or complete reference libraries.
 ## Process
 
 1. Verify deployed source and configuration against the intended candidate and target. Account for every partial write or failed action.
-2. Run the required environment proof with its actual data and reset constraints. Reachability alone does not prove behavior, persistence, migration, or isolation.
+2. Reuse applicable routing or smoke evidence for this exact attempt; run it when required and not yet terminal. Then run the selected environment proof with its actual data and reset constraints. Reachability alone does not prove behavior, persistence, migration, or isolation.
 3. Record exact procedures, results, what the environment proves, production differences, failures, skipped proof, monitoring, and rollback limits.
 4. Carry the terminal evidence into the environment decision. Do not broaden recovery or promotion authority through a successful check.
 

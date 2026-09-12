@@ -25,7 +25,7 @@ Do not load unrelated Projects, other substeps, or complete reference libraries.
 
 1. Verify the criterion, accepted decisions, branch, base, current changes, and blockers. Preserve unrelated work and use the active worktree dependency configuration when needed.
 2. Trace the public behavior and canonical owners. Reuse existing mechanisms and proof before adding another path.
-3. For a regression or high-risk change, demonstrate the distinguishing failure before fixing it. For ordinary work, choose proof from the acceptance and credible risks.
+3. Use test-first implementation when this increment earns new behavioral proof: demonstrate the intended failure, then implement the smallest complete outcome and make it pass. Reuse existing proof when it already protects the criterion. For regressions or high-risk changes, demonstrate the distinguishing failure before fixing it; documentation and mechanical work follow the shared non-applicability rule.
 4. Implement the smallest complete outcome, run its focused checks, and inspect the full increment diff. Commit when delivery is in scope; keep the change coherent and reversible.
 5. Record exact commands, results, candidate identity, omissions, and remaining work on the owning chat/PR. Continue another increment or publication within the requested scope.
 

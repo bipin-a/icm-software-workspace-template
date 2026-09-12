@@ -27,7 +27,7 @@ Do not load unrelated Projects, other substeps, or complete reference libraries.
 
 1. Verify that the evidence belongs to this source and environment and that omissions or partial state are explicit.
 2. Choose the supported action: accept completion, plan the next environment, revise the candidate, retry, contain, roll back, or stop.
-3. Continue only within the accepted environment sequence and authority. Return a materially changed plan to planning and resolve missing authority before writes.
+3. Continue only within the accepted environment sequence and authority. Do not require an environment merely because a template names it. Return a materially changed plan to planning and resolve missing authority before writes.
 4. Record the result, owner, remaining monitoring or recovery obligations, and next route on the canonical release surface. Link it from a selected brief.
 
 ## Outputs

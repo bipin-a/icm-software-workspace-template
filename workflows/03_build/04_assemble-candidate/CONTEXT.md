@@ -28,7 +28,7 @@ Do not load unrelated Projects, other substeps, or complete reference libraries.
 
 1. For one PR, identify its complete candidate. For coordinated delivery, verify required slices are included and their merge conditions were satisfied under the accepted plan.
 2. Check the combined change and integration obligations. Child completion or proof does not establish combined correctness.
-3. Record the candidate base and head, included scope, proof links, and remaining obligations on the owning PR; link it from the brief when present.
+3. Refresh any configured integration view from live delivery metadata. Record the candidate base and head, included scope, proof links, and remaining obligations on the owning PR; link it from the brief when present.
 4. Continue to [Validate](../../04_validate/CONTEXT.md). On a later change, compare against the tested revision and identify only the decisions and proof affected.
 
 ## Outputs

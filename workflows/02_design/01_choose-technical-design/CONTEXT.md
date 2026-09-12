@@ -7,6 +7,15 @@ context:
   inputs:
     - path: projects/<project-slug>/PROJECT.md
       headings: [Product behavior, Technical choices, Acceptance and proof, Open questions]
+  selectors:
+    - path: _shared/domain/CONTEXT.md
+      when: a technical choice depends on domain definitions or ownership
+    - path: _templates/prototype-evidence.md
+      when: an isolated experiment is needed to distinguish technical options
+    - path: _templates/architecture-investigation.md
+      when: material architecture uncertainty needs a bounded investigation
+    - path: _templates/adr.md
+      when: an accepted durable architecture decision needs a separate rationale
 ---
 
 # 01_choose-technical-design — Choose the simplest sufficient technical solution
@@ -22,11 +31,12 @@ Do not load unrelated Projects, other substeps, or complete reference libraries.
 
 ## Process
 
-1. Trace the current system and root cause. Identify existing capabilities, boundaries, data, and owners that can satisfy the outcome.
-2. Choose the smallest sufficient approach. Compare alternatives only when their costs or consequences materially differ; include likely delivery effort, migration, proof, and operations.
-3. Investigate until the decision has sufficient evidence. Apply the shared investigation limit before substantial work; a bounded experiment must answer a named question and have a stop condition.
+1. Pin the applicable product decision and revision. Reuse established root-cause and owner evidence, including brief dispositions of rejected options. Read only exact applicable domain definitions.
+2. Reinspect only changed code, stale external facts, or an unresolved question. Compare reuse with credible alternatives when their consequences differ, including delivery effort, migration, proof, operations, and uncertainty.
+3. Stop when criteria and material risks have evidenced owners or explicit questions and further inspection would not change the options. Apply the shared investigation limit before substantial work. Use an earned isolated experiment, bounded architecture investigation, or human decision for consequential uncertainty.
 4. Record owners, interfaces, proof, and relevant migration, release, rollback, or monitoring obligations under Technical choices or an earned linked decision document.
 5. If feasibility changes intended behavior, return the evidence to [Understand](../../01_understand/CONTEXT.md). Resolve only the decisions affected by that evidence.
+6. Complete any needed [delivery planning](../02_choose-delivery-shape/CONTEXT.md) before requesting remaining approval. Present coupled technical and delivery choices together, using existing evidence and authority.
 
 ## Outputs
 
@@ -34,4 +44,4 @@ Do not load unrelated Projects, other substeps, or complete reference libraries.
 
 ## Human check
 
-Resolve consequential choices not covered by existing authority. A settled, bounded implementation does not need a separate Technical Specification or another approval round-trip.
+Resolve missing authority for consequential technical and delivery choices together. Reuse accepted selections and their original review source. A settled, bounded implementation needs no separate Technical Specification or intermediate approval round-trip.

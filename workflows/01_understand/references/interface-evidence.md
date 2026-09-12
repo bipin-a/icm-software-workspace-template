@@ -35,7 +35,8 @@ that task; non-UI work may record why it is not applicable.
    Do not enumerate states the product cannot reach.
 4. Use realistic safe data. A prototype may use fixtures, but it must not create
    a second production data path or imply that integration is complete.
-5. Keep prototype code isolated. Promotion to production implementation requires the applicable accepted technical decisions and normal
+5. Keep prototype code isolated. Production implementation belongs to Build;
+   promotion requires the applicable accepted technical decisions and normal
    proof under the selected workflow; a separate specification is not required
    by `feature-work`.
 

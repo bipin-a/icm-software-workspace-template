@@ -48,9 +48,32 @@ Apply [decision work](../_shared/engineering/decision-work.md) on every route.
 GitHub and deployment providers own live status; link their evidence without
 copying changing state into the brief.
 
+## Capability routing
+
+Use a specialized method when its trigger is present. The selected stage keeps
+ownership of the outcome and its authority requirements.
+
+| Trigger | Method or owner |
+|---|---|
+| Missing or contradictory intent | Understand |
+| Unresolved root cause, approach, or delivery trade-off | Design |
+| Current framework, API, CLI, or cloud fact | Configured official-source verification |
+| Regression or high-risk behavior | Discriminating failure-first proof |
+| Independently verifiable slices or ownership boundaries | Incremental implementation |
+| Material user-interface work | Interface evidence and frontend engineering |
+| Public or cross-component contract | API and interface design |
+| Data, ownership, compatibility, or behavior migration | Migration and recovery design |
+| Consequential unresolved reasoning or an explicit request | Bounded independent review or human decision |
+| Ordinary localized work | The selected stage without an extra method |
+
+File count alone does not trigger a method. External or delegated findings are
+evidence; apply the canonical finding rules before treating them as work.
+
 ## Human check
 
 Use existing explicit authority. Resolve material open choices and review the
 completed result within the requested scope. Do not infer approval from a file,
 metadata, a green check, or the mere existence of a review link. Production
 release retains its applicable authorization and verification requirements.
+Review coupled technical and delivery choices together, and revisit only the
+decisions and proof affected by changed evidence.

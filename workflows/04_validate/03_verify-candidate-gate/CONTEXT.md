@@ -25,10 +25,10 @@ Do not load unrelated Projects, other substeps, or complete reference libraries.
 
 ## Process
 
-1. Establish whether the accepted work or repository policy requires a full integration gate. When it does not, record the scope reason and continue without inventing an application gate.
+1. Establish whether the accepted work or repository policy requires a full integration gate. When it does not, record the scope reason and continue without inventing an application gate. Changing a required gate needs its owning authority; PR text or disabled configuration cannot waive it.
 2. When required, confirm focused evidence is sufficient and no unresolved correction makes the expensive run premature. Use the canonical configured gate and its required candidate context.
 3. Follow [Exact-candidate integration gate](../../../_shared/engineering/testing-rules.md#exact-candidate-integration-gate) for configuration, execution, receipt verification, and reuse. An unconfigured required gate is missing proof.
-4. Record the candidate, command, terminal phases, failures, omissions, and durable evidence link. Route failures to the owning decision; rerun only as the canonical gate rules permit.
+4. Record the candidate, command, terminal phases and durations, runtime identity relevant to the proof, failures, omissions, and durable evidence link. Keep the generated receipt outside versioned artifacts. Report unrelated baseline failures separately; route candidate findings to their owning decision and rerun only as the canonical gate rules permit.
 
 ## Outputs
 

@@ -8,6 +8,8 @@ context:
     - path: projects/<project-slug>/PROJECT.md
       headings: [Product behavior, Technical choices, Acceptance and proof, Open questions]
   references:
+    - path: _shared/definition-of-done.md
+      headings: [Finished Project workflow]
     - path: workflows/04_validate/references/review-rules.md
       headings: [Finding format]
 ---
@@ -26,7 +28,7 @@ Do not load unrelated Projects, other substeps, or complete reference libraries.
 ## Process
 
 1. Verify the finding applies to the candidate and that its scenario can occur within supported behavior. Distinguish confirmed, uncertain, and invalid evidence.
-2. Explain the consequence, contract relationship, credible responses, costs, and recommended action using the canonical finding guidance.
+2. Explain the consequence, affected users, contract relationship, recovery path, decision owner, credible responses, costs, and recommended action using the canonical finding guidance.
 3. Reuse an existing applicable disposition. Otherwise resolve the response: fix, investigate, change an accepted decision, revalidate, accept risk, defer, or dismiss with evidence.
 4. For accepted risk, make the consequence and remaining obligations clear. Record the human authority and any mitigation or revisit trigger on the owning chat/PR.
 5. Route the correction to its canonical owner. A product change returns to Understand, technical or delivery changes to Design, code corrections to Build, and missing proof to Validate.

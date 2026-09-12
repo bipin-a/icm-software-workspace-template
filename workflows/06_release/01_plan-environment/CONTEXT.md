@@ -26,7 +26,7 @@ Do not load unrelated Projects, other substeps, or complete reference libraries.
 ## Process
 
 1. Verify that the candidate, target, environment, and provider procedure are explicit. This source template supplies no deployment command or target.
-2. Prepare the concrete plan without remote writes. Identify each proposed action, migration, verification step, recovery boundary, and monitoring obligation.
+2. Verify the clean source context and accepted revision. Prepare the concrete plan through the configured no-write procedure and confirm it performs no remote mutation. Identify each proposed action, migration, verification step, recovery boundary, and monitoring obligation.
 3. Compare the plan with the accepted decisions and current environment evidence. Keep credential values out of the plan and its evidence.
 4. Use existing human authority when it covers this exact plan. Resolve missing authority before proceeding to deployment.
 

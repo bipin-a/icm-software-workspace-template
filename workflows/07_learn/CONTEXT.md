@@ -26,9 +26,10 @@ Do not load unrelated Projects, other substeps, or complete reference libraries.
 
 1. Use Learn only when meaningful evidence earns a correction. It may be entered from any stage; stabilize active harm before documenting a lesson.
 2. Explain expected behavior, what occurred, why the existing control failed, recurrence credibility, limitations, and remaining risk.
-3. Choose the canonical owner using [Learning rules](references/learning-rules.md). A lesson is evidence, not another policy source.
+3. Classify the cause as Project, Factory, Input contract, Execution, or External change. Choose the canonical owner using [Learning rules](references/learning-rules.md). A lesson is evidence, not another policy source.
 4. Apply an accepted correction within scope. New lasting guidance or cross-Project principles need human review; keep the evidence in the existing PR unless a separate record earns its place.
-5. Revisit only decisions and proof affected by the correction, then continue the requested outcome. A successful stage alone does not require a lesson document.
+5. Check that the corrected owner is reachable through the task's route under [Decision work](../../_shared/engineering/decision-work.md). Record applicability and limits; structural checks do not prove better agent behavior. Separately agree any substantial behavioral trial.
+6. Revisit only decisions and proof affected by the correction, then continue the requested outcome. A successful stage alone does not require a lesson document.
 
 ## Outputs
 

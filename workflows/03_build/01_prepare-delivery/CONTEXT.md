@@ -27,7 +27,7 @@ Do not load unrelated Projects, other substeps, or complete reference libraries.
 
 1. Use this substep only when several PRs need coordination. A single PR goes directly to implementation.
 2. Verify the accepted plan, base, branch targets, slice boundaries, dependency order, integration lifetime, and authority for the required delivery objects.
-3. Reuse existing issues and branches. Create only the missing objects the selected plan requires, using the repository delivery rules.
+3. Verify the existing Project branch descends from the accepted base and required decisions are reachable from the planned integration head; they need not merge to the base first. Reuse that branch for integration and reuse existing issues. Create only the missing objects the selected plan requires.
 4. Read back created objects, link their stable identities from the brief or owning PR, and select an unblocked slice from live state.
 
 ## Outputs

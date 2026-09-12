@@ -8,6 +8,8 @@ context:
     - path: projects/<project-slug>/PROJECT.md
       headings: [Intent, Product behavior, Acceptance and proof, Open questions]
   selectors:
+    - path: _shared/domain/CONTEXT.md
+      when: the outcome depends on existing domain definitions
     - path: workflows/01_understand/references/interface-evidence.md
       when: the outcome changes a product interface or customer-facing provider flow
 ---
@@ -25,8 +27,8 @@ Do not load unrelated Projects, other substeps, or complete reference libraries.
 
 ## Process
 
-1. Establish the user, problem, desired outcome, fixed constraints, scope, and material unknowns. Reuse answers and decisions already given.
-2. Inspect the existing behavior and its owners. When credible alternatives have materially different consequences, explain the choices and sacrifices; otherwise proceed with the clear approach.
+1. Establish the user's job, desired outcome, fixed constraints, scope, and material unknowns. Distinguish a suggested solution from an explicit constraint. Carry forward accepted selections; investigate only missing or changed facts.
+2. Inspect existing behavior and its owners, reading exact applicable domain definitions. For unresolved intent that changes a source of truth or has several defensible user-visible shapes, compare credible behaviors and sacrifices. Otherwise stay with the clear approach and explain that choice.
 3. For a UI-affecting outcome, follow [Interface evidence](references/interface-evidence.md). Initiate a preview when it resolves uncertainty and reconcile what it teaches into the accepted behavior.
 4. Define observable acceptance and the smallest sufficient proof. Keep decisions in chat/PR; use a living Project brief only when durable coordination needs it.
 5. Use bounded technical inspection or [Design](../02_design/CONTEXT.md) when feasibility can change the product decision. Carry the evidence back to this decision owner.
