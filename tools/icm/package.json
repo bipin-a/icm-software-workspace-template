@@ -1,0 +1,10 @@
+{
+  "name": "@icm-workspace/tools",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node workspace-check.mjs",
+    "context": "node estimate-context.mjs",
+    "test": "node --test test/*.test.mjs"
+  }
+}

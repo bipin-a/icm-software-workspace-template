@@ -1,53 +1,39 @@
 # Multi-PR delivery
 
-Use only when the selected Project has `delivery_profile: multi-pr`.
+Use only when dependencies, independent review boundaries, or release risk need
+several PRs to converge. One reviewable and verifiable PR remains the default.
+The living brief or an earned linked coordination plan owns work ordering and
+proof obligations; GitHub owns changing delivery state.
 
-One job: assemble several independently reviewed implementation pull requests into one validated Project release.
+## Choose and prepare
 
-## Ownership
+Explain the benefit, integration-branch lifetime, synchronization cost, and
+final proof before creating dependent live objects. Reuse existing authority.
+Prefer vertical slices that each demonstrate an observable result; do not split
+database, API, interface, and tests merely to make more tickets.
 
-| Surface | Owns |
-|---|---|
-| Project specifications | Product objective, complete acceptance contract, scope, and technical decisions |
-| Parent GitHub issue | Delivery structure, child-ticket membership, progress, and links to the specifications |
-| Child issue | One vertical slice, its blockers, priority, and release relevance |
-| Child pull request | Focused implementation review and validation evidence for that slice |
-| Integration branch | Assembled code for the complete Project or POC |
-| Draft integration pull request | Delivery status, merge order, release gates, combined diff, and integrated proof |
+For each slice, distinguish priority, technical blockers, merge conditions, and
+release gates. Name its outcome, canonical owners, and discriminating proof.
 
-GitHub child issues own live delivery metadata. Any status table or diagram in the parent issue and integration pull request is a generated view of that metadata and must not invent different dependencies, priorities, or release decisions.
+## Coordinate
 
-## Set up
+- Keep the existing Project branch as the integration branch when applicable.
+- Use one draft integration PR and a parent issue when ticket coordination
+  needs it. Link the brief and child PRs; do not duplicate acceptance.
+- Target children at the integration branch. Define merge methods and trunk
+  synchronization points before assembly.
+- Read blockers and current status from GitHub. If a delivery view is useful,
+  derive it from that metadata and link it; do not hand-maintain another state
+  table in the brief.
+- Work concurrently only when owners and files do not conflict. Completion of a
+  slice does not authorize its merge.
+- Record repairs and course corrections in the delivery record when they
+  change dependencies or release obligations.
 
-1. Confirm the human-approved Delivery Assessment, delivery profile, specifications, branch lifetime, and final proof.
-2. Use the approved slice proposal to create narrow, independently reviewable vertical slices.
-3. Keep development priority, dependency order, merge order, and release gates distinct.
-4. Create the parent issue, child issues, integration branch, and draft integration pull request.
-5. Link all delivery objects from the Project record.
+## Finish
 
-After the delivery objects are published, GitHub owns their live status. The approved Delivery Assessment remains the record of the trade-off decision; it does not mirror ongoing GitHub progress.
-
-Do not split one behaviour into separate database, API, interface, and test tickets merely to create more tickets.
-
-## Deliver
-
-1. Work only on child issues whose blockers are complete.
-2. Target child pull requests at the integration branch.
-3. Require focused review and validation before merging each child.
-4. Keep the integration branch synchronized with `main` at planned checkpoints.
-5. Update the GitHub delivery view when blockers, priorities, gates, issues, or pull requests change.
-6. Record spikes, repairs, removals, and course corrections as first-class delivery work.
-
-Implementation completion does not itself grant permission to merge.
-
-## Complete
-
-The integration pull request remains a draft until:
-
-- every release-blocking child issue is satisfied;
-- every required child pull request is assembled;
-- the combined behaviour and relevant operational paths pass validation;
-- required human gates have explicit approval; and
-- the exact commits, validation evidence, omissions, and remaining risks are recorded.
-
-After merge, preserve GitHub as the historical delivery record and link the final issue, pull request, commit, deployment, and lessons from the Project summaries.
+Review the complete assembled diff and cross-slice behavior. Run the required
+integrated proof on the exact candidate after child findings are resolved.
+Retain original review and tested revisions; verify current merge preconditions.
+Release follows the same explicit authorization and environment verification as
+single-PR work. Link the final delivery evidence from the brief.

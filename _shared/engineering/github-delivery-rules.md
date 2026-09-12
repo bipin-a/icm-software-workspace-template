@@ -1,80 +1,70 @@
 # GitHub delivery rules
 
-Shared rules for commits, pull requests, and release traceability.
+Git owns implementation history. GitHub owns live issues, PRs, reviews, settings,
+and checks. Briefs own durable decisions and links. This source template makes
+no claim about an instance's visibility, protected branches, or approval rules;
+verify and record the applicable policy during setup.
 
-## Configuration state
+## Delivery profiles
 
-GitHub owns live repository visibility, settings, pull requests, and checks. Re-check them before relying on this recorded configuration.
+Use one Project branch and one PR by default. Create a separate worktree when
+independent concurrent work or the full candidate gate needs it. Bounded work
+needs no Project branch ceremony beyond the repository's normal Git policy.
+Do not create artifact-only precursor PRs or extra issues for routine work.
+Use [multi-PR delivery](multi-pr-delivery.md) when dependencies or risk require
+several reviewed changes to converge before release.
 
-Repository URL, visibility, protected branches, pull-request requirement, approving-review count, merge method, commit convention, and production-release owner are setup decisions. Record them through [`../../setup/questionnaire.md`](../../setup/questionnaire.md) before the first Project commit or live GitHub delivery action.
+## Repository hygiene and branches
 
-- Use `.github/pull_request_template.md` for every pull request once pull-request delivery is configured.
-- Derive required check names from the approved Technical Specification, executable test commands, and CI configuration. Record them here before the first Project pull request is merged.
-- Do not copy GitHub settings from the template description. Apply and verify them in the instantiated repository.
-
-## Sources of truth
-
-- The Project and approved specifications own intended behaviour.
-- Git owns code history.
-- GitHub owns live pull request and check status.
-- The deployment platform owns live release status.
-
-Re-check live state before merging or releasing.
-
-## Repository hygiene
-
-- Never commit credentials, secrets, private keys, or populated environment files. Store secret values in an appropriate local, GitHub, deployment, or service secret store; record only safe setup requirements and variable names.
-- Do not commit unapproved personal or production data. Use synthetic, anonymized, or otherwise approved data according to [`testing-rules.md`](testing-rules.md).
-- Review the staged diff for sensitive content before every push.
-
-## Delivery profile
-
-Every Project selects one profile through its approved Delivery Assessment before Build:
-
-- `single-pr` — use when one pull request can be reviewed, validated, and released safely; target `main` directly.
-- `multi-pr` — use when several independently reviewed pull requests must be assembled before the Project has value; follow `multi-pr-delivery.md`.
-- `undecided` — allowed during Spec & Design and Assess Delivery, but not when Build begins.
-
-Recommend `multi-pr` when two or more are true:
-
-- several pull requests must work together before the result is useful;
-- the assembled result needs shared-environment or end-to-end validation;
-- delivery slices have blockers or a required merge order;
-- explicit human review or release gates apply;
-- merging slices directly to `main` would expose incomplete behaviour;
-- parallel delivery lanes must converge on one integrated proof.
-
-The human approves the profile and proposed delivery shape before implementation begins. Do not create live GitHub delivery objects from an unapproved assessment.
+- Inspect worktree, branch, staged changes, and the complete comparison diff.
+- Preserve unrelated changes; never commit secrets or unapproved personal data.
+- Use the instance's configured branch convention; this template imposes none.
+- Derive the destination branch from the task and verified repository policy.
+- Verify exact head and base before a push or PR mutation.
+- Do not force-push, rewrite published shared history, or delete branches or
+  worktrees without explicit authority.
 
 ## Commits
 
-- Keep each commit focused, traceable and easy to review and follow along.
-- Preserve unrelated work.
-- Link material code changes to the relevant Project or specification.
+Keep commits focused, understandable, and reversible. Include relevant proof
+with behavior changes; omit unrelated cleanup. Derive reports from Git evidence.
+Use concise imperative subjects. Do not add an automation tool as co-author.
 
-Commit naming convention: Setup required before the first Project commit.
+## Pull requests are human review surfaces
 
-## Pull requests
+Use the [PR template](../../.github/pull_request_template.md): Problem, Change,
+Validation, Risks / Follow-ups. State the concrete before/after result and any
+material choice or sacrifice. Include comparison base, tested candidate,
+commands, outcomes, and omissions. Link decision owners without copying them.
+Add lifecycle, migration, environment, or integration detail only when relevant.
+A scoped N/A replaces irrelevant proof. Do not infer merge authority from green CI.
 
-Fill out `.github/pull_request_template.md` for every pull request.
-Write the description according to [`../voice.md`](../voice.md).
+## GitHub command adapter
 
-Main branch policy: Setup required before the first Project commit.
+Use an available repository-authorized connector or CLI. Inspect its supported
+arguments; do not assume wrappers preserve raw CLI flags. Use structured text or
+a real UTF-8 body file for multiline updates. Read the saved object back before
+reporting success. Preserve human-authored text during partial/generated updates.
 
-Branch naming convention: Setup required before the first Project branch is published.
+## Checks and delivery truth
 
-Merge method: Setup required before the first Project pull request is merged.
+Read required check names and current state from executable workflows and live
+GitHub settings. Pending is incomplete. Report exact candidate, terminal results,
+links, failures, skipped checks, and unavailable evidence. Recheck before merge;
+read the deployment platform before release.
 
-Required checks: Not yet nameable. Record them before the first Project pull request is merged, after the technical stack, executable test commands, CI configuration, and live check names exist.
+## Traceability and human gates
 
-## Traceability
+Link actual implementation, review source, exact reviewed revisions, and
+applicable release evidence from the brief/PR. A green structural check is not
+human approval. Required review and merge preconditions apply to the exact
+candidate. Production needs explicit human authorization under the release
+procedure even after merge or successful non-production proof.
 
-- Build and validation summaries link to the relevant commit or pull request.
-- Release summaries link to the released commit, pull request, and deployment evidence.
-- Lessons link to their evidence and to the source they changed.
+## Merge methods preserve evidence and history
 
-## Human gates
-
-Required approval before merge: Setup required. Base the rule on who has merge access; do not require an approval that no eligible reviewer can provide.
-
-Required approval before production release: Explicit human authorization for the exact candidate, as required by [`06_release`](../../workflows/06_release/CONTEXT.md). Name the owner during setup or in the first applicable Technical Specification.
+Choose from the repository's actual policy before merge. Squash is suitable for
+one ordinary reviewable change. When acceptance or gate evidence needs the
+validated head to remain reachable, use a method that preserves that identity.
+For multi-PR delivery, define child-to-integration and integration-to-trunk
+methods together. Do not silently change methods or rewrite reviewed identities.

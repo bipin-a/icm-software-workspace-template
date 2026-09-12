@@ -1,65 +1,38 @@
 ---
+type: project
 id:
 title:
-status: proposed
-workflow_stage: 01_spec-design
-iteration: 0
-current_build:
-architecture_hold: none
-active_spike:
-affected_by_spikes: []
-delivery_profile: undecided
-delivery_assessment:
-parent_issue:
-integration_branch:
-integration_pr:
+workflow: feature-work
 ---
 
-# Project
+# Feature brief
+
+- Use only when chat and the PR need a durable coordination owner.
+- Fill the sections from accepted conversation and evidence; keep open decisions
+  explicit.
+- Remove template prompts.
+- Add separate documents only when useful, link their owners, and list their
+  Project-relative paths in `decision_documents` frontmatter.
+
+**What to put in each section**
+
+| Section | Include |
+|---|---|
+| Intent | User's job, problem, desired outcome, and fixed constraints. |
+| Product behavior | Workflow, relevant states, scope/non-goals, and unresolved product choices. Link the current UI and proposed preview when applicable. |
+| Technical choices | Existing owners reused, selected approach, material tradeoffs, and uncertainty. Add sequencing or release details only when they affect the work. |
+| Acceptance and proof | Observable outcomes and the smallest sufficient checks. Link results from the PR; do not duplicate progress, live checks, or provider state here. |
+| Open questions | Only questions that can change the result; otherwise `None`. |
+| Links | Actual implementation, review sources with exact reviewed revisions, and applicable release evidence. No manual approval status or receipt files. |
 
 ## Intent
 
+## Product behavior
 
-## Desired outcome
+## Technical choices
 
-
-## Scope
-
-
-## Non-goals
-
-
-## Completion
-
-
-## Canonical artifacts
-
-- Product Specification:
-- Technical Specification:
-- Active Architecture Spike:
-- Architecture Decisions:
-- Delivery Assessment:
-- Current Build Summary:
-- Current Validation Summary:
-- Current Readiness Decision:
-- Iteration Log:
-- Release Summary:
-- Lessons:
-
-## Delivery
-
-Complete and approve `delivery-assessment.md` before Build. Record its path and selected delivery profile above. For `multi-pr`, follow [`multi-pr-delivery.md`](../../_shared/engineering/multi-pr-delivery.md).
-
-## Workflow
-
-- [Shared workflow](../../CONTEXT.md)
-- [Start or revise specifications](../../workflows/01_spec-design/CONTEXT.md)
-- [Run an architecture spike](../../workflows/architecture-spike/CONTEXT.md)
-- [Assess delivery](../../workflows/02_assess-delivery/CONTEXT.md)
-- [Build](../../workflows/03_build/CONTEXT.md)
-- [Validate](../../workflows/04_validate/CONTEXT.md)
-- [Assess readiness](../../workflows/05_assess-readiness/CONTEXT.md)
-- [Release](../../workflows/06_release/CONTEXT.md)
-- [Learn](../../workflows/07_learn/CONTEXT.md)
+## Acceptance and proof
 
 ## Open questions
+
+## Links

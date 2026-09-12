@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "context": {
+    "packetTokens": 7000,
+    "reserveTokens": 500
+  },
+  "candidateGate": {
+    "enabled": false,
+    "phases": []
+  }
+}

@@ -1,30 +1,48 @@
-# Factory setup
+---
+type: factory-setup-contract
+status: active
+---
 
-One job: configure the stable repository factory before the first Project begins.
+# Workspace setup
+
+One job: establish enough shared context to begin useful work in a new instance.
+Template maintenance leaves the questionnaire incomplete.
 
 ## Inputs
 
-- Working: `questionnaire.md`
-- Working for an existing repository: the verified repository tree, current entry instructions, Git history, and live GitHub settings
-- Reference: `../_shared/methodology/interpretable-context-methodology.md`
-- Reference: `../README.md`
+- [Questionnaire](questionnaire.md) and existing human decisions
+- [README](../README.md), current source tree, entry instructions, and executable configuration
+- Existing repository and external settings when adapting an established project
 
 ## Process
 
-1. Confirm whether this is a new repository or an approved Restructure-mode adaptation of an existing repository.
-2. Ask the required questionnaire decisions one at a time. Offer a concrete recommendation when repository evidence supports one.
-3. Write each accepted answer to its canonical owner named in the questionnaire; do not store a second answer copy here.
-4. Leave evidence-dependent choices with their named trigger and owner instead of inventing defaults.
-5. Review one consolidated diff with the human.
-6. Apply any approved live GitHub settings, verify them from GitHub, then set the questionnaire status to `complete`.
+1. Identify the workspace, intended outcome, and existing canonical owners.
+2. Reuse current answers. Ask only unresolved questions that change setup;
+   group related questions when practical. Routine inspection may proceed.
+3. Write accepted answers to the questionnaire's canonical output map. Keep
+   completion state here, without a duplicate answer set.
+4. Select real source paths, applicable constraints, decision owners, and
+   review surfaces. Keep the default bounded-task/feature-brief workflow.
+5. If executable work exists, verify its native dependency and proof commands.
+   Configure a full candidate gate only when the required proof needs it.
+6. Defer unavailable stack or provider decisions to the first feature that
+   requires them. Record the trigger and owner in the relevant canonical file;
+   do not invent commands, credentials, or application code.
+7. Run the workspace check and relevant tooling tests. Walk from the root to
+   setup, bounded work, and a selected Project without loading unrelated context.
+8. Present the concrete consolidated setup diff. Apply only authorized live
+   settings and read back the result. A local setup does not require deployment.
+9. Mark the questionnaire complete when the human accepts the setup and the
+   applicable verification is complete.
 
 ## Outputs
 
-- Configured human-facing identity, root agent identity, and routing
-- Configured files under `../_shared/`
-- Verified GitHub delivery policy when GitHub is in scope
-- `status: complete` in `questionnaire.md`
+- Configured identity, source routes, decision owners, and shared constraints
+- Verified applicable commands and live settings, with evidence in chat/PR
+- Explicit triggers and owners for deferred choices
+- Questionnaire completion state
 
 ## Human check
 
-Review the consolidated factory configuration, live-setting evidence, and intentionally later choices. Approve the factory before the first Project is created.
+Review material unresolved choices and the consolidated result. Reuse existing
+explicit authority; do not require approval of each intermediate file.
