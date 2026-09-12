@@ -52,7 +52,7 @@ technology or deployment plan is known.
 | Proof commands and environments | Native executable configuration; applicability in `../_shared/engineering/testing-rules.md` |
 | Optional full-gate phases and context estimate | `../icm.config.json` |
 | Reusable external inputs | `../_shared/reusable-assets.md` |
-| Deployment procedure and targets | `../workflows/feature/references/release-rules.md` and its configured provider owner |
+| Deployment procedure and targets | `../workflows/06_release/references/release-rules.md` and its configured provider owner |
 | Outcome-specific decisions | Chat/PR for bounded work; one living Project brief when coordination needs it |
 
 ## Verify completion

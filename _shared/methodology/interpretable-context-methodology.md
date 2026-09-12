@@ -115,8 +115,9 @@ The paper presents traceability as unfinished work. Current ICM workspaces expos
 ## Software workspace adaptation
 
 The sections above describe the original paper, including numbered stages and
-intermediate outputs. This template adapts those ideas through one feature
-contract, scoped references, and optional living Project briefs. Folder numbers,
-separate specifications, approval receipts, and approval of every intermediate
-artifact are not requirements here. Current human authority and the shared
+intermediate outputs. This template keeps seven numbered delivery stages and
+their focused substeps, with scoped references and optional living Project
+briefs. Stage outputs live in the owning chat/PR or brief; separate
+specifications, approval receipts, and approval of every intermediate artifact
+are not requirements here. Current human authority and the shared
 [decision-work contract](../engineering/decision-work.md) govern execution.

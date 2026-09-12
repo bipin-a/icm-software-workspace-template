@@ -171,7 +171,7 @@ a fresh schema alone does not establish migration safety.
 
 ### RULE-DEPLOYMENT-CONFIG — Use one explicit deployment owner
 
-Follow the [release procedure](../../workflows/feature/references/release-rules.md).
+Follow the [release procedure](../../workflows/06_release/references/release-rules.md).
 Resolve the exact environment and target from explicit configuration before a
 remote write. Keep secrets outside the repository. Verify the deployed source,
 configuration, and behavior after the write.

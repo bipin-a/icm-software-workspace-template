@@ -166,7 +166,7 @@ test('workspace validation detects broken routes, profile selections, and invali
   await writeFile(profilePath, profile);
   const routePath = join(root, 'workflows/CONTEXT.md');
   const route = await readFile(routePath, 'utf8');
-  await writeFile(routePath, route.replace('(feature/CONTEXT.md)', '(missing/CONTEXT.md)'));
+  await writeFile(routePath, route.replace('(01_understand/CONTEXT.md)', '(missing/CONTEXT.md)'));
   assert.match((await checkWorkspace(root)).failures.join('\n'), /unreachable|missing/);
   await writeFile(routePath, route);
   const configPath = join(root, 'icm.config.json');
