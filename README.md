@@ -1,14 +1,12 @@
 # ICM Software Workspace Template
 
 A reusable workspace for taking software work from intent through decisions,
-implementation, review, and proof. It generalizes the ICM 2.6 approach in
-[MyEventVision](https://github.com/myeventvision/myeventvision/tree/ab1241e366a0c30a1d49dc728cc751cec2ae8965):
-scoped context, useful initiative, one owner per decision, and proportionate work.
+implementation, review, and proof. It uses scoped context, useful initiative,
+one owner per decision, and proportionate work.
 
 The template has no release-version lifecycle, changelog, upgrade framework, or
-instance version field. The source link identifies this adaptation's provenance;
-it is not an ongoing synchronization requirement. Git continues to hold changes
-and the exact revisions used for review and proof.
+instance version field. Git continues to hold changes and the exact revisions
+used for review and proof.
 
 ## How work runs
 
