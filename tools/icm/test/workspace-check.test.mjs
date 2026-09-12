@@ -186,3 +186,24 @@ test('checker CLI rejects unsupported flags and review comparison without a sele
   await assert.rejects(exec(process.execPath, [command, '--unknown']), error => error.code === 1 && /Usage/.test(error.stderr));
   await assert.rejects(exec(process.execPath, [command, '--reviewed-commit', 'f'.repeat(40)]), error => error.code === 1 && /requires --project/.test(error.stderr));
 });
+
+test('brief and template validation reject ambiguous or wrongly nested decision sections', async (t) => {
+  const { root, brief } = await createFeatureReviewFixture(t);
+  const path = join(root, 'projects/example/PROJECT.md');
+  for (const replacement of ['# Intent', '### Intent', '## Intent\n\nFirst owner.\n\n## Intent — details']) {
+    await writeFile(path, brief.replace('## Intent', replacement));
+    const result = await checkWorkspace(root, { projectSlug: 'example' });
+    assert.match(result.failures.join('\n'), /must use ## Intent|repeats ## Intent/, replacement);
+  }
+
+  const templateRootCopy = await mkdtemp(join(tmpdir(), 'icm-brief-shape-'));
+  t.after(() => rm(templateRootCopy, { recursive: true, force: true }));
+  await cp(templateRoot, templateRootCopy, { recursive: true, filter: entry => !['.git', 'node_modules'].includes(entry.split('/').at(-1)) });
+  const templatePath = join(templateRootCopy, '_templates/project/PROJECT.md');
+  const template = await readFile(templatePath, 'utf8');
+  for (const replacement of ['# Intent', '### Intent', '## Intent\n\n## Intent — details']) {
+    await writeFile(templatePath, template.replace('## Intent', replacement));
+    const result = await checkWorkspace(templateRootCopy);
+    assert.match(result.failures.join('\n'), /must use ## Intent|repeats ## Intent/, replacement);
+  }
+});

@@ -3,7 +3,7 @@ import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { candidateGateConfigurationErrors } from './config.mjs';
 import { parseFrontmatter, headingSection } from './markdown.mjs';
-import { BRIEF_HEADINGS, FEATURE_WORKFLOW, featureProjectChecks } from './feature-review.mjs';
+import { briefStructureFailures, FEATURE_WORKFLOW, featureProjectChecks } from './feature-review.mjs';
 
 async function optionalRead(root, path) {
   if (typeof path !== 'string' || path.length === 0) return null;
@@ -456,9 +456,7 @@ async function checkWorkspaceInternal(repositoryRoot, { projectSlug, reviewedCom
     if (metadata.type !== 'project' || metadata.workflow !== FEATURE_WORKFLOW) {
       failures.push(`${templatePath} must declare type: project and workflow: feature-work`);
     }
-    for (const heading of BRIEF_HEADINGS) {
-      if (!headingSection(template, heading)) failures.push(`${templatePath} is missing ## ${heading}`);
-    }
+    failures.push(...briefStructureFailures(templatePath, template, { requireContent: false }));
   }
   const briefs = await repositoryFiles(join(repositoryRoot, 'projects'), name => name === 'PROJECT.md');
   for (const path of briefs) {

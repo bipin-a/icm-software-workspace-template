@@ -9,6 +9,22 @@ export const FEATURE_WORKFLOW = 'feature-work';
 export const BRIEF_HEADINGS = ['Intent', 'Product behavior', 'Technical choices', 'Acceptance and proof', 'Open questions', 'Links'];
 const approvalFields = ['reviewed', 'approved', 'status', 'approval_contract', 'review_contract'];
 
+export function briefStructureFailures(path, body, { requireContent = true } = {}) {
+  const failures = [];
+  const headings = [...body.matchAll(/^(#{1,6}) (.+)$/gm)];
+  for (const heading of BRIEF_HEADINGS) {
+    const matching = headings.filter(match => match[2] === heading || match[2].startsWith(`${heading} —`));
+    if (matching.some(match => match[1] !== '##')) failures.push(`${path} must use ## ${heading}`);
+    if (matching.length > 1) failures.push(`${path} repeats ## ${heading}`);
+    if (!matching.length && !requireContent) failures.push(`${path} is missing ## ${heading}`);
+    const section = headingSection(body, heading);
+    if (requireContent && !section?.split('\n').slice(1).join('\n').replace(/<!--[\s\S]*?-->/g, '').trim()) {
+      failures.push(`${path} needs content under ## ${heading}`);
+    }
+  }
+  return failures;
+}
+
 function metadata(body, path) {
   const value = parseFrontmatter(path, body);
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${path} needs mapping frontmatter`);
@@ -65,11 +81,7 @@ export async function featureProjectChecks(repositoryRoot, projectSlug, { review
   for (const field of approvalFields) {
     if (Object.hasOwn(project, field)) failures.push(`${path} must not store ${field}; use the live review source and revision comparison`);
   }
-  for (const heading of BRIEF_HEADINGS) {
-    const section = headingSection(brief, heading);
-    if (!section?.split('\n').slice(1).join('\n').replace(/<!--[\s\S]*?-->/g, '').trim()) failures.push(`${path} needs content under ## ${heading}`);
-    if (brief.split('\n').filter(line => line === `## ${heading}`).length > 1) failures.push(`${path} repeats ## ${heading}`);
-  }
+  failures.push(...briefStructureFailures(path, brief));
   const paths = decisionPaths(project, root);
   const current = new Map();
   for (const document of paths) {
