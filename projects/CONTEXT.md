@@ -8,7 +8,7 @@ status: active
 One job: select a Project and route its next unresolved decision.
 
 1. For a named Project, read only `projects/<project-slug>/PROJECT.md`.
-2. For new work, use the [feature workflow](../workflows/feature/CONTEXT.md).
+2. For new work, use the [delivery stages](../workflows/CONTEXT.md#stages).
    Keep bounded work in chat and the PR. Create a brief from
    [`_templates/project/`](../_templates/project/PROJECT.md) only when durable
    coordination needs it; fill `id` with the directory slug and `title` with

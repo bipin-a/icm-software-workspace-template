@@ -13,7 +13,8 @@ Current human instructions and accepted decisions take precedence.
 4. Follow `_shared/voice.md` and apply `_shared/engineering/decision-work.md`
    with its reviewed principles on every route.
 5. For bounded work, use chat/PR context. When durable coordination needs a
-   Project, select its exact brief and the feature workflow.
+   Project, select its exact brief. Use `workflows/CONTEXT.md` to choose the
+   next applicable delivery stage and substep for either route.
 
 ## Always
 

@@ -23,8 +23,11 @@ used for review and proof.
   gate or release procedure applies when the work requires it.
 
 Start with [`AGENTS.md`](AGENTS.md), then select the exact route in
-[`CONTEXT.md`](CONTEXT.md). The [feature workflow](workflows/feature/CONTEXT.md)
-works with either chat/PR context or a selected Project brief.
+[`CONTEXT.md`](CONTEXT.md). The [delivery workflow](workflows/CONTEXT.md#stages)
+keeps seven stages: Understand, Design, Build, Validate, Assess Readiness,
+Release, and Learn. Each works with chat/PR context or a selected Project brief.
+Use the next applicable stage and its focused substeps; carry existing
+authority and evidence forward.
 
 ## Start a new repository
 
@@ -47,7 +50,7 @@ only the relevant workspace contracts through a reviewed diff.
 | Path | Owns |
 |---|---|
 | [`setup/`](setup/CONTEXT.md) | One-time configuration and completion state |
-| [`workflows/`](workflows/CONTEXT.md) | Feature work and conditional evidence procedures |
+| [`workflows/`](workflows/CONTEXT.md) | Seven delivery stages, focused substeps, and evidence procedures |
 | [`projects/`](projects/CONTEXT.md) | Living briefs and earned decision documents |
 | [`_shared/`](_shared/CONTEXT.md) | Shared rules, principles, domain references, and context selection |
 | [`_templates/`](_templates/project/PROJECT.md) | Optional blank artifact shapes |

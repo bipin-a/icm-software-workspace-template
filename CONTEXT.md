@@ -10,7 +10,7 @@ This file routes work; linked owners hold decisions and procedures.
 | Need | Start here |
 |---|---|
 | Configure a new instance | [`setup/CONTEXT.md`](setup/CONTEXT.md) |
-| Build, fix, or refine an outcome | [`workflows/feature/CONTEXT.md`](workflows/feature/CONTEXT.md) |
+| Build, fix, or refine an outcome | [Delivery stages](workflows/CONTEXT.md#stages) |
 | Select or continue a Project | [`projects/CONTEXT.md`](projects/CONTEXT.md) |
 | Select a workflow or conditional procedure | [`workflows/CONTEXT.md`](workflows/CONTEXT.md) |
 | Find a stable shared rule or domain owner | [`_shared/CONTEXT.md`](_shared/CONTEXT.md) |

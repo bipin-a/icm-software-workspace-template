@@ -368,7 +368,6 @@ const ROOT_ROUTES = [
   'setup/CONTEXT.md',
   'projects/CONTEXT.md',
   'workflows/CONTEXT.md',
-  'workflows/feature/CONTEXT.md',
   '_shared/CONTEXT.md',
   'roadmap/CONTEXT.md',
   'architecture/CONTEXT.md',

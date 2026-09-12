@@ -41,7 +41,7 @@
 ## Choose the next useful action
 
 - **Uncertain interaction:** initiate a small UI preview with existing components
-  and safe data; use [Interface evidence](../../workflows/feature/references/interface-evidence.md).
+  and safe data; use [Interface evidence](../../workflows/01_understand/references/interface-evidence.md).
   A trivial correction can be inspected directly without a separate prototype.
 - **Uncertain feasibility:** inspect relevant code first. Run a bounded experiment
   only for a remaining question whose result could change the decision; name

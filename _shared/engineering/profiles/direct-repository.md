@@ -25,7 +25,7 @@ decisions need durable coordination in one living brief.
 | [`testing-rules.md`](../testing-rules.md) | Conditional for browser proof: `Local browser-test safety` |
 | [`testing-rules.md`](../testing-rules.md) | Conditional when full integration proof is required: `Exact-candidate integration gate` |
 | [`github-delivery-rules.md`](../github-delivery-rules.md) | Conditional for Git delivery: `Repository hygiene and branches`; `Commits`; `Pull requests are human review surfaces`; `Checks and delivery truth`; `Traceability and human gates`; `Merge methods preserve evidence and history` |
-| [`review-rules.md`](../../../workflows/feature/references/review-rules.md) | Conditional for candidate or finding review: `Baseline review`; `Conditional angles`; `Finding format` |
-| [`review-rules.md`](../../../workflows/feature/references/review-rules.md) | Conditional for ICM Markdown: `ICM Markdown review` |
-| [`interface-evidence.md`](../../../workflows/feature/references/interface-evidence.md) | Conditional for product UI: `Interface ownership boundary`; `Required UI evidence`; `Evidence record` |
-| [`release-rules.md`](../../../workflows/feature/references/release-rules.md) | Conditional for deployment: `Authority and boundary`; `Plan before writes`; `Execute the authorized plan`; `Verify and decide` |
+| [`review-rules.md`](../../../workflows/04_validate/references/review-rules.md) | Conditional for candidate or finding review: `Baseline review`; `Conditional angles`; `Finding format` |
+| [`review-rules.md`](../../../workflows/04_validate/references/review-rules.md) | Conditional for ICM Markdown: `ICM Markdown review` |
+| [`interface-evidence.md`](../../../workflows/01_understand/references/interface-evidence.md) | Conditional for product UI: `Interface ownership boundary`; `Required UI evidence`; `Evidence record` |
+| [`release-rules.md`](../../../workflows/06_release/references/release-rules.md) | Conditional for deployment: `Authority and boundary`; `Plan before writes`; `Execute the authorized plan`; `Verify and decide` |
