@@ -214,3 +214,40 @@ test('candidate gate rejects duplicate success and an active lock', async (t) =>
 
   await assert.rejects(runCandidateGate({ cwd: lockedRoot }), /already running/);
 });
+
+
+test('receipt reuse permits existing brief prose but rejects runtime and metadata changes', async (t) => {
+  const root = await candidateRepository(t, successfulGate());
+  await mkdir(join(root, 'projects/example'), { recursive: true });
+  const brief = join(root, 'projects/example/PROJECT.md');
+  await writeFile(brief, '---\ntype: project\nworkflow: feature-work\n---\nOriginal wording.\n');
+  git(root, ['add', '.']); git(root, ['commit', '-m', 'Add brief']);
+  const result = await runCandidateGate({ cwd: root });
+  const originalReceipt = await readFile(result.receiptPath, 'utf8');
+  await writeFile(brief, '---\ntype: project\nworkflow: feature-work\n---\nClearer wording.\n');
+  git(root, ['add', '.']); git(root, ['commit', '-m', 'Clarify brief']);
+  const reused = await verifyCandidateReceipt({ cwd: root, evidenceTree: result.tree });
+  assert.equal(reused.reused, true);
+  assert.notEqual(reused.tree, reused.testedTree);
+  assert.deepEqual(reused.changes, ['projects/example/PROJECT.md']);
+  assert.equal(await readFile(result.receiptPath, 'utf8'), originalReceipt);
+  await writeFile(brief, '---\ntype: project\nworkflow: other\n---\nClearer wording.\n');
+  git(root, ['add', '.']); git(root, ['commit', '-m', 'Change metadata']);
+  await assert.rejects(verifyCandidateReceipt({ cwd: root, evidenceTree: result.tree }), /Project metadata/);
+  await writeFile(join(root, 'candidate.txt'), 'Changed runtime');
+  git(root, ['add', '.']); git(root, ['commit', '-m', 'Change runtime']);
+  await assert.rejects(verifyCandidateReceipt({ cwd: root, evidenceTree: result.tree }), /forbids change/);
+  await assert.rejects(verifyCandidateReceipt({ cwd: root, evidenceTree: '../bad' }), /full Git tree SHA/);
+});
+
+test('receipt reuse cannot accept a failed or mismatched phase receipt', async (t) => {
+  const root = await candidateRepository(t, successfulGate());
+  const result = await runCandidateGate({ cwd: root });
+  const receipt = JSON.parse(await readFile(result.receiptPath, 'utf8'));
+  receipt.phases[0].command = ['unrelated'];
+  await writeFile(result.receiptPath, JSON.stringify(receipt));
+  await assert.rejects(verifyCandidateReceipt({ cwd: root, evidenceTree: result.tree }), /no successful/);
+  receipt.result.status = 'failure';
+  await writeFile(result.receiptPath, JSON.stringify(receipt));
+  await assert.rejects(verifyCandidateReceipt({ cwd: root, evidenceTree: result.tree }), /no successful/);
+});
