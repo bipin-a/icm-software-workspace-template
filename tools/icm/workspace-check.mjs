@@ -374,6 +374,36 @@ const ROOT_ROUTES = [
   'app/README.md',
 ];
 
+async function humanCallFailures(repositoryRoot) {
+  const failures = [];
+  const canonical = '.agents/skills/human-call/SKILL.md';
+  const adapter = '.claude/skills/human-call/SKILL.md';
+  for (const path of [canonical, adapter]) {
+    const body = await optionalRead(repositoryRoot, path);
+    if (!body) {
+      failures.push(`${path} is required`);
+      continue;
+    }
+    try {
+      const metadata = parseFrontmatter(path, body);
+      if (metadata.name !== 'human-call') failures.push(`${path} must declare name: human-call`);
+      if (typeof metadata.description !== 'string' || !metadata.description.trim()) {
+        failures.push(`${path} must describe when to use the skill`);
+      }
+    } catch (error) {
+      failures.push(error.message);
+    }
+  }
+  for (const path of [adapter, '_shared/engineering/decision-work.md', '_shared/engineering/safeguards.md']) {
+    const body = await optionalRead(repositoryRoot, path);
+    const source = resolve(repositoryRoot, path);
+    const linksCanonical = markdownLinkTargets(source, body ?? '').some(link =>
+      resolve(dirname(source), link.target) === resolve(repositoryRoot, canonical));
+    if (!linksCanonical) failures.push(`${path} must link to the canonical ${canonical}`);
+  }
+  return failures;
+}
+
 async function rootRouteFailures(repositoryRoot) {
   const failures = [];
   const rootBody = await optionalRead(repositoryRoot, 'CONTEXT.md');
@@ -446,6 +476,7 @@ async function checkWorkspaceInternal(repositoryRoot, { projectSlug, reviewedCom
   const failures = await configurationFailures(repositoryRoot, config, Boolean(configBody));
   failures.push(...await markdownLinkFailures(repositoryRoot));
   failures.push(...await rootRouteFailures(repositoryRoot));
+  failures.push(...await humanCallFailures(repositoryRoot));
   failures.push(...await workflowFailures(repositoryRoot));
   const templatePath = '_templates/project/PROJECT.md';
   const template = await optionalRead(repositoryRoot, templatePath);

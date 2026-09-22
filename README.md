@@ -74,7 +74,8 @@ npm --prefix tools/icm run check -- --project <slug> --reviewed-commit <full-sha
 npm --prefix tools/icm run context -- AGENTS.md CONTEXT.md _shared/voice.md
 ```
 
-The checker validates routes, profile headings, local links, and living briefs.
+The checker validates routes, profile headings, local links, living briefs,
+and the canonical human-call skill and its Claude adapter.
 Revision comparison includes working and staged decision documents. It detects
 change; it cannot establish human approval or classify editorial wording.
 
@@ -100,3 +101,7 @@ Van Clief and David McDermott and was informed by the MIT-licensed
 [`icm-architect`](https://github.com/RinDig/icm-architect) skill.
 The [methodology notes](_shared/methodology/interpretable-context-methodology.md)
 distinguish the original staged method from this software-work adaptation.
+
+The optional [Firstmate assessment](_shared/engineering/evidence/firstmate-decision-escalation-2026-09-14.md)
+records the dated source ideas behind human-call and the mechanisms not adopted.
+Read it when evaluating that design; it is not part of normal agent context.

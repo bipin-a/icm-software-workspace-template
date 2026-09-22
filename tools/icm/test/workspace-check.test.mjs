@@ -207,3 +207,36 @@ test('brief and template validation reject ambiguous or wrongly nested decision 
     assert.match(result.failures.join('\n'), /must use ## Intent|repeats ## Intent/, replacement);
   }
 });
+
+test('human-call wiring rejects missing skills, wrong owners, and lost shared routes', async (t) => {
+  const root = await mkdtemp(join(tmpdir(), 'icm-human-call-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  await cp(templateRoot, root, { recursive: true, filter: path => !['.git', 'node_modules'].includes(path.split('/').at(-1)) });
+  assert.deepEqual((await checkWorkspace(root)).failures, []);
+  const canonical = '.agents/skills/human-call/SKILL.md';
+  const adapter = '.claude/skills/human-call/SKILL.md';
+  for (const path of [canonical, adapter]) {
+    const fullPath = join(root, path);
+    const original = await readFile(fullPath, 'utf8');
+    await rm(fullPath);
+    assert.ok((await checkWorkspace(root)).failures.some(failure => failure.includes(`${path} is required`)));
+    await writeFile(fullPath, original.replace('name: human-call', 'name: unrelated'));
+    assert.ok((await checkWorkspace(root)).failures.some(failure => failure.includes(path) && failure.includes('name')));
+    await writeFile(fullPath, original.replace(/^description:.*$/m, 'description:'));
+    assert.ok((await checkWorkspace(root)).failures.some(failure => failure.includes(path) && failure.includes('describe')));
+    await writeFile(fullPath, original);
+  }
+  for (const path of [adapter, '_shared/engineering/decision-work.md', '_shared/engineering/safeguards.md']) {
+    const fullPath = join(root, path);
+    const original = await readFile(fullPath, 'utf8');
+    // The replacement still resolves: ordinary broken-link checks cannot detect a wrong owner.
+    const wrongOwner = path === adapter ? '../../../README.md' : '../../README.md';
+    await writeFile(fullPath, original.replace(/\]\([^)]*\.agents\/skills\/human-call\/SKILL\.md\)/, `](${wrongOwner})`));
+    assert.ok((await checkWorkspace(root)).failures.some(failure => failure.includes(path) && failure.includes('must link')));
+    await writeFile(fullPath, original);
+  }
+  const adapterPath = join(root, adapter);
+  const original = await readFile(adapterPath, 'utf8');
+  await writeFile(adapterPath, original.replace('../../../.agents/', '../../../.agents/skills/../').replace('This adapter owns no decision procedure.', 'The linked skill owns the procedure.'));
+  assert.deepEqual((await checkWorkspace(root)).failures, [], 'equivalent link spelling and prose are not policy drift');
+});
