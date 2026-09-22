@@ -85,6 +85,33 @@ real application phases are configured; see
 [testing rules](_shared/engineering/testing-rules.md#exact-candidate-integration-gate).
 It is machine proof, separate from human review of decisions.
 
+## Optional coordination tools
+
+These capabilities preserve one living Project brief and apply only when needed:
+
+- [Skill adapters](.agents/skills/to-tickets/SKILL.md) prepare slices;
+  [integration review](.agents/skills/integration-review/SKILL.md) assesses the
+  assembled candidate through the existing workflow owners.
+- [Changed-file checks](_shared/engineering/testing-rules.md#changed-file-icm-checks)
+  select affected Project documents and incoming references with
+  `node tools/icm/workspace-check.mjs --changed-since <commit>`.
+- [Gate receipt reuse](_shared/engineering/testing-rules.md#exact-candidate-integration-gate)
+  checks narrowly permitted prose edits against a successful tested tree. These
+  machine receipts never replace human approval.
+- [Context packets](_shared/engineering/context-packets.md) assemble declared
+  criterion, environment, and prerequisite sections without silently dropping
+  required text to fit a size target.
+- [Multi-PR coordination](_shared/engineering/multi-pr-delivery.md) and
+  [generated delivery views](_shared/engineering/delivery-views.md) use GitHub
+  metadata as their live owner. Preview is read-only; publishing is explicit.
+
+For an existing repository, adopt these through a reviewed diff while preserving
+its code and decision owners. Configure real proof commands before using the
+candidate gate; choose the integration mode and actual GitHub objects before
+using delivery views. Add context selectors only when the living brief needs
+them. This template does not migrate existing repositories or support older
+specification/approval-receipt Project formats.
+
 ## Maintain this template
 
 Leave the setup questionnaire incomplete. Check the setup and Project-selection

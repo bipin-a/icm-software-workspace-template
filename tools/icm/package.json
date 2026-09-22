@@ -6,6 +6,7 @@
     "check": "node workspace-check.mjs",
     "context": "node estimate-context.mjs",
     "test": "node --test test/*.test.mjs",
-    "packet": "node context-packet.mjs"
+    "packet": "node context-packet.mjs",
+    "delivery": "node delivery.mjs"
   }
 }
