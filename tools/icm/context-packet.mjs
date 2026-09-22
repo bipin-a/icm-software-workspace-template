@@ -5,12 +5,16 @@ import { parseFrontmatter, headingSection } from './markdown.mjs';
 import { estimateTokens } from './estimate-context.mjs';
 import { featureProjectChecks } from './feature-review.mjs';
 
-async function readWithin(root, path) {
+async function resolveWithin(root, path) {
   if (typeof path !== 'string' || !path || path.startsWith('/') || /[\\:{}]/.test(path)
     || path.split('/').some(part => !part || part === '..' || part === '.')) throw new Error(`Invalid context path: ${path}`);
   const target = await realpath(resolve(root, path));
   if (relative(await realpath(root), target).startsWith('..')) throw new Error(`Context path escapes repository: ${path}`);
-  return readFile(target, 'utf8');
+  return target;
+}
+
+async function readWithin(root, path) {
+  return readFile(await resolveWithin(root, path), 'utf8');
 }
 
 function section(body, heading, path) {
@@ -77,7 +81,7 @@ export async function loadContextManifest(root, project, brief) {
   return manifest;
 }
 
-export async function assembleContext(root, { project, stage, criterion, environment, workItem, rules = [] } = {}) {
+export async function assembleContext(root, { project, stage, criterion, environment, workItem, rules = [], selectors = [] } = {}) {
   const checked = await featureProjectChecks(root, project);
   if (checked.failures.length) throw new Error(checked.failures.join('; '));
   if (typeof stage !== 'string' || !/^workflows\/.+\/CONTEXT\.md$/.test(stage)) throw new Error('Select an exact workflow step path');
@@ -115,7 +119,18 @@ export async function assembleContext(root, { project, stage, criterion, environ
     if (chosen.length) await add({ path: relative(root, resolve(root, dirname(profile.path), target)), headings: chosen });
   }
   for (const rule of rules) if (!selectedRules.has(rule)) throw new Error(`Unknown profile rule: ${rule}`);
-  for (const input of [...(contract.context.inputs ?? []), ...(contract.context.references ?? [])]) await add(input);
+  for (const input of [...(contract.context.inputs ?? []), ...(contract.context.references ?? []), ...(contract.context.output_templates ?? [])]) await add(input);
+  const conditionalSources = contract.context.selectors ?? [];
+  for (const path of selectors) {
+    const source = conditionalSources.find(entry => entry.path === path);
+    if (!source) throw new Error(`Unknown stage selector: ${path}`);
+    await add({ path: source.path, ...(source.headings ? { headings: source.headings } : {}) });
+  }
+  const executeOnly = contract.context.tools ?? [];
+  for (const tool of executeOnly) {
+    if (tool.access !== 'execute-only') throw new Error('Stage tools must be execute-only');
+    await resolveWithin(root, tool.path); // Verify identity without loading executable code.
+  }
   let nodes = [];
   if (Object.hasOwn(brief, 'context_packets')) {
     const manifest = await loadContextManifest(root, project, brief);
@@ -130,16 +145,17 @@ export async function assembleContext(root, { project, stage, criterion, environ
   const { packetTokens, reserveTokens } = config.context ?? {};
   if (![packetTokens, reserveTokens].every(value => Number.isFinite(value) && value >= 0)) throw new Error('Invalid context token budget');
   const expectedTokens = entries.reduce((sum, entry) => sum + entry.tokens, 0) + reserveTokens;
-  return { project, stage, nodes: nodes.map(node => node.id), entries, summary: { expectedTokens, packetTokens, reserveTokens, oversized: expectedTokens > packetTokens } };
+  return { project, stage, nodes: nodes.map(node => node.id), entries, executeOnly, conditionalSources: conditionalSources.map(source => ({ ...source, selected: selectors.includes(source.path) })), summary: { expectedTokens, packetTokens, reserveTokens, oversized: expectedTokens > packetTokens } };
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
-    const options = { rules: [] }, args = process.argv.slice(2);
+    const options = { rules: [], selectors: [] }, args = process.argv.slice(2);
     const keys = { '--project': 'project', '--stage': 'stage', '--criterion': 'criterion', '--environment': 'environment', '--work-item': 'workItem' };
     for (let i = 0; i < args.length; i += 2) {
       if (!args[i + 1] || args[i + 1].startsWith('--')) throw new Error('Each context option requires a value');
       if (args[i] === '--rule') options.rules.push(args[i + 1]);
+      else if (args[i] === '--selector') options.selectors.push(args[i + 1]);
       else if (!keys[args[i]] || options[keys[args[i]]]) throw new Error(`Unknown or repeated option: ${args[i]}`);
       else options[keys[args[i]]] = args[i + 1];
     }

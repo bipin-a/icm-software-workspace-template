@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
-import { cp, mkdir, mkdtemp, readFile, rm, writeFile, symlink } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, readdir, rm, writeFile, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
+import { parseFrontmatter } from '../markdown.mjs';
 import { assembleContext, selectContextNodes } from '../context-packet.mjs';
 const template = fileURLToPath(new URL('../../..', import.meta.url));
 const node = (id, dependencies = [], criteria = ['All']) => ({ id, dependencies, criteria, environments: ['All'], inputs: [{ path: 'projects/example/decisions.md', headings: [id] }] });
@@ -40,6 +41,18 @@ test('packet assembly selects real sections, retains oversized evidence, and rej
   assert.match(decision.body, /Required owner/);
   assert.match(decision.body, /Selected behavior/);
   assert.doesNotMatch(decision.body, /Unrelated behavior/);
+  for (const file of await readdir(join(root, 'workflows'), { recursive: true })) {
+    if (!file.endsWith('CONTEXT.md')) continue;
+    const path = `workflows/${file}`;
+    const contract = parseFrontmatter(path, await readFile(join(root, path), 'utf8'));
+    if (contract.type !== 'workflow-step') continue;
+    const packet = await assembleContext(root, { project: 'example', stage: path, selectors: (contract.context.selectors ?? []).map(source => source.path) });
+    for (const source of contract.context.selectors ?? []) assert.ok(packet.entries.some(entry => entry.path === source.path));
+    for (const tool of contract.context.tools ?? []) {
+      assert.ok(packet.executeOnly.some(entry => entry.path === tool.path));
+      assert.ok(!packet.entries.some(entry => entry.path === tool.path), 'execute-only tool code must not be loaded');
+    }
+  }
   manifest.nodes[1].inputs[0].headings = ['missing'];
   await writeFile(join(root, 'projects/example/context.json'), JSON.stringify(manifest));
   await assert.rejects(assembleContext(root, options), /exactly one heading/);

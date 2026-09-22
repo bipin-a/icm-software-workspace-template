@@ -13,7 +13,11 @@ source paths, selected headings, full selected text, and estimated size.
 The baseline includes agent entry files, voice, decision work, principles, the
 exact step, brief intent and open questions, declared step inputs/references,
 and the profile's unconditional rule headings. Conditional profile headings
-are added only through repeated `--rule <exact-heading>` selections. Choose
+are added only through repeated `--rule <exact-heading>` selections.
+Use repeated `--selector <stage-declared-path>` options for triggered stage
+sources. The output lists all conditional sources and whether they were selected;
+execute-only tools are identified and checked for existence without loading
+their code. Declared output templates are included. Choose
 those headings from the actual task triggers; the tool cannot infer them.
 
 Without additional selectors, the tool includes all declared context nodes.
