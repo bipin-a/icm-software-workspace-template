@@ -37,3 +37,7 @@ integrated proof on the exact candidate after child findings are resolved.
 Retain original review and tested revisions; verify current merge preconditions.
 Release follows the same explicit authorization and environment verification as
 single-PR work. Link the final delivery evidence from the brief.
+
+Use the [to-tickets skill](../../.agents/skills/to-tickets/SKILL.md) to prepare
+slices and the [integration-review skill](../../.agents/skills/integration-review/SKILL.md)
+when reviewing an assembled candidate. Both route to these existing owners.

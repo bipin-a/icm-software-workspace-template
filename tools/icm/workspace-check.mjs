@@ -374,10 +374,10 @@ const ROOT_ROUTES = [
   'app/README.md',
 ];
 
-async function humanCallFailures(repositoryRoot) {
+async function skillFailures(repositoryRoot, name) {
   const failures = [];
-  const canonical = '.agents/skills/human-call/SKILL.md';
-  const adapter = '.claude/skills/human-call/SKILL.md';
+  const canonical = `.agents/skills/${name}/SKILL.md`;
+  const adapter = `.claude/skills/${name}/SKILL.md`;
   for (const path of [canonical, adapter]) {
     const body = await optionalRead(repositoryRoot, path);
     if (!body) {
@@ -386,7 +386,7 @@ async function humanCallFailures(repositoryRoot) {
     }
     try {
       const metadata = parseFrontmatter(path, body);
-      if (metadata.name !== 'human-call') failures.push(`${path} must declare name: human-call`);
+      if (metadata.name !== name) failures.push(`${path} must declare name: ${name}`);
       if (typeof metadata.description !== 'string' || !metadata.description.trim()) {
         failures.push(`${path} must describe when to use the skill`);
       }
@@ -394,7 +394,7 @@ async function humanCallFailures(repositoryRoot) {
       failures.push(error.message);
     }
   }
-  for (const path of [adapter, '_shared/engineering/decision-work.md', '_shared/engineering/safeguards.md']) {
+  for (const path of [adapter, ...(name === 'human-call' ? ['_shared/engineering/decision-work.md', '_shared/engineering/safeguards.md'] : [])]) {
     const body = await optionalRead(repositoryRoot, path);
     const source = resolve(repositoryRoot, path);
     const linksCanonical = markdownLinkTargets(source, body ?? '').some(link =>
@@ -476,7 +476,9 @@ async function checkWorkspaceInternal(repositoryRoot, { projectSlug, reviewedCom
   const failures = await configurationFailures(repositoryRoot, config, Boolean(configBody));
   failures.push(...await markdownLinkFailures(repositoryRoot));
   failures.push(...await rootRouteFailures(repositoryRoot));
-  failures.push(...await humanCallFailures(repositoryRoot));
+  for (const name of ['human-call', 'integration-review', 'to-tickets']) {
+    failures.push(...await skillFailures(repositoryRoot, name));
+  }
   failures.push(...await workflowFailures(repositoryRoot));
   const templatePath = '_templates/project/PROJECT.md';
   const template = await optionalRead(repositoryRoot, templatePath);

@@ -240,3 +240,18 @@ test('human-call wiring rejects missing skills, wrong owners, and lost shared ro
   await writeFile(adapterPath, original.replace('../../../.agents/', '../../../.agents/skills/../').replace('This adapter owns no decision procedure.', 'The linked skill owns the procedure.'));
   assert.deepEqual((await checkWorkspace(root)).failures, [], 'equivalent link spelling and prose are not policy drift');
 });
+
+
+test('delivery skill adapters must keep their canonical identity and target', async (t) => {
+  const root = await mkdtemp(join(tmpdir(), 'icm-delivery-skills-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  await cp(templateRoot, root, { recursive: true, filter: path => !['.git', 'node_modules'].includes(path.split('/').at(-1)) });
+  for (const name of ['integration-review', 'to-tickets']) {
+    const path = join(root, `.claude/skills/${name}/SKILL.md`);
+    const original = await readFile(path, 'utf8');
+    await writeFile(path, original.replace(`.agents/skills/${name}/`, '.agents/skills/human-call/'));
+    assert.ok((await checkWorkspace(root)).failures.some(failure => failure.includes(name) && failure.includes('must link')));
+    await writeFile(path, original);
+  }
+  assert.deepEqual((await checkWorkspace(root)).failures, []);
+});
