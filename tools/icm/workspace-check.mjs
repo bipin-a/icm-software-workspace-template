@@ -1,6 +1,7 @@
 import { readFile, readdir, realpath, stat } from 'node:fs/promises';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { loadContextManifest } from './context-packet.mjs';
 import { changedPaths } from './change-scope.mjs';
 import { candidateGateConfigurationErrors } from './config.mjs';
 import { parseFrontmatter, headingSection } from './markdown.mjs';
@@ -465,6 +466,15 @@ async function workflowFailures(repositoryRoot) {
   return failures;
 }
 
+async function checkedProject(repositoryRoot, slug, options = {}) {
+  const result = await featureProjectChecks(repositoryRoot, slug, options);
+  if (!result.failures.length) {
+    const path = `projects/${slug}/PROJECT.md`;
+    await loadContextManifest(repositoryRoot, slug, parseFrontmatter(path, await optionalRead(repositoryRoot, path)));
+  }
+  return result;
+}
+
 async function changedWorkspaceChecks(repositoryRoot, base) {
   const changes = await changedPaths(repositoryRoot, base);
   // Shared contracts, tools, and unknown paths can affect any Project.
@@ -496,7 +506,7 @@ async function changedWorkspaceChecks(repositoryRoot, base) {
     const projectFiles = files.filter(path => toRepositoryPath(repositoryRoot, path).startsWith(`projects/${slug}/`));
     // A fully removed Project is allowed; retained consumers are still checked.
     if (projectFiles.length) {
-      failures.push(...(await featureProjectChecks(repositoryRoot, slug)).failures);
+      failures.push(...(await checkedProject(repositoryRoot, slug)).failures);
       failures.push(...await markdownLinkFailures(repositoryRoot, repositoryRoot, projectFiles));
     }
   }
@@ -508,7 +518,7 @@ async function checkWorkspaceInternal(repositoryRoot, { projectSlug, reviewedCom
   if (changedSince) return changedWorkspaceChecks(repositoryRoot, changedSince);
   if (reviewedCommit && !projectSlug) throw new Error('--reviewed-commit requires --project');
   if (projectSlug) {
-    const result = await featureProjectChecks(repositoryRoot, projectSlug, { reviewedCommit });
+    const result = await checkedProject(repositoryRoot, projectSlug, { reviewedCommit });
     result.failures.push(...await markdownLinkFailures(repositoryRoot, join(repositoryRoot, 'projects', projectSlug)));
     return result;
   }
@@ -534,7 +544,7 @@ async function checkWorkspaceInternal(repositoryRoot, { projectSlug, reviewedCom
   const briefs = await repositoryFiles(join(repositoryRoot, 'projects'), name => name === 'PROJECT.md');
   for (const path of briefs) {
     const slug = relative(join(repositoryRoot, 'projects'), dirname(path)).split(sep).join('/');
-    failures.push(...(await featureProjectChecks(repositoryRoot, slug)).failures);
+    failures.push(...(await checkedProject(repositoryRoot, slug)).failures);
   }
   return { failures };
 }

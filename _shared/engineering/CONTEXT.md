@@ -15,3 +15,7 @@ Use `npm --prefix tools/icm run context -- <files...>` to estimate explicitly
 selected files. `icm.config.json` owns the advisory size target and reserve.
 Preserve decisions and proof when oversized; trim repetition. The estimate
 does not reconstruct a packet or establish that an agent used it well.
+
+For declared criterion, environment, or prerequisite selection, use
+[Scoped context packets](context-packets.md). This optional route works with
+living briefs and does not add another Project format.

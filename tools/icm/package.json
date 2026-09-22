@@ -5,6 +5,7 @@
   "scripts": {
     "check": "node workspace-check.mjs",
     "context": "node estimate-context.mjs",
-    "test": "node --test test/*.test.mjs"
+    "test": "node --test test/*.test.mjs",
+    "packet": "node context-packet.mjs"
   }
 }
