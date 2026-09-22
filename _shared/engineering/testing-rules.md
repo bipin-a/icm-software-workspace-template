@@ -219,3 +219,16 @@ A required full gate cannot be waived by leaving configuration disabled.
   retain the tested revision, and rerun affected proof only. A new required
   full-gate tree needs its own receipt.
 - Machine evidence cannot authorize merge, deployment, or a product decision.
+
+
+## Changed-file ICM checks
+
+Use `node tools/icm/workspace-check.mjs --changed-since <commit>` for bounded
+Project prose changes. Selection includes committed, staged, unstaged, and
+untracked non-ignored paths. The checker validates current files, affected
+Projects, and incoming Markdown links transitively. It does not replace staged
+revision comparison before relying on human review.
+
+Shared, tooling, and unknown paths expand to the whole-workspace audit. A
+removed Project is allowed only if remaining references and owners are valid.
+This mode cannot be combined with Project or reviewed-commit selection.

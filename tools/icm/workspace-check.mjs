@@ -1,6 +1,7 @@
 import { readFile, readdir, realpath, stat } from 'node:fs/promises';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { changedPaths } from './change-scope.mjs';
 import { candidateGateConfigurationErrors } from './config.mjs';
 import { parseFrontmatter, headingSection } from './markdown.mjs';
 import { briefStructureFailures, FEATURE_WORKFLOW, featureProjectChecks } from './feature-review.mjs';
@@ -191,9 +192,9 @@ function markdownLinkTargets(path, body) {
   });
 }
 
-async function markdownLinkFailures(repositoryRoot, scope = repositoryRoot) {
+async function markdownLinkFailures(repositoryRoot, scope = repositoryRoot, selectedFiles) {
   const failures = [];
-  const files = await repositoryFiles(scope, (name) => name.endsWith('.md'));
+  const files = selectedFiles ?? await repositoryFiles(scope, (name) => name.endsWith('.md'));
   for (const path of files) {
     const body = await optionalRead(repositoryRoot, toRepositoryPath(repositoryRoot, path));
     for (const link of markdownLinkTargets(path, body)) {
@@ -464,7 +465,47 @@ async function workflowFailures(repositoryRoot) {
   return failures;
 }
 
-async function checkWorkspaceInternal(repositoryRoot, { projectSlug, reviewedCommit } = {}) {
+async function changedWorkspaceChecks(repositoryRoot, base) {
+  const changes = await changedPaths(repositoryRoot, base);
+  // Shared contracts, tools, and unknown paths can affect any Project.
+  if (changes.paths.some(path => !/^projects\/[a-z0-9]+(?:-[a-z0-9]+)*\/.+\.md$/.test(path))) {
+    const result = await checkWorkspaceInternal(repositoryRoot);
+    return { ...result, scope: { ...changes, mode: 'workspace' } };
+  }
+  const files = await repositoryFiles(repositoryRoot, name => name.endsWith('.md'));
+  const affected = new Set(changes.paths);
+  const bodies = new Map(await Promise.all(files.map(async path => [path,
+    await optionalRead(repositoryRoot, toRepositoryPath(repositoryRoot, path))])));
+  let expanded;
+  do {
+    expanded = false;
+    for (const [path, body] of bodies) {
+      const source = toRepositoryPath(repositoryRoot, path);
+      if (affected.has(source)) continue;
+      if (markdownLinkTargets(path, body).some(link => affected.has(
+        toRepositoryPath(repositoryRoot, resolve(dirname(path), link.target))))) {
+        affected.add(source);
+        expanded = true;
+      }
+    }
+  } while (expanded);
+  const selected = files.filter(path => affected.has(toRepositoryPath(repositoryRoot, path)));
+  const failures = await markdownLinkFailures(repositoryRoot, repositoryRoot, selected);
+  const projects = new Set([...affected].map(path => path.match(/^projects\/([^/]+)\//)?.[1]).filter(Boolean));
+  for (const slug of projects) {
+    const projectFiles = files.filter(path => toRepositoryPath(repositoryRoot, path).startsWith(`projects/${slug}/`));
+    // A fully removed Project is allowed; retained consumers are still checked.
+    if (projectFiles.length) {
+      failures.push(...(await featureProjectChecks(repositoryRoot, slug)).failures);
+      failures.push(...await markdownLinkFailures(repositoryRoot, repositoryRoot, projectFiles));
+    }
+  }
+  return { failures: [...new Set(failures)], scope: { ...changes, mode: 'changed', affected: [...affected].sort() } };
+}
+
+async function checkWorkspaceInternal(repositoryRoot, { projectSlug, reviewedCommit, changedSince } = {}) {
+  if (changedSince && (projectSlug || reviewedCommit)) throw new Error('--changed-since cannot be combined with Project/review selection');
+  if (changedSince) return changedWorkspaceChecks(repositoryRoot, changedSince);
   if (reviewedCommit && !projectSlug) throw new Error('--reviewed-commit requires --project');
   if (projectSlug) {
     const result = await featureProjectChecks(repositoryRoot, projectSlug, { reviewedCommit });
@@ -508,11 +549,11 @@ export async function checkWorkspace(repositoryRoot, options = {}) {
 
 function commandOptions(args) {
   const result = {};
-  const keys = { '--project': 'projectSlug', '--reviewed-commit': 'reviewedCommit' };
+  const keys = { '--project': 'projectSlug', '--reviewed-commit': 'reviewedCommit', '--changed-since': 'changedSince' };
   for (let i = 0; i < args.length; i += 2) {
     const key = keys[args[i]];
     if (!key || result[key] || !args[i + 1] || args[i + 1].startsWith('--')) {
-      throw new Error('Usage: workspace-check.mjs [--project <slug> [--reviewed-commit <full-sha>]]');
+      throw new Error('Usage: workspace-check.mjs [--changed-since <commit> | --project <slug> [--reviewed-commit <full-sha>]]');
     }
     result[key] = args[i + 1];
   }
@@ -524,6 +565,7 @@ if (invokedPath === fileURLToPath(import.meta.url)) {
   try {
     const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
     const result = await checkWorkspace(repositoryRoot, commandOptions(process.argv.slice(2)));
+    if (result.scope) console.log(`ICM scope: ${result.scope.mode}; ${result.scope.paths.length} changed paths since ${result.scope.base}`);
     if (result.failures.length) {
       console.error('ICM workspace check failed:');
       for (const failure of result.failures) console.error(`- ${failure}`);

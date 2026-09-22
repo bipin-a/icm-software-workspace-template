@@ -255,3 +255,27 @@ test('delivery skill adapters must keep their canonical identity and target', as
   }
   assert.deepEqual((await checkWorkspace(root)).failures, []);
 });
+
+
+test('changed checking includes staged, restored, untracked paths and incoming links', async (t) => {
+  const { root, reviewedCommit } = await createFeatureReviewFixture(t);
+  await writeFile(join(root, 'projects/example/technical.md'), 'Changed decision.\n');
+  await git(root, 'add', '.');
+  await writeFile(join(root, 'projects/example/technical.md'), 'Reuse the task query.\n');
+  await writeFile(join(root, 'projects/example/new.md'), 'New evidence.\n');
+  let result = await checkWorkspace(root, { changedSince: reviewedCommit });
+  assert.deepEqual(result.failures, []);
+  assert.deepEqual(result.scope.paths, ['projects/example/new.md', 'projects/example/technical.md']);
+  await writeFile(join(root, 'projects/example/technical.md'), '[Deleted evidence](new.md)\n');
+  await git(root, 'add', '.');
+  await git(root, 'commit', '-m', 'Add evidence');
+  const base = (await git(root, 'rev-parse', 'HEAD')).stdout.trim();
+  await rm(join(root, 'projects/example/new.md'));
+  result = await checkWorkspace(root, { changedSince: base });
+  assert.ok(result.scope.affected.includes('projects/example/technical.md'));
+  assert.match(result.failures.join('\n'), /links to missing new.md/);
+  await writeFile(join(root, 'unknown.txt'), 'Unknown impact');
+  result = await checkWorkspace(root, { changedSince: base });
+  assert.equal(result.scope.mode, 'workspace');
+  assert.match((await checkWorkspace(root, { changedSince: base, projectSlug: 'example' })).failures.join('\n'), /cannot be combined/);
+});
