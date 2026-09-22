@@ -279,3 +279,20 @@ test('changed checking includes staged, restored, untracked paths and incoming l
   assert.equal(result.scope.mode, 'workspace');
   assert.match((await checkWorkspace(root, { changedSince: base, projectSlug: 'example' })).failures.join('\n'), /cannot be combined/);
 });
+
+
+test('review comparisons include context selectors and staged selector changes', async t => {
+  const { root, brief } = await createFeatureReviewFixture(t);
+  const path = join(root, 'projects/example/context.json');
+  await writeFile(join(root, 'projects/example/PROJECT.md'), brief.replace('workflow: feature-work', 'workflow: feature-work\ncontext_packets: context.json'));
+  const original = JSON.stringify({ schemaVersion: 1, nodes: [] });
+  await writeFile(path, original);
+  await git(root, 'add', '.'); await git(root, 'commit', '-m', 'Declare context selection');
+  const reviewedCommit = (await git(root, 'rev-parse', 'HEAD')).stdout.trim();
+  await writeFile(path, JSON.stringify({ schemaVersion: 1, nodes: [{ id: 'changed-scope' }] }));
+  await git(root, 'add', '.');
+  await writeFile(path, original);
+  const result = await featureProjectChecks(root, 'example', { reviewedCommit });
+  assert.deepEqual(result.comparison.changed, ['projects/example/context.json']);
+  assert.equal(result.comparison.status, 'needs-review');
+});

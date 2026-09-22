@@ -11,9 +11,15 @@ const textList = value => Array.isArray(value) && value.every(item => typeof ite
 export function metadata(body, kind) {
   const start = `<!-- icm-${kind}\n`, end = '\n-->';
   if (typeof body !== 'string' || body.split(start).length !== 2) throw new Error(`Exactly one icm-${kind} metadata block is required`);
+  const metadataStart = body.indexOf(start);
+  const viewStart = body.indexOf(START), viewEnd = body.indexOf(END);
+  if (viewStart >= 0 && (viewEnd < 0 || (metadataStart > viewStart && metadataStart < viewEnd))) {
+    throw new Error('Canonical metadata must stay outside the generated delivery view');
+  }
   const tail = body.split(start)[1];
   const index = tail.indexOf(end);
   if (index < 0) throw new Error(`Unclosed icm-${kind} metadata block`);
+  if (viewStart > metadataStart && viewStart < metadataStart + start.length + index) throw new Error('Canonical metadata overlaps generated delivery markers');
   return JSON.parse(tail.slice(0, index));
 }
 

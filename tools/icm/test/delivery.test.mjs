@@ -105,3 +105,10 @@ test('publication rejects stale sources and reports partial writes honestly', as
   assert.equal(api.writes.length, 1);
   assert.deepEqual((await syncDelivery({ repo, parent: 1, publish: true, request: api.request })).updated, [10]);
 });
+
+
+test('canonical coordination metadata cannot be inside a replaceable generated view', () => {
+  const data = fixture();
+  data.parent.body = `<!-- icm-delivery-view:start -->\n${data.parent.body}\n<!-- icm-delivery-view:end -->`;
+  assert.throws(() => deliveryModel(data), /outside the generated/);
+});

@@ -61,8 +61,8 @@ The referenced documents must already contain real decisions and be linked
 from the brief; declare decision documents through its existing
 `decision_documents` field. Do not create separate specifications or approval
 receipts. Change the selectors when the actual evidence dependencies change.
-Workspace and selected-Project checks validate declared manifests. Review
-manifest diffs with the decision changes they select; their existence or a
+Workspace and selected-Project checks validate declared manifests. Reviewed-commit comparison also includes the manifest, including staged edits.
+Review manifest diffs with the decision changes they select; their existence or a
 successful packet does not establish that the selected evidence is sufficient.
 
 The assembler retains the stage's required baseline even if it overlaps a

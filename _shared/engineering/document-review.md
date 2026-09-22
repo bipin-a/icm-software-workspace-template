@@ -5,7 +5,8 @@
   only when size or ownership warrants it.
 - Link that owner instead of repeating it and list its Project-relative path in
   `decision_documents` frontmatter.
-- `PROJECT.md` is always included.
+- `PROJECT.md` is always included. A declared `context_packets` JSON manifest is
+  also compared, because selector changes can alter which evidence is loaded.
 - No separate approval receipts or manually stored `reviewed` or `approved` status are
   used for this workflow.
 

@@ -63,7 +63,7 @@ export function selectContextNodes(manifest, { criterion, environment, workItem 
 }
 
 export async function loadContextManifest(root, project, brief) {
-  if (!brief.context_packets) return null;
+  if (!Object.hasOwn(brief, 'context_packets')) return null;
   if (typeof brief.context_packets !== 'string') throw new Error('context_packets must name a Project-relative JSON file');
   const manifest = JSON.parse(await readWithin(root, `projects/${project}/${brief.context_packets}`));
   selectContextNodes(manifest);
@@ -117,7 +117,7 @@ export async function assembleContext(root, { project, stage, criterion, environ
   for (const rule of rules) if (!selectedRules.has(rule)) throw new Error(`Unknown profile rule: ${rule}`);
   for (const input of [...(contract.context.inputs ?? []), ...(contract.context.references ?? [])]) await add(input);
   let nodes = [];
-  if (brief.context_packets) {
+  if (Object.hasOwn(brief, 'context_packets')) {
     const manifest = await loadContextManifest(root, project, brief);
     nodes = selectContextNodes(manifest, { criterion, environment, workItem });
     for (const node of nodes) for (const input of node.inputs) await add(input);

@@ -42,6 +42,14 @@ function decisionPaths(project, root) {
       throw new Error(`${root}/PROJECT.md has an invalid decision document path: ${path}`);
     }
   }
+  if (Object.hasOwn(project, 'context_packets')) {
+    const path = project.context_packets;
+    if (typeof path !== 'string' || !path.endsWith('.json') || isAbsolute(path)
+      || /[\\:\0\r\n]/.test(path) || path.split('/').some(part => !part || part === '.' || part === '..')) {
+      throw new Error(`${root}/PROJECT.md has an invalid context_packets path`);
+    }
+    paths.push(path);
+  }
   return paths.map(path => `${root}/${path}`);
 }
 
