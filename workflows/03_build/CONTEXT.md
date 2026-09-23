@@ -47,10 +47,8 @@ only when its trigger applies.
 | [`safeguards.md`](../../_shared/engineering/safeguards.md) | Conditional when replacing behavior or protection: `RULE-REMOVE-LEGACY`; `RULE-MEANINGFUL-DELETION` |
 | [`safeguards.md`](../../_shared/engineering/safeguards.md) | Conditional for data repair or migration: `RULE-CORRUPT-STATE`; `RULE-MIGRATION-OBJECT-PARITY` |
 | [`safeguards.md`](../../_shared/engineering/safeguards.md) | Conditional for tests: `RULE-TEST-VALUE`; `RULE-DISCRIMINATING-TESTS`; `RULE-PUBLIC-CONTRACT`; `RULE-CONSEQUENCE-TESTS` |
-| [`safeguards.md`](../../_shared/engineering/safeguards.md) | Conditional for several PRs: `RULE-INTEGRATION-DELIVERY` |
 | [`testing-rules.md`](../../_shared/engineering/testing-rules.md) | `Earn each test`; `Use the efficient proof sequence`; `Focused repository commands`; `Worktree dependency bootstrap` |
 | [`testing-rules.md`](../../_shared/engineering/testing-rules.md) | Conditional for tests: `Prove the right cause at a stable boundary`; `Reuse test infrastructure without centralizing scenarios` |
 | [`testing-rules.md`](../../_shared/engineering/testing-rules.md) | Conditional for browser proof: `Local browser-test safety` |
 | [`testing-rules.md`](../../_shared/engineering/testing-rules.md) | Conditional for ICM document edits: `ICM artifact validation` |
 | [`github-delivery-rules.md`](../../_shared/engineering/github-delivery-rules.md) | `Repository hygiene and branches`; `Commits`; `Pull requests are human review surfaces`; `Checks and delivery truth` |
-| [`multi-pr-delivery.md`](../../_shared/engineering/multi-pr-delivery.md) | Conditional for several PRs: `Coordinate` |

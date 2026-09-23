@@ -23,8 +23,11 @@ Enter the earliest stage with an unresolved decision or action; skip stages
 with nothing to decide. A clear bounded fix can start at Build and Validate.
 Reuse completed decisions and proof, and revisit only what new evidence affects.
 Release applies only when requested; Learn applies when evidence earns a correction.
+A solo-size repository has no Assess Readiness or Release stage: decide
+material findings and the finish route in Validate's human check.
 
-Each stage has one contract with its own rule selections. Continue authorized
+Each stage has one contract with its own Rules table; a team-size repository adds
+the kit's rows for that stage from `extras/team-delivery/rules.md`. Continue authorized
 work across stage boundaries in the same task; no folder boundary requires
 another approval or conversation.
 

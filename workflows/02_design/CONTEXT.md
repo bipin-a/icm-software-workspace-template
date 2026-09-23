@@ -48,7 +48,6 @@ only when its trigger applies.
 | [`document-review.md`](../../_shared/engineering/document-review.md) | `Review and change` |
 | [`testing-rules.md`](../../_shared/engineering/testing-rules.md) | `Earn each test`; `Prove the right cause at a stable boundary` |
 | [`github-delivery-rules.md`](../../_shared/engineering/github-delivery-rules.md) | `Delivery profiles` |
-| [`multi-pr-delivery.md`](../../_shared/engineering/multi-pr-delivery.md) | Conditional when dependencies, review boundaries, or release risk need several PRs: `Choose and prepare` |
 | [`domain/CONTEXT.md`](../../_shared/domain/CONTEXT.md) | Conditional when a technical choice depends on domain definitions or ownership: whole file |
 | [`prototype-evidence.md`](../../_templates/prototype-evidence.md) | Conditional when an isolated experiment is needed to distinguish options: whole file |
 | [`architecture-investigation.md`](../../_templates/architecture-investigation.md) | Conditional when material architecture uncertainty needs a bounded investigation: whole file |

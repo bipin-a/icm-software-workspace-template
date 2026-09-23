@@ -10,6 +10,12 @@ second copy of accepted answers. Write decisions to the owners below.
 
 ## Decisions needed to begin
 
+0. **Size:** is this a **solo** repository (one person, no deployment
+   pipeline, one PR at a time: a take-home, spike, or script) or a **team**
+   repository (several PRs, a full candidate gate, or deployments)? Apply the
+   answer first with `npm --prefix tools/icm run setup -- --size <solo|team>`.
+   Solo removes the team kit, the Assess Readiness and Release stages, and the
+   to-tickets skill; this cannot be undone in place, so choose team when unsure.
 1. **Identity and outcome:** who uses the workspace, what is being built, who
    owns material decisions, and where does existing application code live?
 2. **Shared constraints:** which domain, security, privacy, accessibility,
@@ -28,9 +34,10 @@ second copy of accepted answers. Write decisions to the owners below.
 - Before the first application implementation requiring a stack or proof:
   select the source layout, native package/dependency commands, and real tests
   in the owning feature decisions and executable configuration.
-- Before a required full gate: configure complete real command phases in
-  `icm.config.json` and verify its clean linked-worktree execution and receipt.
-- Before any deployment: select the provider procedure, explicit targets,
+- Team size, before a required full gate: configure complete real command
+  phases in `icm.config.json` and verify its clean linked-worktree execution
+  and receipt.
+- Team size, before any deployment: select the provider procedure, explicit targets,
   environment sequence, authorization owner, migration/rollback obligations,
   and live verification under the release rules.
 - When a domain rule becomes shared: record it once in the domain library and
@@ -50,9 +57,9 @@ technology or deployment plan is known.
 | Human review and decision revision | `../_shared/engineering/document-review.md` |
 | Git delivery and live-state boundary | `../_shared/engineering/github-delivery-rules.md` |
 | Proof commands and environments | Native executable configuration; applicability in `../_shared/engineering/testing-rules.md` |
-| Optional full-gate phases and context estimate | `../icm.config.json` |
+| Size, context estimate, and team full-gate phases | `../icm.config.json` |
 | Reusable external inputs | `../_shared/reusable-assets.md` |
-| Deployment procedure and targets | `../workflows/06_release/references/release-rules.md` and its configured provider owner |
+| Deployment procedure and targets | Team size: `../workflows/06_release/references/release-rules.md` and its configured provider owner. Solo size: not applicable |
 | Outcome-specific decisions | Chat/PR for bounded work; one living Project brief when coordination needs it |
 
 ## Verify completion

@@ -47,4 +47,4 @@ only when its trigger applies.
 | [`definition-of-done.md`](../../_shared/definition-of-done.md) | `Finished Project workflow` |
 | [`review-rules.md`](../04_validate/references/review-rules.md) | `Finding format` |
 | [`github-delivery-rules.md`](../../_shared/engineering/github-delivery-rules.md) | `Checks and delivery truth`; `Traceability and human gates`; `Merge methods preserve evidence and history` |
-| [`multi-pr-delivery.md`](../../_shared/engineering/multi-pr-delivery.md) | Conditional for several PRs: `Finish` |
+| [`multi-pr-delivery.md`](../../extras/team-delivery/multi-pr-delivery.md) | Conditional for several PRs: `Finish` |

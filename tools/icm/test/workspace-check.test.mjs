@@ -3,16 +3,23 @@ import { execFile } from 'node:child_process';
 import { cp, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import test from 'node:test';
 import { featureProjectChecks } from '../feature-review.mjs';
 import { checkWorkspace } from '../workspace-check.mjs';
+import { applySize } from '../setup.mjs';
+import { assembleContext } from '../context-packet.mjs';
 import { parseFrontmatter } from '../markdown.mjs';
 
 const exec = promisify(execFile);
 const git = (root, ...args) => exec('git', args, { cwd: root, encoding: 'utf8' });
 const templateRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
+// Setup and team-kit tests apply to the unset template; a configured copy skips them.
+const configuredSize = JSON.parse(readFileSync(join(templateRoot, 'icm.config.json'), 'utf8')).size;
+const templateOnly = { skip: configuredSize !== undefined && `this repository is configured as ${configuredSize}` };
+const kitOnly = { skip: !existsSync(join(templateRoot, 'extras/team-delivery')) && 'the team kit is not installed' };
 
 async function createFeatureReviewFixture(t) {
   const root = await mkdtemp(join(tmpdir(), 'icm-feature-review-'));
@@ -148,7 +155,7 @@ test('new source-template copy supports setup and a filled brief without applica
   assert.match((await checkWorkspace(root)).failures.join('\n'), /type: project/);
 });
 
-test('workspace validation detects broken routes, profile selections, and invalid full-gate configuration', async (t) => {
+test('workspace validation detects broken routes, profile selections, and invalid full-gate configuration', kitOnly, async (t) => {
   const root = await mkdtemp(join(tmpdir(), 'icm-routing-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   await cp(templateRoot, root, { recursive: true, filter: path => !['.git', 'node_modules'].includes(path.split('/').at(-1)) });
@@ -241,7 +248,7 @@ test('human-call wiring rejects missing skills, wrong owners, and lost shared ro
 });
 
 
-test('delivery skill adapters must keep their canonical identity and target', async (t) => {
+test('delivery skill adapters must keep their canonical identity and target', kitOnly, async (t) => {
   const root = await mkdtemp(join(tmpdir(), 'icm-delivery-skills-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   await cp(templateRoot, root, { recursive: true, filter: path => !['.git', 'node_modules'].includes(path.split('/').at(-1)) });
@@ -253,30 +260,6 @@ test('delivery skill adapters must keep their canonical identity and target', as
     await writeFile(path, original);
   }
   assert.deepEqual((await checkWorkspace(root)).failures, []);
-});
-
-
-test('changed checking includes staged, restored, untracked paths and incoming links', async (t) => {
-  const { root, reviewedCommit } = await createFeatureReviewFixture(t);
-  await writeFile(join(root, 'projects/example/technical.md'), 'Changed decision.\n');
-  await git(root, 'add', '.');
-  await writeFile(join(root, 'projects/example/technical.md'), 'Reuse the task query.\n');
-  await writeFile(join(root, 'projects/example/new.md'), 'New evidence.\n');
-  let result = await checkWorkspace(root, { changedSince: reviewedCommit });
-  assert.deepEqual(result.failures, []);
-  assert.deepEqual(result.scope.paths, ['projects/example/new.md', 'projects/example/technical.md']);
-  await writeFile(join(root, 'projects/example/technical.md'), '[Deleted evidence](new.md)\n');
-  await git(root, 'add', '.');
-  await git(root, 'commit', '-m', 'Add evidence');
-  const base = (await git(root, 'rev-parse', 'HEAD')).stdout.trim();
-  await rm(join(root, 'projects/example/new.md'));
-  result = await checkWorkspace(root, { changedSince: base });
-  assert.ok(result.scope.affected.includes('projects/example/technical.md'));
-  assert.match(result.failures.join('\n'), /links to missing new.md/);
-  await writeFile(join(root, 'unknown.txt'), 'Unknown impact');
-  result = await checkWorkspace(root, { changedSince: base });
-  assert.equal(result.scope.mode, 'workspace');
-  assert.match((await checkWorkspace(root, { changedSince: base, projectSlug: 'example' })).failures.join('\n'), /cannot be combined/);
 });
 
 
@@ -324,14 +307,16 @@ test('the current workflow rejects nested steps and requires stage-owned rule se
   assert.deepEqual((await checkWorkspace(root)).failures, []);
 });
 
-test('each stage owns a distinct Rules table with no heading both always and conditionally loaded', async () => {
+test('each stage owns a distinct Rules table; with kit rows, no heading is both always and conditionally loaded', templateOnly, async () => {
   const tables = new Set();
   for (const stage of ['01_understand', '02_design', '03_build', '04_validate', '05_assess-readiness', '06_release', '07_learn']) {
     const body = await readFile(join(templateRoot, 'workflows', stage, 'CONTEXT.md'), 'utf8');
     const rules = body.slice(body.indexOf('## Rules'));
     tables.add(rules.replace(/\]\([^)]*\)/g, ']()'));
+    const kit = await readFile(join(templateRoot, 'extras/team-delivery/rules.md'), 'utf8');
+    const kitSection = kit.match(new RegExp(`^## ${stage}\\n([\\s\\S]*?)(?=^## |(?![\\s\\S]))`, 'm'))?.[1] ?? '';
     const seen = new Map();
-    for (const line of rules.split('\n').filter(row => row.startsWith('| ['))) {
+    for (const line of `${rules}\n${kitSection}`.split('\n').filter(row => row.startsWith('| ['))) {
       const [, source, selection] = line.split('|').map(cell => cell.trim());
       const conditional = selection.startsWith('Conditional');
       for (const [, heading] of selection.matchAll(/`([^`]+)`/g)) {
@@ -355,4 +340,74 @@ test('briefs must not keep the retired workflow field', async t => {
   assert.match((await featureProjectChecks(root, 'example')).failures.join('\n'), /must not declare workflow/);
   await writeFile(join(root, 'projects/example/PROJECT.md'), brief.replace('workflow: feature-work\n', ''));
   assert.deepEqual((await featureProjectChecks(root, 'example')).failures, []);
+});
+
+test('changed-file checks report the missing team kit in a core-only repository', async t => {
+  const { root, reviewedCommit } = await createFeatureReviewFixture(t);
+  assert.match((await checkWorkspace(root, { changedSince: reviewedCommit })).failures.join('\n'),
+    /--changed-since needs the team kit/);
+});
+
+async function templateCopy(t, name) {
+  const root = await mkdtemp(join(tmpdir(), name));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  await cp(templateRoot, root, { recursive: true, filter: path => !['.git', 'node_modules'].includes(path.split('/').at(-1)) });
+  return root;
+}
+
+const exists = path => readFile(path).then(() => true, error => error.code === 'EISDIR' || (error.code === 'ENOENT' ? false : Promise.reject(error)));
+
+test('solo setup removes the team kit and leaves a valid five-stage workspace', templateOnly, async t => {
+  const root = await templateCopy(t, 'icm-solo-');
+  const result = await applySize(root, 'solo');
+  assert.ok(result.changed.includes('extras/team-delivery'));
+  for (const path of ['extras/team-delivery', 'workflows/05_assess-readiness', 'workflows/06_release', '.agents/skills/to-tickets', '.claude/skills/to-tickets']) {
+    assert.equal(await exists(join(root, path)), false, `${path} must be removed`);
+  }
+  const config = JSON.parse(await readFile(join(root, 'icm.config.json'), 'utf8'));
+  assert.equal(config.size, 'solo');
+  assert.equal(Object.hasOwn(config, 'candidateGate'), false);
+  const hub = await readFile(join(root, 'workflows/CONTEXT.md'), 'utf8');
+  assert.deepEqual([...hub.matchAll(/^\| \[(0\d_[a-z-]+)\]/gm)].map(match => match[1]),
+    ['01_understand', '02_design', '03_build', '04_validate', '07_learn']);
+  const toolPackage = JSON.parse(await readFile(join(root, 'tools/icm/package.json'), 'utf8'));
+  assert.equal(Object.hasOwn(toolPackage.scripts, 'delivery'), false);
+  assert.doesNotMatch(toolPackage.scripts.test, /extras/);
+  assert.deepEqual((await checkWorkspace(root)).failures, []);
+  assert.deepEqual(await applySize(root, 'solo'), { size: 'solo', changed: [] });
+  await assert.rejects(applySize(root, 'team'), /cannot change in place/);
+});
+
+test('team setup keeps the kit and its rows reach the stage packet', templateOnly, async t => {
+  const root = await templateCopy(t, 'icm-team-');
+  await applySize(root, 'team');
+  assert.deepEqual((await checkWorkspace(root)).failures, []);
+  await mkdir(join(root, 'projects/example'), { recursive: true });
+  await writeFile(join(root, 'projects/example/PROJECT.md'), '---\ntype: project\nid: example\ntitle: Example\n---\n'
+    + ['Intent', 'Product behavior', 'Technical choices', 'Acceptance and proof', 'Open questions', 'Links'].map(h => `## ${h}\n\nAccepted ${h}.\n`).join('\n'));
+  const stage = 'workflows/03_build/CONTEXT.md';
+  const plain = await assembleContext(root, { project: 'example', stage });
+  assert.ok(!plain.entries.some(entry => entry.path.endsWith('multi-pr-delivery.md')));
+  const coordinated = await assembleContext(root, { project: 'example', stage, rules: ['Coordinate'] });
+  assert.match(coordinated.entries.find(entry => entry.path === 'extras/team-delivery/multi-pr-delivery.md').body, /^## Coordinate/m);
+  const validate = await assembleContext(root, { project: 'example', stage: 'workflows/04_validate/CONTEXT.md' });
+  assert.match(validate.entries.find(entry => entry.path === 'extras/team-delivery/proof-tooling.md').body, /Exact-candidate integration gate/);
+  await assert.rejects(applySize(root, 'solo'), /cannot change in place/);
+});
+
+test('the checker enforces the chosen size and the core-to-kit boundary', templateOnly, async t => {
+  const root = await templateCopy(t, 'icm-size-');
+  const configPath = join(root, 'icm.config.json');
+  const config = JSON.parse(await readFile(configPath, 'utf8'));
+  await writeFile(configPath, JSON.stringify({ ...config, size: 'solo' }));
+  assert.match((await checkWorkspace(root)).failures.join('\n'), /extras\/team-delivery belongs to the team size/);
+  await writeFile(configPath, JSON.stringify({ ...config, size: 'large' }));
+  assert.match((await checkWorkspace(root)).failures.join('\n'), /size must be one of solo, team/);
+  await writeFile(configPath, JSON.stringify(config));
+  const core = join(root, '_shared/engineering/github-delivery-rules.md');
+  await writeFile(core, `${await readFile(core, 'utf8')}\n[kit](../../extras/team-delivery/multi-pr-delivery.md)\n`);
+  assert.match((await checkWorkspace(root)).failures.join('\n'), /links to team-only extras\/team-delivery\/multi-pr-delivery\.md/);
+  const rules = join(root, 'extras/team-delivery/rules.md');
+  await writeFile(rules, `${await readFile(rules, 'utf8')}\n## 09_unknown\n`);
+  assert.match((await checkWorkspace(root)).failures.join('\n'), /section 09_unknown names no stage/);
 });

@@ -103,16 +103,26 @@ export async function assembleContext(root, { project, stage, criterion, environ
   };
   for (const path of ['AGENTS.md', 'CONTEXT.md', '_shared/voice.md', '_shared/engineering/decision-work.md', '_shared/principles/engineering-principles.md', stage]) await add({ path });
   await add({ path: briefPath, headings: ['Intent', 'Open questions'] });
-  // The stage's own Rules table is the only owner of the rules and references it loads.
-  const rulesBody = section(stageBody, 'Rules', stage);
+  // The stage's Rules table, plus the team kit's section for this stage when
+  // the kit is installed, are the only owners of what the stage loads.
+  const tables = [{ file: stage, body: section(stageBody, 'Rules', stage) }];
+  const kitRules = 'extras/team-delivery/rules.md';
+  const kitBody = await readWithin(root, kitRules).catch(error => {
+    if (error.code === 'ENOENT') return null;
+    throw error;
+  });
+  const stageName = stage.split('/')[1];
+  if (kitBody && new RegExp(`^## ${stageName}$`, 'm').test(kitBody)) {
+    tables.push({ file: kitRules, body: section(kitBody, stageName, kitRules) });
+  }
   const selectedRules = new Set();
   const conditionalSources = [];
-  for (const line of rulesBody.split('\n')) {
+  for (const { file, body: rulesBody } of tables) for (const line of rulesBody.split('\n')) {
     if (!line.trim().startsWith('|')) continue;
     const cells = line.split('|').map(cell => cell.trim());
     const target = cells[1]?.match(/\]\(([^)]+)\)/)?.[1];
     if (!target) continue;
-    const path = relative(root, resolve(root, dirname(stage), target));
+    const path = relative(root, resolve(root, dirname(file), target));
     const conditional = /^Conditional\b/.test(cells[2]);
     const selection = conditional ? cells[2].slice(cells[2].indexOf(':') + 1).trim() : cells[2];
     if (selection === 'whole file') {

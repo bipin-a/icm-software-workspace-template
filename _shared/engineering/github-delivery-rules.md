@@ -11,8 +11,8 @@ Use one Project branch and one PR by default. Create a separate worktree when
 independent concurrent work or the full candidate gate needs it. Bounded work
 needs no Project branch ceremony beyond the repository's normal Git policy.
 Do not create artifact-only precursor PRs or extra issues for routine work.
-Use [multi-PR delivery](multi-pr-delivery.md) when dependencies or risk require
-several reviewed changes to converge before release.
+When dependencies or risk require several reviewed changes to converge before
+release, use the team kit's multi-PR rules (`extras/team-delivery/multi-pr-delivery.md`).
 
 ## Repository hygiene and branches
 
