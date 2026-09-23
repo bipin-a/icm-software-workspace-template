@@ -1,13 +1,39 @@
 import { readFile, readdir, realpath, stat } from 'node:fs/promises';
 import { dirname, join, relative, resolve, sep } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { loadContextManifest } from './context-packet.mjs';
-import { changedPaths } from './change-scope.mjs';
-import { candidateGateConfigurationErrors } from './config.mjs';
 import { parseFrontmatter, headingSection } from './markdown.mjs';
-import { briefStructureFailures, FEATURE_WORKFLOW, featureProjectChecks } from './feature-review.mjs';
+import { briefStructureFailures, featureProjectChecks } from './feature-review.mjs';
 
-async function optionalRead(root, path) {
+// The optional team kit. The solo setup deletes it together with these parts.
+export const TEAM_KIT = 'extras/team-delivery';
+export const TEAM_KIT_RULES = `${TEAM_KIT}/rules.md`;
+export const TEAM_ONLY_PATHS = [
+  TEAM_KIT,
+  'workflows/05_assess-readiness',
+  'workflows/06_release',
+  '.agents/skills/to-tickets',
+  '.claude/skills/to-tickets',
+];
+export const SIZES = ['solo', 'team'];
+
+async function pathExists(repositoryRoot, path) {
+  try {
+    await stat(resolve(repositoryRoot, path));
+    return true;
+  } catch (error) {
+    if (error?.code === 'ENOENT') return false;
+    throw error;
+  }
+}
+
+async function teamKitModule(repositoryRoot, file) {
+  const path = resolve(repositoryRoot, TEAM_KIT, 'tools', file);
+  if (!await pathExists(repositoryRoot, toRepositoryPath(repositoryRoot, path))) return null;
+  return import(pathToFileURL(path).href);
+}
+
+export async function optionalRead(root, path) {
   if (typeof path !== 'string' || path.length === 0) return null;
   const resolvedRoot = await realpath(root);
   const lexicalTarget = resolve(resolvedRoot, path);
@@ -28,20 +54,23 @@ async function optionalRead(root, path) {
   }
 }
 
+// A Rules row names headings, or `whole file`, optionally after "Conditional …:".
 function profileRuleSelections(repositoryRoot, profilePath, profileSection) {
   return profileSection.split(/\r?\n/).flatMap((line) => {
     if (!line.trim().startsWith('|')) return [];
     const cells = line.trim().replace(/^\||\|$/g, '').split('|').map((cell) => cell.trim());
     const target = cells[0]?.match(/\]\(([^)]+)\)/)?.[1];
     let selection = cells[1] ?? '';
-    if (/^Conditional\b/.test(selection)) selection = selection.slice(selection.indexOf(':') + 1);
+    const conditional = /^Conditional\b/.test(selection);
+    if (conditional) selection = selection.slice(selection.indexOf(':') + 1).trim();
     const headings = [...selection.matchAll(/`([^`]+)`/g)].map((match) => match[1]);
-    if (!target || headings.length === 0) return [];
+    const wholeFile = selection === 'whole file';
+    if (!target || (headings.length === 0 && !wholeFile)) return [];
     const sourcePath = toRepositoryPath(
       repositoryRoot,
       resolve(dirname(resolve(repositoryRoot, profilePath)), target),
     );
-    return [{ sourcePath, headings }];
+    return [{ sourcePath, headings, wholeFile, conditional }];
   });
 }
 
@@ -64,25 +93,18 @@ export function isSafeRepositoryPath(path) {
 }
 
 export function contextManifestFailures(scope, metadata) {
-  if (metadata.type === 'workflow-hub' || metadata.type === 'workflow-router') {
+  if (metadata.type === 'workflow-hub') {
     return metadata.context ? [`${scope} ${metadata.type} must not declare a context manifest`] : [];
   }
-  if (metadata.type !== 'workflow-step') return [`${scope} has unknown workflow contract type ${metadata.type || 'missing'}`];
+  if (metadata.type !== 'workflow-stage') return [`${scope} has unknown workflow contract type ${metadata.type || 'missing'}`];
   const context = metadata.context;
   if (!context || typeof context !== 'object' || Array.isArray(context)) {
     return [`${scope} is missing its context manifest`];
   }
   const failures = [];
-  const allowedKeys = new Set([
-    'parameters',
-    'capabilities',
-    'profile',
-    'inputs',
-    'selectors',
-    'references',
-    'output_templates',
-    'tools',
-  ]);
+  // The stage's Rules table owns every rule and reference it loads; the
+  // manifest only names brief inputs and execute-only tools.
+  const allowedKeys = new Set(['parameters', 'capabilities', 'inputs', 'tools']);
   for (const key of Object.keys(context)) {
     if (!allowedKeys.has(key)) failures.push(`${scope} context declares unknown key ${key}`);
   }
@@ -92,16 +114,8 @@ export function contextManifestFailures(scope, metadata) {
       && (!Array.isArray(context[key]) || context[key].some((value) => typeof value !== 'string'))
     ) failures.push(`${scope} context ${key} must be a list of strings`);
   }
-  if (!context.profile?.path || !context.profile?.heading) {
-    failures.push(`${scope} must name one exact profile path and heading`);
-  } else if (!isSafeRepositoryPath(context.profile.path)) {
-    failures.push(`${scope} has an invalid profile path ${context.profile.path}`);
-  }
   const categories = [
     ['input', context.inputs ?? []],
-    ['selector', context.selectors ?? []],
-    ['reference', context.references ?? []],
-    ['output template', context.output_templates ?? []],
     ['tool', context.tools ?? []],
   ];
   const seenPaths = new Set();
@@ -117,9 +131,6 @@ export function contextManifestFailures(scope, metadata) {
       }
       if (seenPaths.has(entry.path)) failures.push(`${scope} repeats context path ${entry.path}`);
       seenPaths.add(entry.path);
-      if (kind === 'selector' && (typeof entry.when !== 'string' || entry.when.trim() === '')) {
-        failures.push(`${scope} selector ${entry.path} must declare when`);
-      }
       if (kind === 'tool' && entry.access !== 'execute-only') {
         failures.push(`${scope} tool ${entry.path} must declare execute-only access`);
       }
@@ -158,7 +169,7 @@ export function contextManifestFailures(scope, metadata) {
   return failures;
 }
 
-async function repositoryFiles(directory, predicate) {
+export async function repositoryFiles(directory, predicate) {
   let entries;
   try {
     entries = await readdir(directory, { withFileTypes: true });
@@ -176,9 +187,9 @@ async function repositoryFiles(directory, predicate) {
   return paths;
 }
 
-const toRepositoryPath = (repositoryRoot, path) => relative(repositoryRoot, path).split(sep).join('/');
+export const toRepositoryPath = (repositoryRoot, path) => relative(repositoryRoot, path).split(sep).join('/');
 
-function markdownLinkTargets(path, body) {
+export function markdownLinkTargets(path, body) {
   return [...body.matchAll(/\[[^\]]*\]\(([^)]+)\)/g)].flatMap((match) => {
     let target = match[1].trim();
     if (target.startsWith('<') && target.endsWith('>')) target = target.slice(1, -1);
@@ -193,7 +204,7 @@ function markdownLinkTargets(path, body) {
   });
 }
 
-async function markdownLinkFailures(repositoryRoot, scope = repositoryRoot, selectedFiles) {
+export async function markdownLinkFailures(repositoryRoot, scope = repositoryRoot, selectedFiles) {
   const failures = [];
   const files = selectedFiles ?? await repositoryFiles(scope, (name) => name.endsWith('.md'));
   for (const path of files) {
@@ -234,10 +245,9 @@ function manifestSourcePath(path) {
   return path;
 }
 
-async function manifestTargetFailures(repositoryRoot, scope, metadata) {
-  if (metadata.type !== 'workflow-step' || !metadata.context) return [];
+async function manifestTargetFailures(repositoryRoot, scope, metadata, profile) {
+  if (metadata.type !== 'workflow-stage' || !metadata.context) return [];
   const failures = [];
-  const profile = metadata.context.profile;
   const profileBody = profile?.path && isSafeRepositoryPath(profile.path)
     ? await optionalRead(repositoryRoot, profile.path)
     : null;
@@ -257,6 +267,7 @@ async function manifestTargetFailures(repositoryRoot, scope, metadata) {
         failures.push(`${scope} profile source ${selection.sourcePath} does not exist`);
         continue;
       }
+      if (selection.wholeFile) continue;
       for (const heading of selection.headings) {
         if (!headingSection(sourceBody, heading)) {
           failures.push(`${scope} profile source ${selection.sourcePath} is missing ${heading}`);
@@ -267,9 +278,6 @@ async function manifestTargetFailures(repositoryRoot, scope, metadata) {
 
   const categories = [
     ['input', metadata.context.inputs ?? []],
-    ['selector', metadata.context.selectors ?? []],
-    ['reference', metadata.context.references ?? []],
-    ['output template', metadata.context.output_templates ?? []],
     ['tool', metadata.context.tools ?? []],
   ];
   for (const [kind, entries] of categories) {
@@ -322,8 +330,69 @@ async function configurationFailures(repositoryRoot, config, configPresent) {
       failures.push(`icm.config.json context ${name} must be a non-negative number`);
     }
   }
-  for (const failure of candidateGateConfigurationErrors(config.candidateGate)) {
-    failures.push(`icm.config.json candidateGate ${failure}`);
+  if (config.size !== undefined && !SIZES.includes(config.size)) {
+    failures.push(`icm.config.json size must be one of ${SIZES.join(', ')}`);
+  }
+  const kitConfig = await teamKitModule(repositoryRoot, 'config.mjs');
+  if (kitConfig) {
+    for (const failure of kitConfig.candidateGateConfigurationErrors(config.candidateGate)) {
+      failures.push(`icm.config.json candidateGate ${failure}`);
+    }
+  } else if (config.candidateGate !== undefined) {
+    failures.push(`icm.config.json candidateGate needs the team kit at ${TEAM_KIT}`);
+  }
+  return failures;
+}
+
+// Solo removes every team-only path; team (and the unset template) keeps them.
+async function sizeFailures(repositoryRoot, size) {
+  const failures = [];
+  for (const path of TEAM_ONLY_PATHS) {
+    const present = await pathExists(repositoryRoot, path);
+    if (size === 'solo' && present) failures.push(`${path} belongs to the team size; solo setup removes it`);
+    if (size !== 'solo' && !present) failures.push(`${path} is required unless icm.config.json size is solo`);
+  }
+  return failures;
+}
+
+// Core files must not link into team-only paths, or a solo copy breaks.
+async function teamBoundaryFailures(repositoryRoot) {
+  const failures = [];
+  const inside = (path, roots) => roots.some(root => path === root || path.startsWith(`${root}/`));
+  for (const file of await repositoryFiles(repositoryRoot, name => name.endsWith('.md'))) {
+    const source = toRepositoryPath(repositoryRoot, file);
+    if (inside(source, TEAM_ONLY_PATHS)) continue;
+    const body = await optionalRead(repositoryRoot, source);
+    for (const link of markdownLinkTargets(file, body ?? '')) {
+      const target = toRepositoryPath(repositoryRoot, resolve(dirname(file), link.target));
+      // The hub's Stages rows for team stages are removed by solo setup.
+      const hubStageRow = source === 'workflows/CONTEXT.md' && /^workflows\/0[56]_[a-z-]+\/CONTEXT\.md$/.test(target);
+      if (inside(target, TEAM_ONLY_PATHS) && !hubStageRow) {
+        failures.push(`${source} links to team-only ${target}; name it as a plain path instead`);
+      }
+    }
+  }
+  return failures;
+}
+
+async function teamKitRuleFailures(repositoryRoot) {
+  const body = await optionalRead(repositoryRoot, TEAM_KIT_RULES);
+  if (body === null) return [];
+  const failures = [];
+  for (const [, heading] of body.matchAll(/^## (.+)$/gm)) {
+    const target = heading === 'direct-repository'
+      ? '_shared/engineering/profiles/direct-repository.md'
+      : `workflows/${heading}/CONTEXT.md`;
+    if (!await pathExists(repositoryRoot, target)) {
+      failures.push(`${TEAM_KIT_RULES} section ${heading} names no stage or profile`);
+      continue;
+    }
+    failures.push(...await manifestTargetFailures(
+      repositoryRoot,
+      TEAM_KIT_RULES,
+      { type: 'workflow-stage', context: {} },
+      { path: TEAM_KIT_RULES, heading },
+    ));
   }
   return failures;
 }
@@ -435,8 +504,7 @@ async function rootRouteFailures(repositoryRoot) {
 
 function workflowContractShapeFailures(scope, body, type) {
   const markers = {
-    'workflow-step': ['One job:', '## Inputs', 'Do not load', '## Process', '## Outputs', '## Human check'],
-    'workflow-router': ['One job:', '## Inputs', 'Do not load', '## Routes'],
+    'workflow-stage': ['One job:', '## Inputs', 'Do not load', '## Process', '## Outputs', '## Human check'],
     'workflow-hub': ['One job:', '## Project path binding', '## Human check'],
   }[type] ?? [];
   return markers
@@ -448,6 +516,26 @@ async function workflowFailures(repositoryRoot) {
   const failures = [];
   const root = join(repositoryRoot, 'workflows');
   const contextPaths = await repositoryFiles(root, (name) => name === 'CONTEXT.md');
+  const entries = await readdir(root, { withFileTypes: true }).catch(error => {
+    if (error.code === 'ENOENT') return [];
+    throw error;
+  });
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    const stage = join(root, entry.name);
+    for (const child of await readdir(stage, { withFileTypes: true })) {
+      if (child.isDirectory() && child.name !== 'references') {
+        failures.push(`workflows/${entry.name}/${child.name} adds a step folder; keep one contract per stage`);
+      }
+    }
+  }
+  const direct = '_shared/engineering/profiles/direct-repository.md';
+  failures.push(...await manifestTargetFailures(
+    repositoryRoot,
+    direct,
+    { type: 'workflow-stage', context: {} },
+    { path: direct, heading: 'direct-repository' },
+  ));
   for (const path of contextPaths) {
     const relativePath = toRepositoryPath(repositoryRoot, path);
     const body = await readFile(path, 'utf8');
@@ -458,15 +546,28 @@ async function workflowFailures(repositoryRoot) {
       failures.push(error.message);
       continue;
     }
+    if (relativePath !== 'workflows/CONTEXT.md') {
+      if (!/^workflows\/0[1-7]_[a-z-]+\/CONTEXT\.md$/.test(relativePath)) {
+        failures.push(`${relativePath} must be a direct stage contract`);
+      }
+      if (metadata.type !== 'workflow-stage' || !headingSection(body, 'Rules')) {
+        failures.push(`${relativePath} must declare workflow-stage and own a ## Rules table`);
+      }
+    }
     failures.push(...contextManifestFailures(relativePath, metadata));
     failures.push(...workflowContractShapeFailures(relativePath, body, metadata.type));
-    failures.push(...await manifestTargetFailures(repositoryRoot, relativePath, metadata));
+    failures.push(...await manifestTargetFailures(
+      repositoryRoot,
+      relativePath,
+      metadata,
+      { path: relativePath, heading: 'Rules' },
+    ));
   }
   failures.push(...await workflowReachabilityFailures(repositoryRoot, contextPaths));
   return failures;
 }
 
-async function checkedProject(repositoryRoot, slug, options = {}) {
+export async function checkedProject(repositoryRoot, slug, options = {}) {
   const result = await featureProjectChecks(repositoryRoot, slug, options);
   if (!result.failures.length) {
     const path = `projects/${slug}/PROJECT.md`;
@@ -475,47 +576,13 @@ async function checkedProject(repositoryRoot, slug, options = {}) {
   return result;
 }
 
-async function changedWorkspaceChecks(repositoryRoot, base) {
-  const changes = await changedPaths(repositoryRoot, base);
-  // Shared contracts, tools, and unknown paths can affect any Project.
-  if (changes.paths.some(path => !/^projects\/[a-z0-9]+(?:-[a-z0-9]+)*\/.+\.md$/.test(path))) {
-    const result = await checkWorkspaceInternal(repositoryRoot);
-    return { ...result, scope: { ...changes, mode: 'workspace' } };
-  }
-  const files = await repositoryFiles(repositoryRoot, name => name.endsWith('.md'));
-  const affected = new Set(changes.paths);
-  const bodies = new Map(await Promise.all(files.map(async path => [path,
-    await optionalRead(repositoryRoot, toRepositoryPath(repositoryRoot, path))])));
-  let expanded;
-  do {
-    expanded = false;
-    for (const [path, body] of bodies) {
-      const source = toRepositoryPath(repositoryRoot, path);
-      if (affected.has(source)) continue;
-      if (markdownLinkTargets(path, body).some(link => affected.has(
-        toRepositoryPath(repositoryRoot, resolve(dirname(path), link.target))))) {
-        affected.add(source);
-        expanded = true;
-      }
-    }
-  } while (expanded);
-  const selected = files.filter(path => affected.has(toRepositoryPath(repositoryRoot, path)));
-  const failures = await markdownLinkFailures(repositoryRoot, repositoryRoot, selected);
-  const projects = new Set([...affected].map(path => path.match(/^projects\/([^/]+)\//)?.[1]).filter(Boolean));
-  for (const slug of projects) {
-    const projectFiles = files.filter(path => toRepositoryPath(repositoryRoot, path).startsWith(`projects/${slug}/`));
-    // A fully removed Project is allowed; retained consumers are still checked.
-    if (projectFiles.length) {
-      failures.push(...(await checkedProject(repositoryRoot, slug)).failures);
-      failures.push(...await markdownLinkFailures(repositoryRoot, repositoryRoot, projectFiles));
-    }
-  }
-  return { failures: [...new Set(failures)], scope: { ...changes, mode: 'changed', affected: [...affected].sort() } };
-}
-
 async function checkWorkspaceInternal(repositoryRoot, { projectSlug, reviewedCommit, changedSince } = {}) {
   if (changedSince && (projectSlug || reviewedCommit)) throw new Error('--changed-since cannot be combined with Project/review selection');
-  if (changedSince) return changedWorkspaceChecks(repositoryRoot, changedSince);
+  if (changedSince) {
+    const kit = await teamKitModule(repositoryRoot, 'changed-check.mjs');
+    if (!kit) throw new Error(`--changed-since needs the team kit at ${TEAM_KIT}`);
+    return kit.changedWorkspaceChecks(repositoryRoot, changedSince);
+  }
   if (reviewedCommit && !projectSlug) throw new Error('--reviewed-commit requires --project');
   if (projectSlug) {
     const result = await checkedProject(repositoryRoot, projectSlug, { reviewedCommit });
@@ -527,7 +594,12 @@ async function checkWorkspaceInternal(repositoryRoot, { projectSlug, reviewedCom
   const failures = await configurationFailures(repositoryRoot, config, Boolean(configBody));
   failures.push(...await markdownLinkFailures(repositoryRoot));
   failures.push(...await rootRouteFailures(repositoryRoot));
-  for (const name of ['human-call', 'integration-review', 'to-tickets']) {
+  failures.push(...await sizeFailures(repositoryRoot, config.size));
+  failures.push(...await teamBoundaryFailures(repositoryRoot));
+  failures.push(...await teamKitRuleFailures(repositoryRoot));
+  const skills = ['human-call', 'integration-review'];
+  if (await pathExists(repositoryRoot, '.agents/skills/to-tickets')) skills.push('to-tickets');
+  for (const name of skills) {
     failures.push(...await skillFailures(repositoryRoot, name));
   }
   failures.push(...await workflowFailures(repositoryRoot));
@@ -536,8 +608,8 @@ async function checkWorkspaceInternal(repositoryRoot, { projectSlug, reviewedCom
   if (!template) failures.push(`${templatePath} is required`);
   else {
     const metadata = parseFrontmatter(templatePath, template);
-    if (metadata.type !== 'project' || metadata.workflow !== FEATURE_WORKFLOW) {
-      failures.push(`${templatePath} must declare type: project and workflow: feature-work`);
+    if (metadata.type !== 'project') {
+      failures.push(`${templatePath} must declare type: project`);
     }
     failures.push(...briefStructureFailures(templatePath, template, { requireContent: false }));
   }

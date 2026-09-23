@@ -1,17 +1,9 @@
 ---
-type: workflow-step
+type: workflow-stage
 context:
-  profile:
-    path: _shared/engineering/profiles/direct-repository.md
-    heading: direct-repository
   inputs:
     - path: projects/<project-slug>/PROJECT.md
       headings: [Intent, Product behavior, Acceptance and proof, Open questions]
-  selectors:
-    - path: _shared/domain/CONTEXT.md
-      when: the outcome depends on existing domain definitions
-    - path: workflows/01_understand/references/interface-evidence.md
-      when: the outcome changes a product interface or customer-facing provider flow
 ---
 
 # 01_understand — Understand the problem and desired outcome
@@ -20,10 +12,10 @@ One job: establish the intended behavior, scope, and observable acceptance.
 
 ## Inputs
 
-- Current chat/PR decisions and explicit authority. For a selected Project, use the manifest’s brief sections and the linked decision owners relevant to this step. Bounded work does not require a Project.
+- Current chat/PR decisions and explicit authority. For a selected Project, use the brief sections named in frontmatter and the linked decision owners relevant to this stage. Bounded work does not require a Project.
 - The user request, current product behavior, and only the domain or interface owners needed to resolve this outcome.
 
-Do not load unrelated Projects, other substeps, or complete reference libraries.
+Do not load unrelated Projects, other stages, or complete reference libraries.
 
 ## Process
 
@@ -41,3 +33,17 @@ Do not load unrelated Projects, other substeps, or complete reference libraries.
 ## Human check
 
 Reuse existing authority for clear work. Resolve material product choices or missing authority before dependent implementation. Continue to Design or Build when the needed decisions are already settled.
+
+## Rules
+
+This table is the only list of rules and references this stage loads. Load the
+named headings, or the whole file where a row says so. Load a conditional row
+only when its trigger applies.
+
+| Source | Load only |
+|---|---|
+| [`safeguards.md`](../../_shared/engineering/safeguards.md) | `RULE-PLAN-APPROVAL`; `RULE-PLAIN-DECISIONS`; `RULE-AGENT-PRESENTED-APPROVAL`; `RULE-RELEVANCE`; `RULE-SOURCE`; `RULE-CONTRADICTIONS` |
+| [`document-review.md`](../../_shared/engineering/document-review.md) | `Review and change` |
+| [`domain/CONTEXT.md`](../../_shared/domain/CONTEXT.md) | Conditional when the outcome depends on existing domain definitions: whole file |
+| [`interface-evidence.md`](references/interface-evidence.md) | Conditional when the outcome changes a product interface or customer-facing provider flow: whole file |
+| [`testing-rules.md`](../../_shared/engineering/testing-rules.md) | Conditional for ICM document edits: `ICM artifact validation` |

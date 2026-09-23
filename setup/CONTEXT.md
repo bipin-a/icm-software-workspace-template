@@ -16,7 +16,9 @@ Template maintenance leaves the questionnaire incomplete.
 
 ## Process
 
-1. Identify the workspace, intended outcome, and existing canonical owners.
+1. Settle the repository size (questionnaire item 0) and run
+   `npm --prefix tools/icm run setup -- --size <solo|team>` before other setup.
+   Identify the workspace, intended outcome, and existing canonical owners.
 2. Reuse current answers. Ask only unresolved questions that change setup;
    group related questions when practical. Routine inspection may proceed.
 3. Write accepted answers to the questionnaire's canonical output map. Keep
@@ -24,7 +26,8 @@ Template maintenance leaves the questionnaire incomplete.
 4. Select real source paths, applicable constraints, decision owners, and
    review surfaces. Keep the default bounded-task/feature-brief workflow.
 5. If executable work exists, verify its native dependency and proof commands.
-   Configure a full candidate gate only when the required proof needs it.
+   In a team repository, configure a full candidate gate only when the
+   required proof needs it.
 6. Defer unavailable stack or provider decisions to the first feature that
    requires them. Record the trigger and owner in the relevant canonical file;
    do not invent commands, credentials, or application code.

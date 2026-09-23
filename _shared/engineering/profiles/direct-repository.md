@@ -7,8 +7,8 @@ status: active
 
 ## direct-repository
 
-Use for bounded work with clear intent and known owners, and for selected
-feature briefs. File count alone does not justify a Project. Keep work in chat
+Use for bounded work with clear intent and known owners that needs no stage.
+Stage contracts own rule selection for selected workflow work. File count alone does not justify a Project. Keep work in chat
 and the PR unless unresolved product, architecture, ownership, or work-order
 decisions need durable coordination in one living brief.
 
@@ -23,9 +23,7 @@ decisions need durable coordination in one living brief.
 | [`testing-rules.md`](../testing-rules.md) | Conditional for ICM edits: `ICM artifact validation` |
 | [`testing-rules.md`](../testing-rules.md) | Conditional for tests: `Prove the right cause at a stable boundary`; `Reuse test infrastructure without centralizing scenarios` |
 | [`testing-rules.md`](../testing-rules.md) | Conditional for browser proof: `Local browser-test safety` |
-| [`testing-rules.md`](../testing-rules.md) | Conditional when full integration proof is required: `Exact-candidate integration gate` |
 | [`github-delivery-rules.md`](../github-delivery-rules.md) | Conditional for Git delivery: `Repository hygiene and branches`; `Commits`; `Pull requests are human review surfaces`; `Checks and delivery truth`; `Traceability and human gates`; `Merge methods preserve evidence and history` |
 | [`review-rules.md`](../../../workflows/04_validate/references/review-rules.md) | Conditional for candidate or finding review: `Baseline review`; `Conditional angles`; `Finding format` |
 | [`review-rules.md`](../../../workflows/04_validate/references/review-rules.md) | Conditional for ICM Markdown: `ICM Markdown review` |
 | [`interface-evidence.md`](../../../workflows/01_understand/references/interface-evidence.md) | Conditional for product UI: `Interface ownership boundary`; `Required UI evidence`; `Evidence record` |
-| [`release-rules.md`](../../../workflows/06_release/references/release-rules.md) | Conditional for deployment: `Authority and boundary`; `Plan before writes`; `Execute the authorized plan`; `Verify and decide` |

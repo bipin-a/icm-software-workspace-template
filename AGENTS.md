@@ -14,7 +14,7 @@ Current human instructions and accepted decisions take precedence.
    with its reviewed principles on every route.
 5. For bounded work, use chat/PR context. When durable coordination needs a
    Project, select its exact brief. Use `workflows/CONTEXT.md` to choose the
-   next applicable delivery stage and substep for either route.
+   next applicable delivery stage for either route.
 
 ## Always
 
@@ -30,6 +30,9 @@ Current human instructions and accepted decisions take precedence.
 - Follow applicable safeguards for destructive actions, public contracts,
   security, migration, and deployment.
 
-Use only `_shared/engineering/profiles/direct-repository.md#direct-repository`
-and its triggered sections for both bounded work and feature briefs. Domain
-rules come from `_shared/domain/CONTEXT.md` when the task needs them.
+Each stage names its exact rules. Bounded work that needs no stage uses only
+`_shared/engineering/profiles/direct-repository.md#direct-repository` and its
+triggered sections. Domain rules come from `_shared/domain/CONTEXT.md` when needed.
+
+ICM has one current workflow. Change it in place without preserving older
+workflow identities or compatibility contracts.

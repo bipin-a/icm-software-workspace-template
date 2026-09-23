@@ -17,6 +17,7 @@ This file routes work; linked owners hold decisions and procedures.
 | Record a future direction | [`roadmap/CONTEXT.md`](roadmap/CONTEXT.md) |
 | Investigate shared architecture | [`architecture/CONTEXT.md`](architecture/CONTEXT.md) |
 | Locate application code | [`app/README.md`](app/README.md) |
+| Multi-PR, full-gate, or delivery-view rules (team size only) | `extras/team-delivery/CONTEXT.md` |
 | Maintain the template or work directly in the repository | [`AGENTS.md`](AGENTS.md) |
 
 Identify the selected task and canonical owner before changing files. This

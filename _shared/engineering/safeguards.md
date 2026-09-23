@@ -173,7 +173,8 @@ a fresh schema alone does not establish migration safety.
 
 ### RULE-DEPLOYMENT-CONFIG — Use one explicit deployment owner
 
-Follow the [release procedure](../../workflows/06_release/references/release-rules.md).
+Follow the release procedure (`workflows/06_release/references/release-rules.md`
+in a team-size repository).
 Resolve the exact environment and target from explicit configuration before a
 remote write. Keep secrets outside the repository. Verify the deployed source,
 configuration, and behavior after the write.
@@ -283,7 +284,7 @@ deployment state different from what a summary implied.
   acceptance contract.
 - GitHub owns live delivery state: priority, dependencies, implementation issues and
   PRs, merge order, checks, release gates, and current status.
-- A multi-PR Project follows [multi-PR delivery](multi-pr-delivery.md). Any
+- A multi-PR Project follows `extras/team-delivery/multi-pr-delivery.md`. Any
   delivery view derives from live metadata and creates no second state owner.
 - Do not hand-maintain live GitHub state in Project files or copy the Project acceptance
   contract into GitHub as a second owner.

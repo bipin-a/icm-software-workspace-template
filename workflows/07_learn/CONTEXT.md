@@ -1,14 +1,9 @@
 ---
-type: workflow-step
+type: workflow-stage
 context:
-  profile:
-    path: _shared/engineering/profiles/direct-repository.md
-    heading: direct-repository
   inputs:
     - path: projects/<project-slug>/PROJECT.md
       headings: [Intent, Technical choices, Acceptance and proof, Links]
-  references:
-    - path: workflows/07_learn/references/learning-rules.md
 ---
 
 # 07_learn — Apply earned learning to the right owner
@@ -17,10 +12,10 @@ One job: correct the canonical source when evidence supports a useful lasting im
 
 ## Inputs
 
-- Current chat/PR decisions and explicit authority. For a selected Project, use the manifest’s brief sections and the linked decision owners relevant to this step. Bounded work does not require a Project.
+- Current chat/PR decisions and explicit authority. For a selected Project, use the brief sections named in frontmatter and the linked decision owners relevant to this stage. Bounded work does not require a Project.
 - The exact implementation, validation, release, or workflow evidence that revealed the lesson, and the one source that may need correction.
 
-Do not load unrelated Projects, other substeps, or complete reference libraries.
+Do not load unrelated Projects, other stages, or complete reference libraries.
 
 ## Process
 
@@ -38,3 +33,17 @@ Do not load unrelated Projects, other substeps, or complete reference libraries.
 ## Human check
 
 Reuse authority for an accepted correction. Human review is required before promoting new lasting guidance; a one-off execution mistake does not justify another permanent rule.
+
+## Rules
+
+This table is the only list of rules and references this stage loads. Load the
+named headings, or the whole file where a row says so. Load a conditional row
+only when its trigger applies.
+
+| Source | Load only |
+|---|---|
+| [`safeguards.md`](../../_shared/engineering/safeguards.md) | `RULE-PLAIN-DECISIONS`; `RULE-RELEVANCE`; `RULE-SOURCE`; `RULE-REPLACE-FIRST`; `RULE-CONTRADICTIONS`; `RULE-WHOLE-TRUTH` |
+| [`learning-rules.md`](references/learning-rules.md) | whole file |
+| [`document-review.md`](../../_shared/engineering/document-review.md) | `Review and change` |
+| [`testing-rules.md`](../../_shared/engineering/testing-rules.md) | Conditional for ICM document edits: `ICM artifact validation` |
+| [`review-rules.md`](../04_validate/references/review-rules.md) | Conditional for ICM Markdown: `ICM Markdown review` |

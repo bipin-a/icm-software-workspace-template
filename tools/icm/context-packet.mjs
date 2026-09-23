@@ -84,12 +84,12 @@ export async function loadContextManifest(root, project, brief) {
 export async function assembleContext(root, { project, stage, criterion, environment, workItem, rules = [], selectors = [] } = {}) {
   const checked = await featureProjectChecks(root, project);
   if (checked.failures.length) throw new Error(checked.failures.join('; '));
-  if (typeof stage !== 'string' || !/^workflows\/.+\/CONTEXT\.md$/.test(stage)) throw new Error('Select an exact workflow step path');
+  if (typeof stage !== 'string' || !/^workflows\/.+\/CONTEXT\.md$/.test(stage)) throw new Error('Select an exact workflow stage path');
   const briefPath = `projects/${project}/PROJECT.md`;
   const brief = parseFrontmatter(briefPath, await readWithin(root, briefPath));
   const stageBody = await readWithin(root, stage);
   const contract = parseFrontmatter(stage, stageBody);
-  if (contract.type !== 'workflow-step') throw new Error('Context assembly requires a workflow-step, not a router');
+  if (contract.type !== 'workflow-stage') throw new Error('Context assembly requires a workflow-stage, not a router');
   const files = new Map();
   const add = async input => {
     if (!input || Object.keys(input).some(key => !['path', 'headings'].includes(key))) throw new Error('Context inputs accept only path and headings');
@@ -103,29 +103,46 @@ export async function assembleContext(root, { project, stage, criterion, environ
   };
   for (const path of ['AGENTS.md', 'CONTEXT.md', '_shared/voice.md', '_shared/engineering/decision-work.md', '_shared/principles/engineering-principles.md', stage]) await add({ path });
   await add({ path: briefPath, headings: ['Intent', 'Open questions'] });
-  const profile = contract.context?.profile;
-  if (!profile?.path || !profile.heading) throw new Error('Workflow step needs an exact profile');
-  await add({ path: profile.path, headings: [profile.heading] });
-  const profileBody = section(await readWithin(root, profile.path), profile.heading, profile.path);
+  // The stage's Rules table, plus the team kit's section for this stage when
+  // the kit is installed, are the only owners of what the stage loads.
+  const tables = [{ file: stage, body: section(stageBody, 'Rules', stage) }];
+  const kitRules = 'extras/team-delivery/rules.md';
+  const kitBody = await readWithin(root, kitRules).catch(error => {
+    if (error.code === 'ENOENT') return null;
+    throw error;
+  });
+  const stageName = stage.split('/')[1];
+  if (kitBody && new RegExp(`^## ${stageName}$`, 'm').test(kitBody)) {
+    tables.push({ file: kitRules, body: section(kitBody, stageName, kitRules) });
+  }
   const selectedRules = new Set();
-  for (const line of profileBody.split('\n')) {
+  const conditionalSources = [];
+  for (const { file, body: rulesBody } of tables) for (const line of rulesBody.split('\n')) {
     if (!line.trim().startsWith('|')) continue;
     const cells = line.split('|').map(cell => cell.trim());
     const target = cells[1]?.match(/\]\(([^)]+)\)/)?.[1];
     if (!target) continue;
-    const headings = [...(cells[2] ?? '').matchAll(/`([^`]+)`/g)].map(match => match[1]);
-    const chosen = /^Conditional\b/.test(cells[2]) ? headings.filter(heading => rules.includes(heading)) : headings;
+    const path = relative(root, resolve(root, dirname(file), target));
+    const conditional = /^Conditional\b/.test(cells[2]);
+    const selection = conditional ? cells[2].slice(cells[2].indexOf(':') + 1).trim() : cells[2];
+    if (selection === 'whole file') {
+      if (!conditional) await add({ path });
+      else {
+        conditionalSources.push({ path, when: cells[2].slice(0, cells[2].indexOf(':')) });
+        if (selectors.includes(path)) await add({ path });
+      }
+      continue;
+    }
+    const headings = [...selection.matchAll(/`([^`]+)`/g)].map(match => match[1]);
+    const chosen = conditional ? headings.filter(heading => rules.includes(heading)) : headings;
     for (const heading of chosen) selectedRules.add(heading);
-    if (chosen.length) await add({ path: relative(root, resolve(root, dirname(profile.path), target)), headings: chosen });
+    if (chosen.length) await add({ path, headings: chosen });
   }
-  for (const rule of rules) if (!selectedRules.has(rule)) throw new Error(`Unknown profile rule: ${rule}`);
-  for (const input of [...(contract.context.inputs ?? []), ...(contract.context.references ?? []), ...(contract.context.output_templates ?? [])]) await add(input);
-  const conditionalSources = contract.context.selectors ?? [];
+  for (const rule of rules) if (!selectedRules.has(rule)) throw new Error(`Unknown stage rule: ${rule}`);
   for (const path of selectors) {
-    const source = conditionalSources.find(entry => entry.path === path);
-    if (!source) throw new Error(`Unknown stage selector: ${path}`);
-    await add({ path: source.path, ...(source.headings ? { headings: source.headings } : {}) });
+    if (!conditionalSources.some(source => source.path === path)) throw new Error(`Unknown stage selector: ${path}`);
   }
+  for (const input of contract.context?.inputs ?? []) await add(input);
   const executeOnly = contract.context.tools ?? [];
   for (const tool of executeOnly) {
     if (tool.access !== 'execute-only') throw new Error('Stage tools must be execute-only');

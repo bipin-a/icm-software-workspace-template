@@ -7,17 +7,17 @@ not decide what to ask, infer human authority, or replace `human-call`.
 ## Assemble
 
 Run `node tools/icm/context-packet.mjs --project <slug> --stage
-workflows/04_validate/02_validate-criterion/CONTEXT.md`. The JSON output includes
+workflows/04_validate/CONTEXT.md`. The JSON output includes
 source paths, selected headings, full selected text, and estimated size.
 
 The baseline includes agent entry files, voice, decision work, principles, the
-exact step, brief intent and open questions, declared step inputs/references,
-and the profile's unconditional rule headings. Conditional profile headings
-are added only through repeated `--rule <exact-heading>` selections.
-Use repeated `--selector <stage-declared-path>` options for triggered stage
-sources. The output lists all conditional sources and whether they were selected;
-execute-only tools are identified and checked for existence without loading
-their code. Declared output templates are included. Choose
+exact stage, brief intent and open questions, the stage's declared brief inputs,
+and the unconditional rows of its Rules table. Conditional headings are added
+only through repeated `--rule <exact-heading>` selections. Conditional
+`whole file` rows are added through repeated `--selector <repository-path>`
+options. The output lists every conditional whole-file row and whether it was
+selected; execute-only tools are identified and checked for existence without
+loading their code. Choose
 those headings from the actual task triggers; the tool cannot infer them.
 
 Without additional selectors, the tool includes all declared context nodes.

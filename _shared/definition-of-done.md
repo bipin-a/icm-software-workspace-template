@@ -39,5 +39,5 @@ Apply the repository's canonical
 [testing rules](engineering/testing-rules.md),
 [GitHub delivery rules](engineering/github-delivery-rules.md), and
 [safeguards](engineering/safeguards.md). For work split across several pull
-requests, also apply the
-[multi-PR delivery rules](engineering/multi-pr-delivery.md).
+requests, also apply the team kit's multi-PR rules
+(`extras/team-delivery/multi-pr-delivery.md`).

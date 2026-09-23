@@ -26,8 +26,9 @@ Start with [`AGENTS.md`](AGENTS.md), then select the exact route in
 [`CONTEXT.md`](CONTEXT.md). The [delivery workflow](workflows/CONTEXT.md#stages)
 keeps seven stages: Understand, Design, Build, Validate, Assess Readiness,
 Release, and Learn. Each works with chat/PR context or a selected Project brief.
-Use the next applicable stage and its focused substeps; carry existing
-authority and evidence forward.
+Enter only the stages the work needs, each with one contract and explicit rule
+selections. A clear fix can start at Build and Validate; carry existing authority
+and evidence forward.
 
 ## Start a new repository
 
@@ -50,13 +51,14 @@ only the relevant workspace contracts through a reviewed diff.
 | Path | Owns |
 |---|---|
 | [`setup/`](setup/CONTEXT.md) | One-time configuration and completion state |
-| [`workflows/`](workflows/CONTEXT.md) | Seven delivery stages, focused substeps, and evidence procedures |
+| [`workflows/`](workflows/CONTEXT.md) | Seven stage contracts and their evidence procedures |
 | [`projects/`](projects/CONTEXT.md) | Living briefs and earned decision documents |
 | [`_shared/`](_shared/CONTEXT.md) | Shared rules, principles, domain references, and context selection |
 | [`_templates/`](_templates/project/PROJECT.md) | Optional blank artifact shapes |
 | [`architecture/`](architecture/CONTEXT.md) | Investigation evidence with no natural Project owner |
 | [`roadmap/`](roadmap/CONTEXT.md) | Future directions outside accepted work |
 | [`app/`](app/README.md) | The application source-layout boundary |
+| `extras/team-delivery/` | Team-size rules and tools; removed by solo setup |
 
 Repository documents own durable intent and links. GitHub owns live delivery
 state; checks and deployment providers own their results. Do not copy live
@@ -74,36 +76,50 @@ npm --prefix tools/icm run check -- --project <slug> --reviewed-commit <full-sha
 npm --prefix tools/icm run context -- AGENTS.md CONTEXT.md _shared/voice.md
 ```
 
-The checker validates routes, profile headings, local links, living briefs,
+The checker validates stage routes, stage-owned rule selections, local links, living briefs,
 and the canonical human-call skill and its Claude adapter.
 Revision comparison includes working and staged decision documents. It detects
 change; it cannot establish human approval or classify editorial wording.
 
-[`icm.config.json`](icm.config.json) owns the context-size estimate and optional
-full candidate gate. The size estimate is advisory. The gate is disabled until
-real application phases are configured; see
-[testing rules](_shared/engineering/testing-rules.md#exact-candidate-integration-gate).
-It is machine proof, separate from human review of decisions.
+[`icm.config.json`](icm.config.json) owns the repository size and the
+advisory context-size estimate.
 
-## Optional coordination tools
+## Choose a size
 
-These capabilities preserve one living Project brief and apply only when needed:
+Setup asks one question first: is this repository **solo** or **team**?
 
-- [Skill adapters](.agents/skills/to-tickets/SKILL.md) prepare slices;
-  [integration review](.agents/skills/integration-review/SKILL.md) assesses the
-  assembled candidate through the existing workflow owners.
-- [Changed-file checks](_shared/engineering/testing-rules.md#changed-file-icm-checks)
-  select affected Project documents and incoming references with
-  `node tools/icm/workspace-check.mjs --changed-since <commit>`.
-- [Gate receipt reuse](_shared/engineering/testing-rules.md#exact-candidate-integration-gate)
-  checks narrowly permitted prose edits against a successful tested tree. These
-  machine receipts never replace human approval.
-- [Context packets](_shared/engineering/context-packets.md) assemble declared
-  criterion, environment, and prerequisite sections without silently dropping
-  required text to fit a size target.
-- [Multi-PR coordination](_shared/engineering/multi-pr-delivery.md) and
-  [generated delivery views](_shared/engineering/delivery-views.md) use GitHub
-  metadata as their live owner. Preview is read-only; publishing is explicit.
+| Size | Stages | Team kit |
+|---|---|---|
+| Solo: one person, one PR at a time, no deployment pipeline (a take-home, spike, or script) | Understand, Design, Build, Validate, Learn | Removed |
+| Team: several PRs, a full candidate gate, or deployments | All seven | Kept |
+
+```sh
+npm --prefix tools/icm run setup -- --size solo
+npm --prefix tools/icm run setup -- --size team
+```
+
+Solo setup deletes `extras/team-delivery/`, the Assess Readiness and Release
+stages, and the `to-tickets` skill. It cannot be undone in place; choose team
+when unsure. The checker then enforces the chosen size.
+
+## Team delivery kit
+
+`extras/team-delivery/` holds what only a team needs. Its `rules.md` adds rows
+to the stages it applies to, so a solo copy carries none of it:
+
+- Multi-PR coordination and generated delivery views, with GitHub metadata as
+  their live owner. Preview is read-only; publishing is explicit.
+- The optional full candidate gate and its receipt verifier. The gate is
+  disabled in `icm.config.json` until real application phases are configured.
+  It is machine proof, separate from human review of decisions.
+- Changed-file checks: `node tools/icm/workspace-check.mjs --changed-since <commit>`
+  selects affected Project documents and incoming references.
+- The `to-tickets` skill, which prepares slices for several PRs.
+
+The core keeps [integration review](.agents/skills/integration-review/SKILL.md)
+and [context packets](_shared/engineering/context-packets.md), which assemble
+declared criterion, environment, and prerequisite sections without silently
+dropping required text to fit a size target.
 
 For an existing repository, adopt these through a reviewed diff while preserving
 its code and decision owners. Configure real proof commands before using the

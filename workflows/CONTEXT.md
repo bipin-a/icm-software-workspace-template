@@ -9,26 +9,27 @@ One job: route the requested outcome through the next useful delivery stage.
 
 ## Stages
 
-| Stage | Job |
-|---|---|
-| [01_understand](01_understand/CONTEXT.md) | Establish intent, product behavior, scope, and acceptance. |
-| [02_design](02_design/CONTEXT.md) | Choose technical owners and a proportionate delivery shape. |
-| [03_build](03_build/CONTEXT.md) | Implement, publish, and identify the candidate. |
-| [04_validate](04_validate/CONTEXT.md) | Review the candidate and gather the required proof. |
-| [05_assess-readiness](05_assess-readiness/CONTEXT.md) | Resolve findings and choose the next route. |
-| [06_release](06_release/CONTEXT.md) | Plan, execute, and verify an authorized environment change. |
-| [07_learn](07_learn/CONTEXT.md) | Apply an evidence-backed improvement to its owner. |
+| Stage | Job | Writes to |
+|---|---|---|
+| [01_understand](01_understand/CONTEXT.md) | Establish intent, product behavior, scope, and acceptance. | Intent, Product behavior, Acceptance and proof |
+| [02_design](02_design/CONTEXT.md) | Choose technical owners and a proportionate delivery shape. | Technical choices |
+| [03_build](03_build/CONTEXT.md) | Implement, publish, and identify the candidate. | PR; brief Links |
+| [04_validate](04_validate/CONTEXT.md) | Review the candidate and gather the required proof. | PR; brief Acceptance and proof |
+| [05_assess-readiness](05_assess-readiness/CONTEXT.md) | Resolve findings and choose the next route. | PR finding decisions and next route |
+| [06_release](06_release/CONTEXT.md) | Plan, execute, and verify an authorized environment change. | Release evidence; brief Links |
+| [07_learn](07_learn/CONTEXT.md) | Apply an evidence-backed improvement to its owner. | The canonical source needing correction |
 
-The normal progression is Understand → Design → Build → Validate → Assess
-Readiness → Release → Learn. Enter at the next unresolved decision or action;
-reuse completed decisions and proof. Release applies only when requested, and
-Learn applies when evidence earns a correction. Return to an earlier stage
-when new evidence changes its decision.
+Enter the earliest stage with an unresolved decision or action; skip stages
+with nothing to decide. A clear bounded fix can start at Build and Validate.
+Reuse completed decisions and proof, and revisit only what new evidence affects.
+Release applies only when requested; Learn applies when evidence earns a correction.
+A solo-size repository has no Assess Readiness or Release stage: decide
+material findings and the finish route in Validate's human check.
 
-Design, Build, Validate, Assess Readiness, and Release have focused substeps.
-Their parent contracts select the next substep; load only that contract and its
-needed inputs. Continue authorized work across stage boundaries in the same
-task. A folder boundary does not require another approval or conversation.
+Each stage has one contract with its own Rules table; a team-size repository adds
+the kit's rows for that stage from `extras/team-delivery/rules.md`. Continue authorized
+work across stage boundaries in the same task; no folder boundary requires
+another approval or conversation.
 
 ## Project path binding
 
@@ -36,14 +37,16 @@ For selected Project work, bind `<project-slug>` to exactly one
 `projects/<project-slug>/PROJECT.md`. An unresolved placeholder is not an input.
 For bounded work, use chat/PR context; do not create an artifact to fill a path.
 
-`workflow: feature-work` identifies this seven-stage workflow. Use one living
+This is the only current workflow. Change it in place; do not preserve old
+workflow identities or compatibility contracts. Use one living
 brief when durable coordination needs it; decisions may stay in chat/PR for
 bounded work. Separate specifications, stage summaries, and approval receipt
 files are not required. Additional decision documents must earn their place
 and have one canonical owner.
 
 Read only the selected contract, relevant decision documents, and triggered
-headings from the [engineering profile](../_shared/engineering/profiles/direct-repository.md#direct-repository).
+headings from its Rules table. Bounded work that needs no stage uses the
+[direct profile](../_shared/engineering/profiles/direct-repository.md#direct-repository).
 Apply [decision work](../_shared/engineering/decision-work.md) on every route.
 GitHub and deployment providers own live status; link their evidence without
 copying changing state into the brief.

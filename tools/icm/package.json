@@ -5,8 +5,9 @@
   "scripts": {
     "check": "node workspace-check.mjs",
     "context": "node estimate-context.mjs",
-    "test": "node --test test/*.test.mjs",
+    "test": "node --test test/*.test.mjs ../../extras/team-delivery/tools/test/*.test.mjs",
     "packet": "node context-packet.mjs",
-    "delivery": "node delivery.mjs"
+    "setup": "node setup.mjs",
+    "delivery": "node ../../extras/team-delivery/tools/delivery.mjs"
   }
 }
