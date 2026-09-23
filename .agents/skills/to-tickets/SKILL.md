@@ -4,7 +4,9 @@ description: Turn an accepted brief or plan into dependency-linked vertical slic
 ---
 
 Read [AGENTS.md](../../../AGENTS.md) and the accepted chat/PR plan or selected
-living Project brief. Follow [multi-PR delivery](../../../_shared/engineering/multi-pr-delivery.md).
+living Project brief. Use [Design](../../../workflows/02_design/CONTEXT.md)
+for unresolved delivery choices and [Build](../../../workflows/03_build/CONTEXT.md)
+for an agreed plan. Follow [multi-PR delivery](../../../_shared/engineering/multi-pr-delivery.md).
 
 Use one PR unless independent proof, dependencies, or release risk justify
 several. For each slice, identify the observable outcome, canonical owners,

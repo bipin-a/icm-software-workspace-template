@@ -4,9 +4,9 @@ description: Review an assembled PR or integration branch for cross-slice behavi
 ---
 
 Read [AGENTS.md](../../../AGENTS.md). Identify the exact base and candidate,
-and select the owning living Project brief when one exists. Follow the
+and select the owning living Project brief when one exists. Follow the [Validate stage](../../../workflows/04_validate/CONTEXT.md), the
 [review rules](../../../workflows/04_validate/references/review-rules.md) and
-only the triggered headings of the direct-repository profile.
+only the triggered rules selected by that stage.
 
 For multi-PR work, use the completion requirements in
 [multi-PR delivery](../../../_shared/engineering/multi-pr-delivery.md).

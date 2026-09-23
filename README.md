@@ -26,8 +26,9 @@ Start with [`AGENTS.md`](AGENTS.md), then select the exact route in
 [`CONTEXT.md`](CONTEXT.md). The [delivery workflow](workflows/CONTEXT.md#stages)
 keeps seven stages: Understand, Design, Build, Validate, Assess Readiness,
 Release, and Learn. Each works with chat/PR context or a selected Project brief.
-Use the next applicable stage and its focused substeps; carry existing
-authority and evidence forward.
+Enter only the stages the work needs, each with one contract and explicit rule
+selections. A clear fix can start at Build and Validate; carry existing authority
+and evidence forward.
 
 ## Start a new repository
 
@@ -50,7 +51,7 @@ only the relevant workspace contracts through a reviewed diff.
 | Path | Owns |
 |---|---|
 | [`setup/`](setup/CONTEXT.md) | One-time configuration and completion state |
-| [`workflows/`](workflows/CONTEXT.md) | Seven delivery stages, focused substeps, and evidence procedures |
+| [`workflows/`](workflows/CONTEXT.md) | Seven stage contracts and their evidence procedures |
 | [`projects/`](projects/CONTEXT.md) | Living briefs and earned decision documents |
 | [`_shared/`](_shared/CONTEXT.md) | Shared rules, principles, domain references, and context selection |
 | [`_templates/`](_templates/project/PROJECT.md) | Optional blank artifact shapes |
@@ -74,7 +75,7 @@ npm --prefix tools/icm run check -- --project <slug> --reviewed-commit <full-sha
 npm --prefix tools/icm run context -- AGENTS.md CONTEXT.md _shared/voice.md
 ```
 
-The checker validates routes, profile headings, local links, living briefs,
+The checker validates stage routes, stage-owned rule selections, local links, living briefs,
 and the canonical human-call skill and its Claude adapter.
 Revision comparison includes working and staged decision documents. It detects
 change; it cannot establish human approval or classify editorial wording.

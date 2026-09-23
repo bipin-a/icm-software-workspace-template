@@ -5,7 +5,6 @@ import { promisify } from 'node:util';
 import { parseFrontmatter, headingSection } from './markdown.mjs';
 
 const execFileAsync = promisify(execFile);
-export const FEATURE_WORKFLOW = 'feature-work';
 export const BRIEF_HEADINGS = ['Intent', 'Product behavior', 'Technical choices', 'Acceptance and proof', 'Open questions', 'Links'];
 const approvalFields = ['reviewed', 'approved', 'status', 'approval_contract', 'review_contract'];
 
@@ -81,8 +80,8 @@ export async function featureProjectChecks(repositoryRoot, projectSlug, { review
   const brief = await currentDocument(repositoryRoot, root, path);
   if (brief === null) return { failures: [`Missing feature brief: ${path}`] };
   const project = metadata(brief, path);
-  if (project.type !== 'project' || project.workflow !== FEATURE_WORKFLOW) {
-    failures.push(`${path} must declare type: project and workflow: ${FEATURE_WORKFLOW}`);
+  if (project.type !== 'project') {
+    failures.push(`${path} must declare type: project`);
   }
   if (project.id !== projectSlug) failures.push(`${path} id must match ${projectSlug}`);
   if (typeof project.title !== 'string' || !project.title.trim()) failures.push(`${path} needs a title`);
@@ -111,7 +110,6 @@ export async function featureProjectChecks(repositoryRoot, projectSlug, { review
   if (!reviewedFiles.has(path)) throw new Error(`${path} did not exist at reviewed commit ${reviewedCommit}`);
   const reviewedBrief = await git(['show', `${reviewedCommit}:${path}`]);
   const previous = metadata(reviewedBrief, path);
-  if (previous.workflow !== FEATURE_WORKFLOW) throw new Error('Workflow adaptation needs an explicit review; the reviewed commit is not feature-work');
   const previousPaths = decisionPaths(previous, root);
   for (const document of previousPaths) {
     if (!reviewedFiles.has(document)) throw new Error(`Reviewed decision document is missing at ${reviewedCommit}: ${document}`);

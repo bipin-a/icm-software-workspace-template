@@ -14,8 +14,8 @@ One job: select a Project and route its next unresolved decision.
    coordination needs it; fill `id` with the directory slug and `title` with
    the outcome. Use one Project branch under
    [Delivery profiles](../_shared/engineering/github-delivery-rules.md#delivery-profiles).
-3. Require `workflow: feature-work`. Correct an unknown value; never infer a
-   route from filenames or relabel existing work to evade a review obligation.
+3. Use the one current workflow and the next unresolved decision. Do not add a
+   workflow discriminator or relabel work to evade a review obligation.
 4. Read only the brief and linked decision owners relevant to the current
    question. Follow [document review](../_shared/engineering/document-review.md).
 5. Continue authorized implementation and sufficient proof in the same task.

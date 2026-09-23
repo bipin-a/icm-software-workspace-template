@@ -7,8 +7,8 @@ status: active
 
 ## direct-repository
 
-Use for bounded work with clear intent and known owners, and for selected
-feature briefs. File count alone does not justify a Project. Keep work in chat
+Use for bounded work with clear intent and known owners that needs no stage.
+Stage contracts own rule selection for selected workflow work. File count alone does not justify a Project. Keep work in chat
 and the PR unless unresolved product, architecture, ownership, or work-order
 decisions need durable coordination in one living brief.
 

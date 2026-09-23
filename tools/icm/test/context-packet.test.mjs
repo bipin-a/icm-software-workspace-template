@@ -25,7 +25,7 @@ test('packet assembly selects real sections, retains oversized evidence, and rej
   t.after(() => rm(root, { recursive: true, force: true }));
   await cp(template, root, { recursive: true, filter: p => !['.git', 'node_modules'].includes(p.split('/').at(-1)) });
   await mkdir(join(root, 'projects/example'), { recursive: true });
-  const brief = '---\ntype: project\nid: example\ntitle: Example\nworkflow: feature-work\ncontext_packets: context.json\ndecision_documents: [decisions.md]\n---\n'
+  const brief = '---\ntype: project\nid: example\ntitle: Example\ncontext_packets: context.json\ndecision_documents: [decisions.md]\n---\n'
     + ['Intent', 'Product behavior', 'Technical choices', 'Acceptance and proof', 'Open questions', 'Links'].map(h => `## ${h}\n\nAccepted evidence for ${h}.\n`).join('\n');
   await writeFile(join(root, 'projects/example/PROJECT.md'), brief);
   await writeFile(join(root, 'projects/example/decisions.md'), '## base\nRequired owner.\n## feature\nSelected behavior.\n## other\nUnrelated behavior.\n');
@@ -34,9 +34,17 @@ test('packet assembly selects real sections, retains oversized evidence, and rej
   const config = JSON.parse(await readFile(join(root, 'icm.config.json'), 'utf8'));
   config.context.packetTokens = 1;
   await writeFile(join(root, 'icm.config.json'), JSON.stringify(config));
-  const options = { project: 'example', stage: 'workflows/04_validate/02_validate-criterion/CONTEXT.md', criterion: 'search' };
+  const options = { project: 'example', stage: 'workflows/04_validate/CONTEXT.md', criterion: 'search' };
   const result = await assembleContext(root, options);
   assert.equal(result.summary.oversized, true);
+  assert.ok(!result.entries.some(entry => entry.path.includes('/profiles/')),
+    'the stage owns its rule selection rather than loading a second profile');
+  const safeguards = result.entries.find(entry => entry.path.endsWith('/safeguards.md'));
+  assert.doesNotMatch(safeguards.body, /### RULE-CONSEQUENCE-TESTS/);
+  const triggered = await assembleContext(root, { ...options, rules: ['RULE-CONSEQUENCE-TESTS'] });
+  assert.match(triggered.entries.find(entry => entry.path.endsWith('/safeguards.md')).body,
+    /### RULE-CONSEQUENCE-TESTS/);
+  await assert.rejects(assembleContext(root, { ...options, rules: ['RULE-NOT-DECLARED'] }), /Unknown profile rule/);
   const decision = result.entries.find(e => e.path.endsWith('decisions.md'));
   assert.match(decision.body, /Required owner/);
   assert.match(decision.body, /Selected behavior/);
@@ -45,7 +53,7 @@ test('packet assembly selects real sections, retains oversized evidence, and rej
     if (!file.endsWith('CONTEXT.md')) continue;
     const path = `workflows/${file}`;
     const contract = parseFrontmatter(path, await readFile(join(root, path), 'utf8'));
-    if (contract.type !== 'workflow-step') continue;
+    if (contract.type !== 'workflow-stage') continue;
     const packet = await assembleContext(root, { project: 'example', stage: path, selectors: (contract.context.selectors ?? []).map(source => source.path) });
     for (const source of contract.context.selectors ?? []) assert.ok(packet.entries.some(entry => entry.path === source.path));
     for (const tool of contract.context.tools ?? []) {

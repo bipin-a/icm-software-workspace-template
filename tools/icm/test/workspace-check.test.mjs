@@ -25,7 +25,6 @@ async function createFeatureReviewFixture(t) {
 type: project
 id: example
 title: Task filtering
-workflow: feature-work
 decision_documents: [technical.md]
 ---
 # Task filtering
@@ -85,7 +84,7 @@ test('feature review includes added and removed document owners and rejects stal
   await writeFile(path, brief.replace('decision_documents: [technical.md]\n', ''));
   await rm(join(root, 'projects/example/technical.md'));
   assert.ok((await featureProjectChecks(root, 'example', { reviewedCommit })).comparison.changed.includes('projects/example/technical.md'));
-  await writeFile(path, brief.replace('workflow: feature-work', 'workflow: feature-work\nreviewed: true'));
+  await writeFile(path, brief.replace('type: project', 'type: project\nreviewed: true'));
   assert.match((await featureProjectChecks(root, 'example')).failures.join('\n'), /must not store reviewed/);
 });
 
@@ -105,14 +104,14 @@ test('feature review rejects missing source revisions and escaping document path
 });
 
 
-test('selected brief checking is scoped, requires real decisions, and rejects unknown workflow identities', async (t) => {
+test('selected brief checking is scoped, requires real decisions, and rejects invalid Project types', async (t) => {
   const { root, brief } = await createFeatureReviewFixture(t);
   const path = join(root, 'projects/example/PROJECT.md');
   await mkdir(join(root, 'projects/unrelated'), { recursive: true });
   await writeFile(join(root, 'projects/unrelated/PROJECT.md'), 'Not in the selected scope.');
   assert.deepEqual((await checkWorkspace(root, { projectSlug: 'example' })).failures, []);
-  await writeFile(path, brief.replace('workflow: feature-work', 'workflow: project-delivery'));
-  assert.match((await checkWorkspace(root, { projectSlug: 'example' })).failures.join('\n'), /workflow: feature-work/);
+  await writeFile(path, brief.replace('type: project', 'type: unrelated'));
+  assert.match((await checkWorkspace(root, { projectSlug: 'example' })).failures.join('\n'), /type: project/);
   await writeFile(path, brief.replace('Help a user find incomplete tasks.', '<!-- Fill this later -->'));
   assert.match((await checkWorkspace(root, { projectSlug: 'example' })).failures.join('\n'), /content under ## Intent/);
   await writeFile(path, brief + '\n[Missing evidence](missing.md)\n');
@@ -126,7 +125,7 @@ test('new source-template copy supports setup and a filled brief without applica
   assert.deepEqual((await checkWorkspace(root)).failures, []);
   const raw = await readFile(join(root, '_templates/project/PROJECT.md'), 'utf8');
   const template = parseFrontmatter('_templates/project/PROJECT.md', raw);
-  assert.equal(template.workflow, 'feature-work');
+  assert.equal(Object.hasOwn(template, 'workflow'), false);
   await mkdir(join(root, 'projects/first-outcome'), { recursive: true });
   const path = join(root, 'projects/first-outcome/PROJECT.md');
   let brief = raw.replace('id:', 'id: first-outcome').replace('title:', 'title: First outcome');
@@ -145,8 +144,8 @@ test('new source-template copy supports setup and a filled brief without applica
     + Object.entries(decisions).map(([heading, text]) => `## ${heading}\n\n${text}\n`).join('\n');
   await writeFile(path, brief);
   assert.deepEqual((await checkWorkspace(root)).failures, []);
-  await writeFile(path, brief.replace('workflow: feature-work', 'workflow: feature-typo'));
-  assert.match((await checkWorkspace(root)).failures.join('\n'), /workflow: feature-work/);
+  await writeFile(path, brief.replace('type: project', 'type: unrelated'));
+  assert.match((await checkWorkspace(root)).failures.join('\n'), /type: project/);
 });
 
 test('workspace validation detects broken routes, profile selections, and invalid full-gate configuration', async (t) => {
@@ -155,8 +154,8 @@ test('workspace validation detects broken routes, profile selections, and invali
   await cp(templateRoot, root, { recursive: true, filter: path => !['.git', 'node_modules'].includes(path.split('/').at(-1)) });
   const templatePath = join(root, '_templates/project/PROJECT.md');
   const template = await readFile(templatePath, 'utf8');
-  await writeFile(templatePath, template.replace('workflow: feature-work', 'workflow: project-delivery').replace('## Intent', '## Missing intent'));
-  assert.match((await checkWorkspace(root)).failures.join('\n'), /workflow: feature-work/);
+  await writeFile(templatePath, template.replace('type: project', 'type: unrelated').replace('## Intent', '## Missing intent'));
+  assert.match((await checkWorkspace(root)).failures.join('\n'), /type: project/);
   assert.match((await checkWorkspace(root)).failures.join('\n'), /missing ## Intent/);
   await writeFile(templatePath, template);
   const profilePath = join(root, '_shared/engineering/profiles/direct-repository.md');
@@ -177,8 +176,8 @@ test('workspace validation detects broken routes, profile selections, and invali
 });
 
 test('brief metadata cannot hide duplicated authority fields or unparsed entries', () => {
-  assert.throws(() => parseFrontmatter('PROJECT.md', '---\nworkflow: unknown\nworkflow: feature-work\n---\n'), /duplicate/);
-  assert.throws(() => parseFrontmatter('PROJECT.md', '---\nworkflow: feature-work\n  approved: true\n---\n'), /unparsed/);
+  assert.throws(() => parseFrontmatter('PROJECT.md', '---\ntitle: First\ntitle: Second\n---\n'), /duplicate/);
+  assert.throws(() => parseFrontmatter('PROJECT.md', '---\ntype: project\n  approved: true\n---\n'), /unparsed/);
 });
 
 test('checker CLI rejects unsupported flags and review comparison without a selected Project', async () => {
@@ -284,7 +283,7 @@ test('changed checking includes staged, restored, untracked paths and incoming l
 test('review comparisons include context selectors and staged selector changes', async t => {
   const { root, brief } = await createFeatureReviewFixture(t);
   const path = join(root, 'projects/example/context.json');
-  await writeFile(join(root, 'projects/example/PROJECT.md'), brief.replace('workflow: feature-work', 'workflow: feature-work\ncontext_packets: context.json'));
+  await writeFile(join(root, 'projects/example/PROJECT.md'), brief.replace('type: project', 'type: project\ncontext_packets: context.json'));
   const original = JSON.stringify({ schemaVersion: 1, nodes: [] });
   await writeFile(path, original);
   await git(root, 'add', '.'); await git(root, 'commit', '-m', 'Declare context selection');
@@ -295,4 +294,22 @@ test('review comparisons include context selectors and staged selector changes',
   const result = await featureProjectChecks(root, 'example', { reviewedCommit });
   assert.deepEqual(result.comparison.changed, ['projects/example/context.json']);
   assert.equal(result.comparison.status, 'needs-review');
+});
+
+test('the current workflow rejects nested steps and requires stage-owned rule selections', async t => {
+  const root = await mkdtemp(join(tmpdir(), 'icm-stage-contracts-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  await cp(templateRoot, root, { recursive: true, filter: path => !['.git', 'node_modules'].includes(path.split('/').at(-1)) });
+  const nested = join(root, 'workflows/03_build/01_old-step');
+  await mkdir(nested);
+  assert.match((await checkWorkspace(root)).failures.join('\n'), /step folder/);
+  await rm(nested, { recursive: true });
+  const path = join(root, 'workflows/03_build/CONTEXT.md');
+  const stage = await readFile(path, 'utf8');
+  await writeFile(path, stage.replace('heading: Rules', 'heading: Missing'));
+  assert.match((await checkWorkspace(root)).failures.join('\n'), /Rules/);
+  await writeFile(path, stage.replace('`RULE-SOURCE`', '`RULE-MISSING`'));
+  assert.match((await checkWorkspace(root)).failures.join('\n'), /RULE-MISSING/);
+  await writeFile(path, stage);
+  assert.deepEqual((await checkWorkspace(root)).failures, []);
 });

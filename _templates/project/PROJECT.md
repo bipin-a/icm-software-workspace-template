@@ -2,7 +2,6 @@
 type: project
 id:
 title:
-workflow: feature-work
 ---
 
 # Feature brief

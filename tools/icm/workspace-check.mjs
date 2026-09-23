@@ -5,7 +5,7 @@ import { loadContextManifest } from './context-packet.mjs';
 import { changedPaths } from './change-scope.mjs';
 import { candidateGateConfigurationErrors } from './config.mjs';
 import { parseFrontmatter, headingSection } from './markdown.mjs';
-import { briefStructureFailures, FEATURE_WORKFLOW, featureProjectChecks } from './feature-review.mjs';
+import { briefStructureFailures, featureProjectChecks } from './feature-review.mjs';
 
 async function optionalRead(root, path) {
   if (typeof path !== 'string' || path.length === 0) return null;
@@ -64,10 +64,10 @@ export function isSafeRepositoryPath(path) {
 }
 
 export function contextManifestFailures(scope, metadata) {
-  if (metadata.type === 'workflow-hub' || metadata.type === 'workflow-router') {
+  if (metadata.type === 'workflow-hub') {
     return metadata.context ? [`${scope} ${metadata.type} must not declare a context manifest`] : [];
   }
-  if (metadata.type !== 'workflow-step') return [`${scope} has unknown workflow contract type ${metadata.type || 'missing'}`];
+  if (metadata.type !== 'workflow-stage') return [`${scope} has unknown workflow contract type ${metadata.type || 'missing'}`];
   const context = metadata.context;
   if (!context || typeof context !== 'object' || Array.isArray(context)) {
     return [`${scope} is missing its context manifest`];
@@ -235,7 +235,7 @@ function manifestSourcePath(path) {
 }
 
 async function manifestTargetFailures(repositoryRoot, scope, metadata) {
-  if (metadata.type !== 'workflow-step' || !metadata.context) return [];
+  if (metadata.type !== 'workflow-stage' || !metadata.context) return [];
   const failures = [];
   const profile = metadata.context.profile;
   const profileBody = profile?.path && isSafeRepositoryPath(profile.path)
@@ -435,8 +435,7 @@ async function rootRouteFailures(repositoryRoot) {
 
 function workflowContractShapeFailures(scope, body, type) {
   const markers = {
-    'workflow-step': ['One job:', '## Inputs', 'Do not load', '## Process', '## Outputs', '## Human check'],
-    'workflow-router': ['One job:', '## Inputs', 'Do not load', '## Routes'],
+    'workflow-stage': ['One job:', '## Inputs', 'Do not load', '## Process', '## Outputs', '## Human check'],
     'workflow-hub': ['One job:', '## Project path binding', '## Human check'],
   }[type] ?? [];
   return markers
@@ -448,6 +447,23 @@ async function workflowFailures(repositoryRoot) {
   const failures = [];
   const root = join(repositoryRoot, 'workflows');
   const contextPaths = await repositoryFiles(root, (name) => name === 'CONTEXT.md');
+  const entries = await readdir(root, { withFileTypes: true }).catch(error => {
+    if (error.code === 'ENOENT') return [];
+    throw error;
+  });
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    const stage = join(root, entry.name);
+    for (const child of await readdir(stage, { withFileTypes: true })) {
+      if (child.isDirectory() && child.name !== 'references') {
+        failures.push(`workflows/${entry.name}/${child.name} adds a step folder; keep one contract per stage`);
+      }
+    }
+  }
+  const direct = '_shared/engineering/profiles/direct-repository.md';
+  failures.push(...await manifestTargetFailures(repositoryRoot, direct, {
+    type: 'workflow-stage', context: { profile: { path: direct, heading: 'direct-repository' } },
+  }));
   for (const path of contextPaths) {
     const relativePath = toRepositoryPath(repositoryRoot, path);
     const body = await readFile(path, 'utf8');
@@ -457,6 +473,16 @@ async function workflowFailures(repositoryRoot) {
     } catch (error) {
       failures.push(error.message);
       continue;
+    }
+    if (relativePath !== 'workflows/CONTEXT.md') {
+      if (!/^workflows\/0[1-7]_[a-z-]+\/CONTEXT\.md$/.test(relativePath)) {
+        failures.push(`${relativePath} must be a direct stage contract`);
+      }
+      if (metadata.type !== 'workflow-stage'
+        || metadata.context?.profile?.path !== relativePath
+        || metadata.context?.profile?.heading !== 'Rules') {
+        failures.push(`${relativePath} must declare workflow-stage and select its own Rules heading`);
+      }
     }
     failures.push(...contextManifestFailures(relativePath, metadata));
     failures.push(...workflowContractShapeFailures(relativePath, body, metadata.type));
@@ -536,8 +562,8 @@ async function checkWorkspaceInternal(repositoryRoot, { projectSlug, reviewedCom
   if (!template) failures.push(`${templatePath} is required`);
   else {
     const metadata = parseFrontmatter(templatePath, template);
-    if (metadata.type !== 'project' || metadata.workflow !== FEATURE_WORKFLOW) {
-      failures.push(`${templatePath} must declare type: project and workflow: feature-work`);
+    if (metadata.type !== 'project') {
+      failures.push(`${templatePath} must declare type: project`);
     }
     failures.push(...briefStructureFailures(templatePath, template, { requireContent: false }));
   }

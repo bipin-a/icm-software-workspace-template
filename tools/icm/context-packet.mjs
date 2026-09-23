@@ -84,12 +84,12 @@ export async function loadContextManifest(root, project, brief) {
 export async function assembleContext(root, { project, stage, criterion, environment, workItem, rules = [], selectors = [] } = {}) {
   const checked = await featureProjectChecks(root, project);
   if (checked.failures.length) throw new Error(checked.failures.join('; '));
-  if (typeof stage !== 'string' || !/^workflows\/.+\/CONTEXT\.md$/.test(stage)) throw new Error('Select an exact workflow step path');
+  if (typeof stage !== 'string' || !/^workflows\/.+\/CONTEXT\.md$/.test(stage)) throw new Error('Select an exact workflow stage path');
   const briefPath = `projects/${project}/PROJECT.md`;
   const brief = parseFrontmatter(briefPath, await readWithin(root, briefPath));
   const stageBody = await readWithin(root, stage);
   const contract = parseFrontmatter(stage, stageBody);
-  if (contract.type !== 'workflow-step') throw new Error('Context assembly requires a workflow-step, not a router');
+  if (contract.type !== 'workflow-stage') throw new Error('Context assembly requires a workflow-stage, not a router');
   const files = new Map();
   const add = async input => {
     if (!input || Object.keys(input).some(key => !['path', 'headings'].includes(key))) throw new Error('Context inputs accept only path and headings');
@@ -104,7 +104,7 @@ export async function assembleContext(root, { project, stage, criterion, environ
   for (const path of ['AGENTS.md', 'CONTEXT.md', '_shared/voice.md', '_shared/engineering/decision-work.md', '_shared/principles/engineering-principles.md', stage]) await add({ path });
   await add({ path: briefPath, headings: ['Intent', 'Open questions'] });
   const profile = contract.context?.profile;
-  if (!profile?.path || !profile.heading) throw new Error('Workflow step needs an exact profile');
+  if (profile?.path !== stage || profile?.heading !== 'Rules') throw new Error('Workflow stage needs its own Rules selection');
   await add({ path: profile.path, headings: [profile.heading] });
   const profileBody = section(await readWithin(root, profile.path), profile.heading, profile.path);
   const selectedRules = new Set();

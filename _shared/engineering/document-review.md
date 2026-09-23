@@ -1,6 +1,6 @@
 # Review of living decisions
 
-- For `workflow: feature-work`, chat or the PR records human authority.
+- Chat or the PR records human authority.
 - A Project keeps one living `PROJECT.md` brief; split a decision into another document
   only when size or ownership warrants it.
 - Link that owner instead of repeating it and list its Project-relative path in
