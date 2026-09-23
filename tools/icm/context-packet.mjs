@@ -103,29 +103,36 @@ export async function assembleContext(root, { project, stage, criterion, environ
   };
   for (const path of ['AGENTS.md', 'CONTEXT.md', '_shared/voice.md', '_shared/engineering/decision-work.md', '_shared/principles/engineering-principles.md', stage]) await add({ path });
   await add({ path: briefPath, headings: ['Intent', 'Open questions'] });
-  const profile = contract.context?.profile;
-  if (profile?.path !== stage || profile?.heading !== 'Rules') throw new Error('Workflow stage needs its own Rules selection');
-  await add({ path: profile.path, headings: [profile.heading] });
-  const profileBody = section(await readWithin(root, profile.path), profile.heading, profile.path);
+  // The stage's own Rules table is the only owner of the rules and references it loads.
+  const rulesBody = section(stageBody, 'Rules', stage);
   const selectedRules = new Set();
-  for (const line of profileBody.split('\n')) {
+  const conditionalSources = [];
+  for (const line of rulesBody.split('\n')) {
     if (!line.trim().startsWith('|')) continue;
     const cells = line.split('|').map(cell => cell.trim());
     const target = cells[1]?.match(/\]\(([^)]+)\)/)?.[1];
     if (!target) continue;
-    const headings = [...(cells[2] ?? '').matchAll(/`([^`]+)`/g)].map(match => match[1]);
-    const chosen = /^Conditional\b/.test(cells[2]) ? headings.filter(heading => rules.includes(heading)) : headings;
+    const path = relative(root, resolve(root, dirname(stage), target));
+    const conditional = /^Conditional\b/.test(cells[2]);
+    const selection = conditional ? cells[2].slice(cells[2].indexOf(':') + 1).trim() : cells[2];
+    if (selection === 'whole file') {
+      if (!conditional) await add({ path });
+      else {
+        conditionalSources.push({ path, when: cells[2].slice(0, cells[2].indexOf(':')) });
+        if (selectors.includes(path)) await add({ path });
+      }
+      continue;
+    }
+    const headings = [...selection.matchAll(/`([^`]+)`/g)].map(match => match[1]);
+    const chosen = conditional ? headings.filter(heading => rules.includes(heading)) : headings;
     for (const heading of chosen) selectedRules.add(heading);
-    if (chosen.length) await add({ path: relative(root, resolve(root, dirname(profile.path), target)), headings: chosen });
+    if (chosen.length) await add({ path, headings: chosen });
   }
-  for (const rule of rules) if (!selectedRules.has(rule)) throw new Error(`Unknown profile rule: ${rule}`);
-  for (const input of [...(contract.context.inputs ?? []), ...(contract.context.references ?? []), ...(contract.context.output_templates ?? [])]) await add(input);
-  const conditionalSources = contract.context.selectors ?? [];
+  for (const rule of rules) if (!selectedRules.has(rule)) throw new Error(`Unknown stage rule: ${rule}`);
   for (const path of selectors) {
-    const source = conditionalSources.find(entry => entry.path === path);
-    if (!source) throw new Error(`Unknown stage selector: ${path}`);
-    await add({ path: source.path, ...(source.headings ? { headings: source.headings } : {}) });
+    if (!conditionalSources.some(source => source.path === path)) throw new Error(`Unknown stage selector: ${path}`);
   }
+  for (const input of contract.context?.inputs ?? []) await add(input);
   const executeOnly = contract.context.tools ?? [];
   for (const tool of executeOnly) {
     if (tool.access !== 'execute-only') throw new Error('Stage tools must be execute-only');

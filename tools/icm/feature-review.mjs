@@ -85,6 +85,8 @@ export async function featureProjectChecks(repositoryRoot, projectSlug, { review
   }
   if (project.id !== projectSlug) failures.push(`${path} id must match ${projectSlug}`);
   if (typeof project.title !== 'string' || !project.title.trim()) failures.push(`${path} needs a title`);
+  // There is one workflow; a stored workflow identity is a retired field.
+  if (Object.hasOwn(project, 'workflow')) failures.push(`${path} must not declare workflow; there is only one workflow`);
   for (const field of approvalFields) {
     if (Object.hasOwn(project, field)) failures.push(`${path} must not store ${field}; use the live review source and revision comparison`);
   }

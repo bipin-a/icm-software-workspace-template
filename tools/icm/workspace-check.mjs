@@ -28,20 +28,23 @@ async function optionalRead(root, path) {
   }
 }
 
+// A Rules row names headings, or `whole file`, optionally after "Conditional …:".
 function profileRuleSelections(repositoryRoot, profilePath, profileSection) {
   return profileSection.split(/\r?\n/).flatMap((line) => {
     if (!line.trim().startsWith('|')) return [];
     const cells = line.trim().replace(/^\||\|$/g, '').split('|').map((cell) => cell.trim());
     const target = cells[0]?.match(/\]\(([^)]+)\)/)?.[1];
     let selection = cells[1] ?? '';
-    if (/^Conditional\b/.test(selection)) selection = selection.slice(selection.indexOf(':') + 1);
+    const conditional = /^Conditional\b/.test(selection);
+    if (conditional) selection = selection.slice(selection.indexOf(':') + 1).trim();
     const headings = [...selection.matchAll(/`([^`]+)`/g)].map((match) => match[1]);
-    if (!target || headings.length === 0) return [];
+    const wholeFile = selection === 'whole file';
+    if (!target || (headings.length === 0 && !wholeFile)) return [];
     const sourcePath = toRepositoryPath(
       repositoryRoot,
       resolve(dirname(resolve(repositoryRoot, profilePath)), target),
     );
-    return [{ sourcePath, headings }];
+    return [{ sourcePath, headings, wholeFile, conditional }];
   });
 }
 
@@ -73,16 +76,9 @@ export function contextManifestFailures(scope, metadata) {
     return [`${scope} is missing its context manifest`];
   }
   const failures = [];
-  const allowedKeys = new Set([
-    'parameters',
-    'capabilities',
-    'profile',
-    'inputs',
-    'selectors',
-    'references',
-    'output_templates',
-    'tools',
-  ]);
+  // The stage's Rules table owns every rule and reference it loads; the
+  // manifest only names brief inputs and execute-only tools.
+  const allowedKeys = new Set(['parameters', 'capabilities', 'inputs', 'tools']);
   for (const key of Object.keys(context)) {
     if (!allowedKeys.has(key)) failures.push(`${scope} context declares unknown key ${key}`);
   }
@@ -92,16 +88,8 @@ export function contextManifestFailures(scope, metadata) {
       && (!Array.isArray(context[key]) || context[key].some((value) => typeof value !== 'string'))
     ) failures.push(`${scope} context ${key} must be a list of strings`);
   }
-  if (!context.profile?.path || !context.profile?.heading) {
-    failures.push(`${scope} must name one exact profile path and heading`);
-  } else if (!isSafeRepositoryPath(context.profile.path)) {
-    failures.push(`${scope} has an invalid profile path ${context.profile.path}`);
-  }
   const categories = [
     ['input', context.inputs ?? []],
-    ['selector', context.selectors ?? []],
-    ['reference', context.references ?? []],
-    ['output template', context.output_templates ?? []],
     ['tool', context.tools ?? []],
   ];
   const seenPaths = new Set();
@@ -117,9 +105,6 @@ export function contextManifestFailures(scope, metadata) {
       }
       if (seenPaths.has(entry.path)) failures.push(`${scope} repeats context path ${entry.path}`);
       seenPaths.add(entry.path);
-      if (kind === 'selector' && (typeof entry.when !== 'string' || entry.when.trim() === '')) {
-        failures.push(`${scope} selector ${entry.path} must declare when`);
-      }
       if (kind === 'tool' && entry.access !== 'execute-only') {
         failures.push(`${scope} tool ${entry.path} must declare execute-only access`);
       }
@@ -234,10 +219,9 @@ function manifestSourcePath(path) {
   return path;
 }
 
-async function manifestTargetFailures(repositoryRoot, scope, metadata) {
+async function manifestTargetFailures(repositoryRoot, scope, metadata, profile) {
   if (metadata.type !== 'workflow-stage' || !metadata.context) return [];
   const failures = [];
-  const profile = metadata.context.profile;
   const profileBody = profile?.path && isSafeRepositoryPath(profile.path)
     ? await optionalRead(repositoryRoot, profile.path)
     : null;
@@ -257,6 +241,7 @@ async function manifestTargetFailures(repositoryRoot, scope, metadata) {
         failures.push(`${scope} profile source ${selection.sourcePath} does not exist`);
         continue;
       }
+      if (selection.wholeFile) continue;
       for (const heading of selection.headings) {
         if (!headingSection(sourceBody, heading)) {
           failures.push(`${scope} profile source ${selection.sourcePath} is missing ${heading}`);
@@ -267,9 +252,6 @@ async function manifestTargetFailures(repositoryRoot, scope, metadata) {
 
   const categories = [
     ['input', metadata.context.inputs ?? []],
-    ['selector', metadata.context.selectors ?? []],
-    ['reference', metadata.context.references ?? []],
-    ['output template', metadata.context.output_templates ?? []],
     ['tool', metadata.context.tools ?? []],
   ];
   for (const [kind, entries] of categories) {
@@ -461,9 +443,12 @@ async function workflowFailures(repositoryRoot) {
     }
   }
   const direct = '_shared/engineering/profiles/direct-repository.md';
-  failures.push(...await manifestTargetFailures(repositoryRoot, direct, {
-    type: 'workflow-stage', context: { profile: { path: direct, heading: 'direct-repository' } },
-  }));
+  failures.push(...await manifestTargetFailures(
+    repositoryRoot,
+    direct,
+    { type: 'workflow-stage', context: {} },
+    { path: direct, heading: 'direct-repository' },
+  ));
   for (const path of contextPaths) {
     const relativePath = toRepositoryPath(repositoryRoot, path);
     const body = await readFile(path, 'utf8');
@@ -478,15 +463,18 @@ async function workflowFailures(repositoryRoot) {
       if (!/^workflows\/0[1-7]_[a-z-]+\/CONTEXT\.md$/.test(relativePath)) {
         failures.push(`${relativePath} must be a direct stage contract`);
       }
-      if (metadata.type !== 'workflow-stage'
-        || metadata.context?.profile?.path !== relativePath
-        || metadata.context?.profile?.heading !== 'Rules') {
-        failures.push(`${relativePath} must declare workflow-stage and select its own Rules heading`);
+      if (metadata.type !== 'workflow-stage' || !headingSection(body, 'Rules')) {
+        failures.push(`${relativePath} must declare workflow-stage and own a ## Rules table`);
       }
     }
     failures.push(...contextManifestFailures(relativePath, metadata));
     failures.push(...workflowContractShapeFailures(relativePath, body, metadata.type));
-    failures.push(...await manifestTargetFailures(repositoryRoot, relativePath, metadata));
+    failures.push(...await manifestTargetFailures(
+      repositoryRoot,
+      relativePath,
+      metadata,
+      { path: relativePath, heading: 'Rules' },
+    ));
   }
   failures.push(...await workflowReachabilityFailures(repositoryRoot, contextPaths));
   return failures;

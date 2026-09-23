@@ -306,10 +306,53 @@ test('the current workflow rejects nested steps and requires stage-owned rule se
   await rm(nested, { recursive: true });
   const path = join(root, 'workflows/03_build/CONTEXT.md');
   const stage = await readFile(path, 'utf8');
-  await writeFile(path, stage.replace('heading: Rules', 'heading: Missing'));
-  assert.match((await checkWorkspace(root)).failures.join('\n'), /Rules/);
+  await writeFile(path, stage.replace('## Rules', '## Loading'));
+  assert.match((await checkWorkspace(root)).failures.join('\n'), /own a ## Rules table/);
   await writeFile(path, stage.replace('`RULE-SOURCE`', '`RULE-MISSING`'));
   assert.match((await checkWorkspace(root)).failures.join('\n'), /RULE-MISSING/);
+  // A second loader in frontmatter could contradict the Rules table.
+  for (const key of ['profile', 'references', 'selectors', 'output_templates']) {
+    await writeFile(path, stage.replace('context:\n', `context:\n  ${key}: []\n`));
+    assert.match((await checkWorkspace(root)).failures.join('\n'), new RegExp(`unknown key ${key}`));
+  }
+  const design = join(root, 'workflows/02_design/CONTEXT.md');
+  const designBody = await readFile(design, 'utf8');
+  await writeFile(design, designBody.replace('_templates/adr.md', '_templates/missing-adr.md'));
+  assert.match((await checkWorkspace(root)).failures.join('\n'), /missing-adr\.md does not exist/);
+  await writeFile(design, designBody);
   await writeFile(path, stage);
   assert.deepEqual((await checkWorkspace(root)).failures, []);
+});
+
+test('each stage owns a distinct Rules table with no heading both always and conditionally loaded', async () => {
+  const tables = new Set();
+  for (const stage of ['01_understand', '02_design', '03_build', '04_validate', '05_assess-readiness', '06_release', '07_learn']) {
+    const body = await readFile(join(templateRoot, 'workflows', stage, 'CONTEXT.md'), 'utf8');
+    const rules = body.slice(body.indexOf('## Rules'));
+    tables.add(rules.replace(/\]\([^)]*\)/g, ']()'));
+    const seen = new Map();
+    for (const line of rules.split('\n').filter(row => row.startsWith('| ['))) {
+      const [, source, selection] = line.split('|').map(cell => cell.trim());
+      const conditional = selection.startsWith('Conditional');
+      for (const [, heading] of selection.matchAll(/`([^`]+)`/g)) {
+        const key = `${source} ${heading}`;
+        assert.ok(!seen.has(key) || seen.get(key) === conditional, `${stage} loads ${heading} both always and conditionally`);
+        seen.set(key, conditional);
+      }
+    }
+  }
+  assert.equal(tables.size, 7, 'stages must not share one copied table');
+});
+
+test('briefs must not keep the retired workflow field', async t => {
+  const root = await mkdtemp(join(tmpdir(), 'icm-workflow-field-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  await cp(templateRoot, root, { recursive: true, filter: path => !['.git', 'node_modules'].includes(path.split('/').at(-1)) });
+  await mkdir(join(root, 'projects/example'), { recursive: true });
+  const brief = '---\ntype: project\nid: example\ntitle: Example\nworkflow: feature-work\n---\n'
+    + ['Intent', 'Product behavior', 'Technical choices', 'Acceptance and proof', 'Open questions', 'Links'].map(h => `## ${h}\n\nAccepted ${h}.\n`).join('\n');
+  await writeFile(join(root, 'projects/example/PROJECT.md'), brief);
+  assert.match((await featureProjectChecks(root, 'example')).failures.join('\n'), /must not declare workflow/);
+  await writeFile(join(root, 'projects/example/PROJECT.md'), brief.replace('workflow: feature-work\n', ''));
+  assert.deepEqual((await featureProjectChecks(root, 'example')).failures, []);
 });

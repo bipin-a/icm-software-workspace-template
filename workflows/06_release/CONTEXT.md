@@ -1,15 +1,9 @@
 ---
 type: workflow-stage
 context:
-  profile:
-    path: workflows/06_release/CONTEXT.md
-    heading: Rules
   inputs:
     - path: projects/<project-slug>/PROJECT.md
       headings: [Technical choices, Acceptance and proof, Links, Product behavior]
-  references:
-    - path: workflows/06_release/references/release-rules.md
-      headings: [Authority and boundary, Plan before writes, Execute the authorized plan, Verify and decide]
 ---
 
 # 06_release — Deploy and verify one environment at a time
@@ -18,7 +12,7 @@ One job: plan, execute, verify, and decide one authorized environment change. Sk
 
 ## Inputs
 
-- Current chat/PR decisions and authority. With a Project, use the manifest's brief sections and relevant linked decision owners. Bounded work needs no Project.
+- Current chat/PR decisions and authority. With a Project, use the brief sections named in frontmatter and relevant linked decision owners. Bounded work needs no Project.
 - The accepted candidate, configured provider procedure, selected target, existing plan and authority, and environment-specific migration, proof, recovery, and monitoring obligations. Never load credential values.
 
 Do not load unrelated Projects, stages, or complete reference libraries.
@@ -42,23 +36,15 @@ Resolve missing authority for the plan, production, or a changed action. Reuse e
 
 ## Rules
 
-Load only the named headings; conditional rows apply only when triggered. The
-manifest lists brief inputs and additional stage references and selectors.
+This table is the only list of rules and references this stage loads. Load the
+named headings, or the whole file where a row says so. Load a conditional row
+only when its trigger applies.
 
 | Source | Load only |
 |---|---|
-| [`safeguards.md`](../../_shared/engineering/safeguards.md) | `RULE-PLAN-APPROVAL`; `RULE-RELEVANCE`; `RULE-ARCHITECTURE-DIRECTION`; `RULE-SOURCE`; `RULE-REPLACE-FIRST`; `RULE-WORKTREES`; `RULE-REVIEWABLE-COMMITS`; `RULE-DIFF-TRUTH`; `RULE-WHOLE-TRUTH` |
-| [`safeguards.md`](../../_shared/engineering/safeguards.md) | Conditional when replacing behavior or protection: `RULE-REMOVE-LEGACY`; `RULE-MEANINGFUL-DELETION` |
-| [`safeguards.md`](../../_shared/engineering/safeguards.md) | Conditional for data repair or migration: `RULE-CORRUPT-STATE`; `RULE-MIGRATION-OBJECT-PARITY` |
-| [`safeguards.md`](../../_shared/engineering/safeguards.md) | Conditional for tests: `RULE-TEST-VALUE`; `RULE-DISCRIMINATING-TESTS`; `RULE-PUBLIC-CONTRACT`; `RULE-CONSEQUENCE-TESTS` |
-| [`document-review.md`](../../_shared/engineering/document-review.md) | `Review and change`; `Mechanical comparison` |
-| [`testing-rules.md`](../../_shared/engineering/testing-rules.md) | `Earn each test`; `Use the efficient proof sequence`; `Focused repository commands`; `Worktree dependency bootstrap` |
-| [`testing-rules.md`](../../_shared/engineering/testing-rules.md) | Conditional for ICM edits: `ICM artifact validation` |
-| [`testing-rules.md`](../../_shared/engineering/testing-rules.md) | Conditional for tests: `Prove the right cause at a stable boundary`; `Reuse test infrastructure without centralizing scenarios` |
+| [`safeguards.md`](../../_shared/engineering/safeguards.md) | `RULE-PLAN-APPROVAL`; `RULE-AGENT-PRESENTED-APPROVAL`; `RULE-SOURCE`; `RULE-NO-INFERENCE`; `RULE-DEPLOYMENT-CONFIG`; `RULE-MIGRATION-OBJECT-PARITY`; `RULE-CONTRADICTIONS`; `RULE-WHOLE-TRUTH` |
+| [`release-rules.md`](references/release-rules.md) | `Authority and boundary`; `Plan before writes`; `Execute the authorized plan`; `Verify and decide` |
+| [`release-rules.md`](references/release-rules.md) | Conditional on a failed or partial deployment: `Diagnose a deployed runtime failure`; `Failure and rollback boundary` |
+| [`testing-rules.md`](../../_shared/engineering/testing-rules.md) | `Use the efficient proof sequence`; `Progress evidence through environments`; `Focused repository commands` |
 | [`testing-rules.md`](../../_shared/engineering/testing-rules.md) | Conditional for browser proof: `Local browser-test safety` |
-| [`testing-rules.md`](../../_shared/engineering/testing-rules.md) | Conditional when full integration proof is required: `Exact-candidate integration gate` |
-| [`github-delivery-rules.md`](../../_shared/engineering/github-delivery-rules.md) | Conditional for Git delivery: `Repository hygiene and branches`; `Commits`; `Pull requests are human review surfaces`; `Checks and delivery truth`; `Traceability and human gates`; `Merge methods preserve evidence and history` |
-| [`review-rules.md`](../04_validate/references/review-rules.md) | Conditional for candidate or finding review: `Baseline review`; `Conditional angles`; `Finding format` |
-| [`review-rules.md`](../04_validate/references/review-rules.md) | Conditional for ICM Markdown: `ICM Markdown review` |
-| [`interface-evidence.md`](../01_understand/references/interface-evidence.md) | Conditional for product UI: `Interface ownership boundary`; `Required UI evidence`; `Evidence record` |
-| [`release-rules.md`](../06_release/references/release-rules.md) | Conditional for deployment: `Authority and boundary`; `Plan before writes`; `Execute the authorized plan`; `Verify and decide` |
+| [`github-delivery-rules.md`](../../_shared/engineering/github-delivery-rules.md) | `Traceability and human gates` |

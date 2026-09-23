@@ -1,23 +1,9 @@
 ---
 type: workflow-stage
 context:
-  profile:
-    path: workflows/02_design/CONTEXT.md
-    heading: Rules
   inputs:
     - path: projects/<project-slug>/PROJECT.md
       headings: [Product behavior, Technical choices, Acceptance and proof, Open questions, Intent]
-  selectors:
-    - path: _shared/domain/CONTEXT.md
-      when: a technical choice depends on domain definitions or ownership
-    - path: _templates/prototype-evidence.md
-      when: an isolated experiment is needed to distinguish technical options
-    - path: _templates/architecture-investigation.md
-      when: material architecture uncertainty needs a bounded investigation
-    - path: _templates/adr.md
-      when: an accepted durable architecture decision needs a separate rationale
-    - path: _shared/engineering/multi-pr-delivery.md
-      when: dependencies, independent review boundaries, or release risk need several PRs to converge
 ---
 
 # 02_design — Choose the simplest sufficient solution
@@ -26,7 +12,7 @@ One job: choose technical owners and a proportionate delivery shape. Skip when t
 
 ## Inputs
 
-- Current chat/PR decisions and authority. With a Project, use the manifest's brief sections and relevant linked decision owners. Bounded work needs no Project.
+- Current chat/PR decisions and authority. With a Project, use the brief sections named in frontmatter and relevant linked decision owners. Bounded work needs no Project.
 - The affected code, verified external facts, existing decisions, and material dependencies.
 
 Do not load unrelated Projects, stages, or complete reference libraries.
@@ -50,23 +36,21 @@ Resolve missing authority for consequential technical and delivery choices toget
 
 ## Rules
 
-Load only the named headings; conditional rows apply only when triggered. The
-manifest lists brief inputs and additional stage references and selectors.
+This table is the only list of rules and references this stage loads. Load the
+named headings, or the whole file where a row says so. Load a conditional row
+only when its trigger applies.
 
 | Source | Load only |
 |---|---|
-| [`safeguards.md`](../../_shared/engineering/safeguards.md) | `RULE-PLAN-APPROVAL`; `RULE-RELEVANCE`; `RULE-ARCHITECTURE-DIRECTION`; `RULE-SOURCE`; `RULE-REPLACE-FIRST`; `RULE-WORKTREES`; `RULE-REVIEWABLE-COMMITS`; `RULE-DIFF-TRUTH`; `RULE-WHOLE-TRUTH` |
+| [`safeguards.md`](../../_shared/engineering/safeguards.md) | `RULE-PLAN-APPROVAL`; `RULE-PLAIN-DECISIONS`; `RULE-AGENT-PRESENTED-APPROVAL`; `RULE-RELEVANCE`; `RULE-ARCHITECTURE-DIRECTION`; `RULE-SOURCE`; `RULE-CALLER-MEANING`; `RULE-NO-INFERENCE`; `RULE-REPLACE-FIRST`; `RULE-CONTRADICTIONS` |
 | [`safeguards.md`](../../_shared/engineering/safeguards.md) | Conditional when replacing behavior or protection: `RULE-REMOVE-LEGACY`; `RULE-MEANINGFUL-DELETION` |
 | [`safeguards.md`](../../_shared/engineering/safeguards.md) | Conditional for data repair or migration: `RULE-CORRUPT-STATE`; `RULE-MIGRATION-OBJECT-PARITY` |
-| [`safeguards.md`](../../_shared/engineering/safeguards.md) | Conditional for tests: `RULE-TEST-VALUE`; `RULE-DISCRIMINATING-TESTS`; `RULE-PUBLIC-CONTRACT`; `RULE-CONSEQUENCE-TESTS` |
-| [`document-review.md`](../../_shared/engineering/document-review.md) | `Review and change`; `Mechanical comparison` |
-| [`testing-rules.md`](../../_shared/engineering/testing-rules.md) | `Earn each test`; `Use the efficient proof sequence`; `Focused repository commands`; `Worktree dependency bootstrap` |
-| [`testing-rules.md`](../../_shared/engineering/testing-rules.md) | Conditional for ICM edits: `ICM artifact validation` |
-| [`testing-rules.md`](../../_shared/engineering/testing-rules.md) | Conditional for tests: `Prove the right cause at a stable boundary`; `Reuse test infrastructure without centralizing scenarios` |
-| [`testing-rules.md`](../../_shared/engineering/testing-rules.md) | Conditional for browser proof: `Local browser-test safety` |
-| [`testing-rules.md`](../../_shared/engineering/testing-rules.md) | Conditional when full integration proof is required: `Exact-candidate integration gate` |
-| [`github-delivery-rules.md`](../../_shared/engineering/github-delivery-rules.md) | Conditional for Git delivery: `Repository hygiene and branches`; `Commits`; `Pull requests are human review surfaces`; `Checks and delivery truth`; `Traceability and human gates`; `Merge methods preserve evidence and history` |
-| [`review-rules.md`](../04_validate/references/review-rules.md) | Conditional for candidate or finding review: `Baseline review`; `Conditional angles`; `Finding format` |
-| [`review-rules.md`](../04_validate/references/review-rules.md) | Conditional for ICM Markdown: `ICM Markdown review` |
-| [`interface-evidence.md`](../01_understand/references/interface-evidence.md) | Conditional for product UI: `Interface ownership boundary`; `Required UI evidence`; `Evidence record` |
-| [`release-rules.md`](../06_release/references/release-rules.md) | Conditional for deployment: `Authority and boundary`; `Plan before writes`; `Execute the authorized plan`; `Verify and decide` |
+| [`document-review.md`](../../_shared/engineering/document-review.md) | `Review and change` |
+| [`testing-rules.md`](../../_shared/engineering/testing-rules.md) | `Earn each test`; `Prove the right cause at a stable boundary` |
+| [`github-delivery-rules.md`](../../_shared/engineering/github-delivery-rules.md) | `Delivery profiles` |
+| [`multi-pr-delivery.md`](../../_shared/engineering/multi-pr-delivery.md) | Conditional when dependencies, review boundaries, or release risk need several PRs: `Choose and prepare` |
+| [`domain/CONTEXT.md`](../../_shared/domain/CONTEXT.md) | Conditional when a technical choice depends on domain definitions or ownership: whole file |
+| [`prototype-evidence.md`](../../_templates/prototype-evidence.md) | Conditional when an isolated experiment is needed to distinguish options: whole file |
+| [`architecture-investigation.md`](../../_templates/architecture-investigation.md) | Conditional when material architecture uncertainty needs a bounded investigation: whole file |
+| [`adr.md`](../../_templates/adr.md) | Conditional when an accepted durable architecture decision needs a separate rationale: whole file |
+| [`testing-rules.md`](../../_shared/engineering/testing-rules.md) | Conditional for ICM document edits: `ICM artifact validation` |

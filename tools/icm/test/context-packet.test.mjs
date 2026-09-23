@@ -39,12 +39,12 @@ test('packet assembly selects real sections, retains oversized evidence, and rej
   assert.equal(result.summary.oversized, true);
   assert.ok(!result.entries.some(entry => entry.path.includes('/profiles/')),
     'the stage owns its rule selection rather than loading a second profile');
-  const safeguards = result.entries.find(entry => entry.path.endsWith('/safeguards.md'));
-  assert.doesNotMatch(safeguards.body, /### RULE-CONSEQUENCE-TESTS/);
-  const triggered = await assembleContext(root, { ...options, rules: ['RULE-CONSEQUENCE-TESTS'] });
-  assert.match(triggered.entries.find(entry => entry.path.endsWith('/safeguards.md')).body,
-    /### RULE-CONSEQUENCE-TESTS/);
-  await assert.rejects(assembleContext(root, { ...options, rules: ['RULE-NOT-DECLARED'] }), /Unknown profile rule/);
+  const testing = result.entries.find(entry => entry.path.endsWith('/testing-rules.md'));
+  assert.doesNotMatch(testing.body, /## Local browser-test safety/);
+  const triggered = await assembleContext(root, { ...options, rules: ['Local browser-test safety'] });
+  assert.match(triggered.entries.find(entry => entry.path.endsWith('/testing-rules.md')).body,
+    /## Local browser-test safety/);
+  await assert.rejects(assembleContext(root, { ...options, rules: ['RULE-NOT-DECLARED'] }), /Unknown stage rule/);
   const decision = result.entries.find(e => e.path.endsWith('decisions.md'));
   assert.match(decision.body, /Required owner/);
   assert.match(decision.body, /Selected behavior/);
@@ -54,8 +54,10 @@ test('packet assembly selects real sections, retains oversized evidence, and rej
     const path = `workflows/${file}`;
     const contract = parseFrontmatter(path, await readFile(join(root, path), 'utf8'));
     if (contract.type !== 'workflow-stage') continue;
-    const packet = await assembleContext(root, { project: 'example', stage: path, selectors: (contract.context.selectors ?? []).map(source => source.path) });
-    for (const source of contract.context.selectors ?? []) assert.ok(packet.entries.some(entry => entry.path === source.path));
+    const { conditionalSources } = await assembleContext(root, { project: 'example', stage: path });
+    const selectors = conditionalSources.map(source => source.path);
+    const packet = await assembleContext(root, { project: 'example', stage: path, selectors });
+    for (const source of selectors) assert.ok(packet.entries.some(entry => entry.path === source && !entry.headings), `${path} loads ${source} whole when selected`);
     for (const tool of contract.context.tools ?? []) {
       assert.ok(packet.executeOnly.some(entry => entry.path === tool.path));
       assert.ok(!packet.entries.some(entry => entry.path === tool.path), 'execute-only tool code must not be loaded');
