@@ -40,6 +40,13 @@
 
 ## Choose the next useful action
 
+Before asking a question that could pause engineering work, or before a material
+action when authority may be missing, use
+[`human-call`](../../.agents/skills/human-call/SKILL.md). It owns the shared
+act, investigate, or ask classification and the human-facing call. The current
+Project, chat, pull request, issue, or configured approval surface remains the
+decision owner; the skill creates no second decision store.
+
 - **Uncertain interaction:** initiate a small UI preview with existing components
   and safe data; use [Interface evidence](../../workflows/01_understand/references/interface-evidence.md).
   A trivial correction can be inspected directly without a separate prototype.

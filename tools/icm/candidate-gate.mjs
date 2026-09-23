@@ -196,10 +196,12 @@ function successfulReceipt(receipt, tree, gate) {
     || receipt.result?.status !== 'success'
     || receipt.result?.exitCode !== 0
   ) return false;
-  const phases = new Map((receipt.phases ?? []).map((phase) => [phase.name, phase]));
-  return gate.phases.every((phase) => (
-    phases.get(phase.name)?.status === 'success' && phases.get(phase.name)?.exitCode === 0
-  ));
+  if (!Array.isArray(receipt.phases) || receipt.phases.length !== gate.phases.length) return false;
+  return gate.phases.every((phase, index) => {
+    const recorded = receipt.phases[index];
+    return recorded?.name === phase.name && recorded.status === 'success'
+      && recorded.exitCode === 0 && JSON.stringify(recorded.command) === JSON.stringify(phase.command);
+  });
 }
 
 function gateEnvironment() {

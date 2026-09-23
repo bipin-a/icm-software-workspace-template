@@ -74,7 +74,8 @@ npm --prefix tools/icm run check -- --project <slug> --reviewed-commit <full-sha
 npm --prefix tools/icm run context -- AGENTS.md CONTEXT.md _shared/voice.md
 ```
 
-The checker validates routes, profile headings, local links, and living briefs.
+The checker validates routes, profile headings, local links, living briefs,
+and the canonical human-call skill and its Claude adapter.
 Revision comparison includes working and staged decision documents. It detects
 change; it cannot establish human approval or classify editorial wording.
 
@@ -83,6 +84,33 @@ full candidate gate. The size estimate is advisory. The gate is disabled until
 real application phases are configured; see
 [testing rules](_shared/engineering/testing-rules.md#exact-candidate-integration-gate).
 It is machine proof, separate from human review of decisions.
+
+## Optional coordination tools
+
+These capabilities preserve one living Project brief and apply only when needed:
+
+- [Skill adapters](.agents/skills/to-tickets/SKILL.md) prepare slices;
+  [integration review](.agents/skills/integration-review/SKILL.md) assesses the
+  assembled candidate through the existing workflow owners.
+- [Changed-file checks](_shared/engineering/testing-rules.md#changed-file-icm-checks)
+  select affected Project documents and incoming references with
+  `node tools/icm/workspace-check.mjs --changed-since <commit>`.
+- [Gate receipt reuse](_shared/engineering/testing-rules.md#exact-candidate-integration-gate)
+  checks narrowly permitted prose edits against a successful tested tree. These
+  machine receipts never replace human approval.
+- [Context packets](_shared/engineering/context-packets.md) assemble declared
+  criterion, environment, and prerequisite sections without silently dropping
+  required text to fit a size target.
+- [Multi-PR coordination](_shared/engineering/multi-pr-delivery.md) and
+  [generated delivery views](_shared/engineering/delivery-views.md) use GitHub
+  metadata as their live owner. Preview is read-only; publishing is explicit.
+
+For an existing repository, adopt these through a reviewed diff while preserving
+its code and decision owners. Configure real proof commands before using the
+candidate gate; choose the integration mode and actual GitHub objects before
+using delivery views. Add context selectors only when the living brief needs
+them. This template does not migrate existing repositories or support older
+specification/approval-receipt Project formats.
 
 ## Maintain this template
 
@@ -100,3 +128,7 @@ Van Clief and David McDermott and was informed by the MIT-licensed
 [`icm-architect`](https://github.com/RinDig/icm-architect) skill.
 The [methodology notes](_shared/methodology/interpretable-context-methodology.md)
 distinguish the original staged method from this software-work adaptation.
+
+The optional [Firstmate assessment](_shared/engineering/evidence/firstmate-decision-escalation-2026-09-14.md)
+records the dated source ideas behind human-call and the mechanisms not adopted.
+Read it when evaluating that design; it is not part of normal agent context.

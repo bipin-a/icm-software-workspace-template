@@ -35,7 +35,9 @@ proceeds within scope. Unrelated work needs its own authority.
 
 Explain material decisions in plain language. Define needed terms, give a
 concrete repository example, state what can go wrong, and ask one decision
-question at a time.
+question at a time. Use the shared
+[`human-call`](../../.agents/skills/human-call/SKILL.md) procedure to decide
+whether to act, investigate, or ask and to present the call.
 
 **Why:** an approval is only useful when the human can see the real choice and its
 consequences.

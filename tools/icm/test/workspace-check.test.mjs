@@ -207,3 +207,92 @@ test('brief and template validation reject ambiguous or wrongly nested decision 
     assert.match(result.failures.join('\n'), /must use ## Intent|repeats ## Intent/, replacement);
   }
 });
+
+test('human-call wiring rejects missing skills, wrong owners, and lost shared routes', async (t) => {
+  const root = await mkdtemp(join(tmpdir(), 'icm-human-call-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  await cp(templateRoot, root, { recursive: true, filter: path => !['.git', 'node_modules'].includes(path.split('/').at(-1)) });
+  assert.deepEqual((await checkWorkspace(root)).failures, []);
+  const canonical = '.agents/skills/human-call/SKILL.md';
+  const adapter = '.claude/skills/human-call/SKILL.md';
+  for (const path of [canonical, adapter]) {
+    const fullPath = join(root, path);
+    const original = await readFile(fullPath, 'utf8');
+    await rm(fullPath);
+    assert.ok((await checkWorkspace(root)).failures.some(failure => failure.includes(`${path} is required`)));
+    await writeFile(fullPath, original.replace('name: human-call', 'name: unrelated'));
+    assert.ok((await checkWorkspace(root)).failures.some(failure => failure.includes(path) && failure.includes('name')));
+    await writeFile(fullPath, original.replace(/^description:.*$/m, 'description:'));
+    assert.ok((await checkWorkspace(root)).failures.some(failure => failure.includes(path) && failure.includes('describe')));
+    await writeFile(fullPath, original);
+  }
+  for (const path of [adapter, '_shared/engineering/decision-work.md', '_shared/engineering/safeguards.md']) {
+    const fullPath = join(root, path);
+    const original = await readFile(fullPath, 'utf8');
+    // The replacement still resolves: ordinary broken-link checks cannot detect a wrong owner.
+    const wrongOwner = path === adapter ? '../../../README.md' : '../../README.md';
+    await writeFile(fullPath, original.replace(/\]\([^)]*\.agents\/skills\/human-call\/SKILL\.md\)/, `](${wrongOwner})`));
+    assert.ok((await checkWorkspace(root)).failures.some(failure => failure.includes(path) && failure.includes('must link')));
+    await writeFile(fullPath, original);
+  }
+  const adapterPath = join(root, adapter);
+  const original = await readFile(adapterPath, 'utf8');
+  await writeFile(adapterPath, original.replace('../../../.agents/', '../../../.agents/skills/../').replace('This adapter owns no decision procedure.', 'The linked skill owns the procedure.'));
+  assert.deepEqual((await checkWorkspace(root)).failures, [], 'equivalent link spelling and prose are not policy drift');
+});
+
+
+test('delivery skill adapters must keep their canonical identity and target', async (t) => {
+  const root = await mkdtemp(join(tmpdir(), 'icm-delivery-skills-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  await cp(templateRoot, root, { recursive: true, filter: path => !['.git', 'node_modules'].includes(path.split('/').at(-1)) });
+  for (const name of ['integration-review', 'to-tickets']) {
+    const path = join(root, `.claude/skills/${name}/SKILL.md`);
+    const original = await readFile(path, 'utf8');
+    await writeFile(path, original.replace(`.agents/skills/${name}/`, '.agents/skills/human-call/'));
+    assert.ok((await checkWorkspace(root)).failures.some(failure => failure.includes(name) && failure.includes('must link')));
+    await writeFile(path, original);
+  }
+  assert.deepEqual((await checkWorkspace(root)).failures, []);
+});
+
+
+test('changed checking includes staged, restored, untracked paths and incoming links', async (t) => {
+  const { root, reviewedCommit } = await createFeatureReviewFixture(t);
+  await writeFile(join(root, 'projects/example/technical.md'), 'Changed decision.\n');
+  await git(root, 'add', '.');
+  await writeFile(join(root, 'projects/example/technical.md'), 'Reuse the task query.\n');
+  await writeFile(join(root, 'projects/example/new.md'), 'New evidence.\n');
+  let result = await checkWorkspace(root, { changedSince: reviewedCommit });
+  assert.deepEqual(result.failures, []);
+  assert.deepEqual(result.scope.paths, ['projects/example/new.md', 'projects/example/technical.md']);
+  await writeFile(join(root, 'projects/example/technical.md'), '[Deleted evidence](new.md)\n');
+  await git(root, 'add', '.');
+  await git(root, 'commit', '-m', 'Add evidence');
+  const base = (await git(root, 'rev-parse', 'HEAD')).stdout.trim();
+  await rm(join(root, 'projects/example/new.md'));
+  result = await checkWorkspace(root, { changedSince: base });
+  assert.ok(result.scope.affected.includes('projects/example/technical.md'));
+  assert.match(result.failures.join('\n'), /links to missing new.md/);
+  await writeFile(join(root, 'unknown.txt'), 'Unknown impact');
+  result = await checkWorkspace(root, { changedSince: base });
+  assert.equal(result.scope.mode, 'workspace');
+  assert.match((await checkWorkspace(root, { changedSince: base, projectSlug: 'example' })).failures.join('\n'), /cannot be combined/);
+});
+
+
+test('review comparisons include context selectors and staged selector changes', async t => {
+  const { root, brief } = await createFeatureReviewFixture(t);
+  const path = join(root, 'projects/example/context.json');
+  await writeFile(join(root, 'projects/example/PROJECT.md'), brief.replace('workflow: feature-work', 'workflow: feature-work\ncontext_packets: context.json'));
+  const original = JSON.stringify({ schemaVersion: 1, nodes: [] });
+  await writeFile(path, original);
+  await git(root, 'add', '.'); await git(root, 'commit', '-m', 'Declare context selection');
+  const reviewedCommit = (await git(root, 'rev-parse', 'HEAD')).stdout.trim();
+  await writeFile(path, JSON.stringify({ schemaVersion: 1, nodes: [{ id: 'changed-scope' }] }));
+  await git(root, 'add', '.');
+  await writeFile(path, original);
+  const result = await featureProjectChecks(root, 'example', { reviewedCommit });
+  assert.deepEqual(result.comparison.changed, ['projects/example/context.json']);
+  assert.equal(result.comparison.status, 'needs-review');
+});

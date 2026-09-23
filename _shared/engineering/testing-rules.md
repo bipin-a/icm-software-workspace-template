@@ -214,8 +214,27 @@ A required full gate cannot be waived by leaving configuration disabled.
   under the common Git directory.
 - Run `node tools/icm/verify-candidate-receipt.mjs` before relying on that receipt.
   It accepts only complete success for the current clean tree.
-- This portable gate does not implement the source repository's special
-  cross-tree receipt reuse. For ordinary focused evidence, inspect the diff,
-  retain the tested revision, and rerun affected proof only. A new required
-  full-gate tree needs its own receipt.
+- To reuse evidence after editorial edits, run `node tools/icm/verify-candidate-receipt.mjs
+  --evidence-tree <tested-tree-sha>`. The tested commit must be an ancestor.
+- Only modifications of existing regular `README.md` and
+  `projects/<slug>/PROJECT.md` files qualify; Project frontmatter must be unchanged.
+  Additions, deletions, moves, mode changes, linked decision documents, workflow,
+  configuration, operational instructions, and executable inputs require fresh proof.
+- The verifier checks the path boundary, not whether meaning is editorial. Review
+  the diff and changed decisions separately, and rerun affected ICM checks.
+- Preserve the original receipt and tested tree. Report reuse explicitly; never
+  claim the current tree ran the full gate. A failed receipt cannot be reused.
 - Machine evidence cannot authorize merge, deployment, or a product decision.
+
+
+## Changed-file ICM checks
+
+Use `node tools/icm/workspace-check.mjs --changed-since <commit>` for bounded
+Project prose changes. Selection includes committed, staged, unstaged, and
+untracked non-ignored paths. The checker validates current files, affected
+Projects, and incoming Markdown links transitively. It does not replace staged
+revision comparison before relying on human review.
+
+Shared, tooling, and unknown paths expand to the whole-workspace audit. A
+removed Project is allowed only if remaining references and owners are valid.
+This mode cannot be combined with Project or reviewed-commit selection.

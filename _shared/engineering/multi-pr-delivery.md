@@ -37,3 +37,41 @@ integrated proof on the exact candidate after child findings are resolved.
 Retain original review and tested revisions; verify current merge preconditions.
 Release follows the same explicit authorization and environment verification as
 single-PR work. Link the final delivery evidence from the brief.
+
+Use the [to-tickets skill](../../.agents/skills/to-tickets/SKILL.md) to prepare
+slices and the [integration-review skill](../../.agents/skills/integration-review/SKILL.md)
+when reviewing an assembled candidate. Both route to these existing owners.
+
+## Supported integration workflow
+
+Select this mode explicitly when multi-PR coordination is warranted:
+
+1. Identify the accepted brief, trunk, existing Project branch, and current base.
+   Use that Project branch as the integration branch; do not introduce an
+   artifact-only precursor branch or PR.
+2. Present the dependency graph, priorities, proof obligations, release blockers,
+   safe parallel lanes, synchronization points, and human checkpoints.
+3. Within authorized scope, create one parent issue and a draft integration PR
+   targeting trunk. Create child issues in prerequisite order and record their
+   actual identities. Use the [delivery-view metadata](delivery-views.md) as the
+   single owner of changing coordination fields.
+4. Target each child PR at the integration branch. Keep an independently
+   observable result, its tests, and its relevant layers together in each slice.
+5. Squash children into integration after focused proof, review, and applicable
+   human authorization. Merge trunk into integration at planned checkpoints and
+   before final validation. Prefer unrelated fixes on trunk first, followed by
+   an explicit integration synchronization.
+6. Recompute the frontier and refresh both generated views after each material
+   change. Do not infer final integration correctness from passing child checks.
+7. Review the complete assembled candidate, resolve findings, and run required
+   integrated proof on its exact revision. Keep the integration PR draft until
+   release-blocking work, proof, and human readiness decisions are complete.
+8. Merge integration to trunk with a merge commit preserving the validated head
+   as a parent, provided repository policy permits it. Verify the head and merge
+   preconditions immediately before the merge. If repository policy forbids
+   this shape, resolve the delivery-method decision before starting this mode.
+
+A new integration commit invalidates assumptions about the previously tested
+candidate; reuse only evidence whose explicit verifier and scope permit it.
+After merge, link final implementation and release evidence from the brief.
+The generated view does not replace deployment verification or human authority.
