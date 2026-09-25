@@ -22,7 +22,7 @@ Do not load unrelated Projects, other stages, or complete reference libraries.
 1. Establish the user's job, desired outcome, fixed constraints, scope, and material unknowns. Distinguish a suggested solution from an explicit constraint. Carry forward accepted selections; investigate only missing or changed facts.
 2. Inspect existing behavior and its owners, reading exact applicable domain definitions. For unresolved intent that changes a source of truth or has several defensible user-visible shapes, compare credible behaviors and sacrifices. Otherwise stay with the clear approach and explain that choice.
 3. For a UI-affecting outcome, follow [Interface evidence](references/interface-evidence.md). Initiate a preview when it resolves uncertainty and reconcile what it teaches into the accepted behavior.
-4. Define observable acceptance and the smallest sufficient proof. Keep decisions in chat/PR; use a living Project brief only when durable coordination needs it.
+4. Define observable acceptance and the smallest sufficient proof. Each proposed metric or check names the acceptance criterion it serves; defer any that serves none. Keep decisions in chat/PR; use a living Project brief only when durable coordination needs it.
 5. Use bounded technical inspection or [Design](../02_design/CONTEXT.md) when feasibility can change the product decision. Carry the evidence back to this decision owner.
 
 ## Outputs

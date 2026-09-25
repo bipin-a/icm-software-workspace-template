@@ -63,6 +63,10 @@ decision owner; the skill creates no second decision store.
   minimal proof.
 - Carry decisions through implementation. Documents and draft PRs are
   intermediate unless specifically requested as the deliverable.
+- **Documentation budget:** keep progress status in one owner. Write a note
+  only when something would otherwise be lost: a decision and its reason, a
+  surprise or failure, a measured result, or a deviation from the plan.
+  Routine progress belongs in the commit message.
 
 ## Investigation limit
 
