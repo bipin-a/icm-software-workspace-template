@@ -24,11 +24,13 @@ Do not load unrelated Projects, stages, or complete reference libraries.
 3. Record owners, invariants, proof, and relevant environment, migration, rollback, and monitoring obligations under Technical choices. An ADR or experiment must earn its place.
 4. Keep one PR as the default. When several PRs are justified, define vertical outcomes, blockers, merge conditions, integration lifetime, combined proof, and human checkpoints under the multi-PR rules. Do not copy live status.
 5. Complete coupled technical and delivery choices before presenting missing decisions together. Reuse authority; create dependent delivery objects only after the plan is agreed. Do not trade away accepted security, accessibility, integrity, or recovery obligations to reduce effort.
-6. Return changed product behavior to Understand. Otherwise continue to Build within authority.
+6. Before approval, show a short code sketch (about ten lines) of each main function or boundary the change adds, so the human can judge its complexity. Skip this for documentation-only or mechanical changes.
+7. Return changed product behavior to Understand. Otherwise continue to Build within authority.
 
 ## Outputs
 
 - Brief: Technical choices, or the same decisions in chat/PR; earned investigation or ADR links.
+- Code sketches of the main functions or boundaries, shown in chat/PR.
 
 ## Human check
 
@@ -36,7 +38,8 @@ Resolve missing authority for consequential technical and delivery choices toget
 
 ## Rules
 
-This table is the only list of rules and references this stage loads. Load the
+This table lists the rules this stage adds to the always-loaded set named in
+`AGENTS.md` (voice, decision work, and principles); those still apply. Load the
 named headings, or the whole file where a row says so. Load a conditional row
 only when its trigger applies.
 

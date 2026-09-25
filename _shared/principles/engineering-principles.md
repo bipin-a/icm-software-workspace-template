@@ -17,6 +17,13 @@ authorities.
 - Choose the simplest reversible design that satisfies the accepted outcome.
 - Add an extension seam only for credible pressure on a boundary that would be
   expensive to change later.
+- Write the plainest code that meets the stated requirement, for the people who
+  must read, maintain, or present it. Test seams, generics, async code, and
+  lifecycle wrappers are abstractions too; each needs a named requirement that
+  plainer code cannot meet.
+- Prefer a library's documented test doubles over custom injection points.
+- When a proof rule and simplicity conflict, choose the least complex proof that
+  still distinguishes the failure, and state the trade-off.
 
 ## Make material trade-offs visible
 

@@ -36,7 +36,8 @@ Reuse authority for an accepted correction. Human review is required before prom
 
 ## Rules
 
-This table is the only list of rules and references this stage loads. Load the
+This table lists the rules this stage adds to the always-loaded set named in
+`AGENTS.md` (voice, decision work, and principles); those still apply. Load the
 named headings, or the whole file where a row says so. Load a conditional row
 only when its trigger applies.
 

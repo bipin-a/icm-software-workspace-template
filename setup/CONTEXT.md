@@ -21,6 +21,9 @@ Template maintenance leaves the questionnaire incomplete.
    Identify the workspace, intended outcome, and existing canonical owners.
 2. Reuse current answers. Ask only unresolved questions that change setup;
    group related questions when practical. Routine inspection may proceed.
+   Always settle the code audience and quality bar (questionnaire item 2),
+   and show the starter defaults in item 3 for confirmation; inherited defaults
+   are material assumptions, not settled answers.
 3. Write accepted answers to the questionnaire's canonical output map. Keep
    completion state here, without a duplicate answer set.
 4. Select real source paths, applicable constraints, decision owners, and

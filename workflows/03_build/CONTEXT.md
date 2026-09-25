@@ -19,9 +19,9 @@ Do not load unrelated Projects, stages, or complete reference libraries.
 
 ## Process
 
-1. Verify scope, base, branch, current changes, and authority. Preserve unrelated work and use the configured worktree dependency procedure when needed.
+1. Verify scope, base, branch, current changes, and authority. Preserve unrelated work and use the configured worktree dependency procedure when needed. Before the first increment that depends on an external model or paid service, make one real call confirming that the planned model and parameters are accepted and the account can be charged.
 2. For several PRs, verify the accepted plan and integration ancestry. Reuse the Project branch and existing issues; create only missing authorized objects. Read them back and select an unblocked slice. A single PR skips this coordination.
-3. Trace public behavior and canonical owners. Use existing proof where sufficient. When new behavioral proof is earned, show the intended failure, implement the smallest complete outcome, and make it pass. Regressions and high-risk changes require distinguishing failure-first proof; documentation and mechanical changes may mark behavioral testing N/A.
+3. Make the first increment run the whole path end to end, even crudely, before adding design detail or hardening; show the human its code, not only a summary. Trace public behavior and canonical owners. Use existing proof where sufficient. When new behavioral proof is earned, show the intended failure, implement the smallest complete outcome, and make it pass. Regressions and high-risk changes require distinguishing failure-first proof; documentation and mechanical changes may mark behavioral testing N/A.
 4. Run focused checks, inspect the full increment diff, and commit coherent work when delivery is in scope. Continue increments until the intended slice is complete.
 5. Within publication authority, push and open or update the PR against the configured base or integration branch. Use the PR template to record exact revisions, proof, omissions, and remaining risks. Read back head, base, body, and checks.
 6. Verify all required slices and merge conditions before relying on an assembled candidate. Child proof does not establish combined correctness. Refresh any configured delivery view from live metadata.
@@ -37,7 +37,8 @@ Review scope, commits, proof, and omissions. Publication and passing checks do n
 
 ## Rules
 
-This table is the only list of rules and references this stage loads. Load the
+This table lists the rules this stage adds to the always-loaded set named in
+`AGENTS.md` (voice, decision work, and principles); those still apply. Load the
 named headings, or the whole file where a row says so. Load a conditional row
 only when its trigger applies.
 
