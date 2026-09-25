@@ -18,15 +18,21 @@ second copy of accepted answers. Write decisions to the owners below.
    to-tickets skill; this cannot be undone in place, so choose team when unsure.
 1. **Identity and outcome:** who uses the workspace, what is being built, who
    owns material decisions, and where does existing application code live?
-2. **Shared constraints:** which domain, security, privacy, accessibility,
-   migration, and operational rules apply across work? Accept or revise the
-   starter voice and principles.
-3. **Review and delivery:** where do human decisions and implementation reviews
+2. **Code audience and quality bar:** who reads, maintains, or presents the
+   code, and what bar applies: production, prototype, or demonstration (such
+   as a take-home walkthrough)? Size describes team structure, not this bar;
+   a solo repository can still be production software.
+3. **Shared constraints:** which domain, security, privacy, accessibility,
+   migration, and operational rules apply across work? Show the starter
+   defaults that most affect the output (quality bar, test depth, tolerance
+   for abstraction, documentation volume) and have the human confirm or
+   revise each. Do not record inherited defaults as accepted without showing them.
+4. **Review and delivery:** where do human decisions and implementation reviews
    live? What branch, merge, required-check, and authorization rules apply?
    Read live settings when those rules depend on an external repository.
-4. **Proof:** what executable checks and environments already exist? Which
+5. **Proof:** what executable checks and environments already exist? Which
    focused commands prove current work, and what scope requires a full gate?
-5. **Reusable inputs:** what existing data, references, services, or design
+6. **Reusable inputs:** what existing data, references, services, or design
    assets may be used, with what access and freshness limits?
 
 ## Conditional decisions
@@ -51,6 +57,7 @@ technology or deployment plan is known.
 | Decision | Owner |
 |---|---|
 | Identity and source layout | `../README.md`, `../AGENTS.md`, `../CONTEXT.md`, `../app/README.md` |
+| Code audience and quality bar | `../README.md`; restate in a Project's Technical choices when it differs |
 | Voice | `../_shared/voice.md` |
 | Shared constraints and domain meaning | Narrowest owner under `../_shared/`, linked from its catalog |
 | Completion | `../_shared/definition-of-done.md` |
