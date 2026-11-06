@@ -148,3 +148,7 @@ distinguish the original staged method from this software-work adaptation.
 The optional [Firstmate assessment](_shared/engineering/evidence/firstmate-decision-escalation-2026-09-14.md)
 records the dated source ideas behind human-call and the mechanisms not adopted.
 Read it when evaluating that design; it is not part of normal agent context.
+
+The optional [icm-architect adoption proposal](_shared/engineering/evidence/icm-architect-adoption-2026-11-06.md)
+compares this template with icm-architect for Gemini CLI use. It is a
+proposal, not a rule, and it is not part of normal agent context.
