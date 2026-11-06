@@ -56,22 +56,26 @@ Purpose: count drift per thread so you know when to hand off, and collect
 evidence for any later rule change.
 
 - One shared script: `tools/icm/drift-hook.mjs`.
-  - Runs on `UserPromptSubmit` (exists in both Claude Code and Codex).
+  - Runs on `UserPromptSubmit` (Claude Code, Codex) and `BeforeAgent`
+    (Gemini CLI); it echoes the incoming `hook_event_name` in its output.
   - If the prompt starts with `!drift` (optional category word after it),
     add one to a per-session counter in `.icm/drift/<session_id>.json`
     (add `.icm/` to `.gitignore`).
   - Return a short line to context, e.g. `drift: 2 this session`.
   - Any other prompt passes through untouched.
-- Two thin configs pointing at the script:
+- Three thin configs pointing at the script:
   - Claude Code: `.claude/settings.json` (`hooks.UserPromptSubmit`).
   - Codex: `.codex/hooks.json`.
+  - Gemini CLI: `.gemini/settings.json` (`hooks.BeforeAgent`, via
+    `$GEMINI_PROJECT_DIR`). Gemini fingerprints project hooks and warns
+    before the first run and after any change to the hook's name or command.
 - Verify before relying on it:
   - Input field names (session id, prompt) may differ between the tools; the
     script should accept both.
   - Codex hooks must be trusted before they run and may need a feature flag
     depending on version. Check https://developers.openai.com/codex/hooks
     against the installed Codex version.
-- Test both tools with a real `!drift` prompt.
+- Test each tool with a real `!drift` prompt.
 - Run as a trial for about two weeks. No rule-file changes during the trial.
 
 How to use the count: 1 drift → correct once; the same drift again → hand off

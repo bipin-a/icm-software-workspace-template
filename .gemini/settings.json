@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "BeforeAgent": [
+      {
+        "hooks": [
+          {
+            "name": "icm-drift",
+            "type": "command",
+            "command": "node \"$GEMINI_PROJECT_DIR/tools/icm/drift-hook.mjs\"",
+            "description": "Count !drift prompts per session in .icm/drift/",
+            "timeout": 10000
+          }
+        ]
+      }
+    ]
+  }
+}

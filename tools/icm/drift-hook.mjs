@@ -1,11 +1,13 @@
 import { execFile } from 'node:child_process';
+import { realpathSync } from 'node:fs';
 import { copyFile, mkdir, readFile, rename, writeFile } from 'node:fs/promises';
-import { dirname, join, relative, resolve, sep } from 'node:path';
+import { dirname, extname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 
-// Claude Code and Codex both send `session_id` and `prompt` on UserPromptSubmit;
-// the alternates keep the hook working if either tool renames them.
+// Claude Code and Codex send `session_id` and `prompt` on UserPromptSubmit, and
+// Gemini CLI sends the same fields on BeforeAgent; the alternates keep the hook
+// working if a tool renames them.
 const SESSION_FIELDS = ['session_id', 'sessionId', 'conversation_id'];
 const PROMPT_FIELDS = ['prompt', 'user_prompt', 'userPrompt'];
 const TRANSCRIPT_FIELDS = ['transcript_path', 'transcriptPath'];
@@ -54,7 +56,8 @@ async function gitState(cwd) {
 // Transcripts expire, so keep a copy of what the agent had read at this point.
 async function snapshotTranscript(root, transcriptPath, directory, name) {
   if (!transcriptPath) return null;
-  const target = join(directory, `${name}.jsonl`);
+  // Claude and Codex write JSONL transcripts; Gemini CLI writes JSON.
+  const target = join(directory, `${name}${extname(transcriptPath) || '.jsonl'}`);
   try {
     await copyFile(transcriptPath, target);
   } catch (error) {
@@ -116,25 +119,31 @@ export function driftContext(counter) {
   return `drift: ${counter.count} this session${category ? ` (latest: ${category})` : ''}`;
 }
 
+// Echo the event that fired so one script serves UserPromptSubmit (Claude, Codex)
+// and BeforeAgent (Gemini CLI).
+export function hookOutput(input, counter) {
+  return {
+    hookSpecificOutput: {
+      hookEventName: firstString(input, ['hook_event_name', 'hookEventName']) || 'UserPromptSubmit',
+      additionalContext: driftContext(counter),
+    },
+  };
+}
+
 async function readStdin() {
   const chunks = [];
   for await (const chunk of process.stdin) chunks.push(chunk);
   return Buffer.concat(chunks).toString('utf8');
 }
 
-const invokedPath = process.argv[1] ? resolve(process.argv[1]) : '';
+// Compare real paths: a project dir behind a symlink would otherwise skip the hook.
+const invokedPath = process.argv[1] ? realpathSync(resolve(process.argv[1])) : '';
 if (invokedPath === fileURLToPath(import.meta.url)) {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
   try {
-    const counter = await recordDrift(root, JSON.parse(await readStdin()));
-    if (counter) {
-      console.log(JSON.stringify({
-        hookSpecificOutput: {
-          hookEventName: 'UserPromptSubmit',
-          additionalContext: driftContext(counter),
-        },
-      }));
-    }
+    const input = JSON.parse(await readStdin());
+    const counter = await recordDrift(root, input);
+    if (counter) console.log(JSON.stringify(hookOutput(input, counter)));
   } catch (error) {
     // A broken counter must never block the human's prompt.
     console.error(`drift-hook: ${error.message}`);
