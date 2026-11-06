@@ -1,8 +1,10 @@
-# icm-architect adoption proposal — 2026-11-06
+# icm-architect assessment — 2026-11-06
 
-This is optional, dated maintainer research. It is a proposal, not an
-execution rule or authorization to implement. Normal engineering work does not
-need to load it.
+This is optional, dated maintainer research. It records why the template
+adopted some icm-architect ideas and not others. It is not an execution rule.
+The [README](../../../README.md#maintain-this-template) and `workspace-check`
+own the adopted behavior. Normal engineering work does not need to load this
+note.
 
 It compares this template with
 [icm-architect at 8bc2f56](https://github.com/RinDig/icm-architect/tree/8bc2f5610d3843b3ffa31a142effe6b6337fef3c)
@@ -11,20 +13,21 @@ source and the Gemini CLI docs as of this date. Nothing was installed or run in
 Gemini CLI. The template already credits icm-architect as an influence in
 [`README.md`](../../../README.md).
 
-## Recommendation
+## Outcome
 
-| Idea | Proposal | Size |
-|---|---|---|
-| `GEMINI.md` pointer to `AGENTS.md` | Adopt | One file, one checker rule |
-| Gemini loads `.agents/skills/` | No change needed; verify on first Gemini run | None |
-| Walk test | Adopt an adapted version as a template-maintenance check | One short section |
-| `links.py` | Do not adopt; port one rule if the pointer lands | Small checker change |
-| `quotes.py`, `index.py` | Do not adopt | None |
-| `viz.py` graph | Park | None |
+| Idea | Outcome |
+|---|---|
+| `GEMINI.md` pointer to `AGENTS.md` | Adopted: root `GEMINI.md` plus a checker rule |
+| Gemini loads `.agents/skills/` | No change needed; verify on first Gemini run |
+| Walk test | Adopted, adapted, as a template-maintenance check in the README |
+| `links.py` | Not adopted; its `@` import rule became the pointer check |
+| `quotes.py`, `index.py` | Not adopted |
+| `viz.py` graph | Parked |
+| Restructure safeguards | Not adopted; noted below |
 
 ## Entry file and `GEMINI.md`
 
-**Proposal:** add a root `GEMINI.md` whose only content is `@./AGENTS.md`.
+**Adopted:** a root `GEMINI.md` whose only content is `@./AGENTS.md`.
 
 - Gemini CLI loads `GEMINI.md` by default and supports relative `@file`
   imports
@@ -41,9 +44,9 @@ Gemini CLI. The template already credits icm-architect as an influence in
     matching file on the path and sends it with every prompt. Here that would
     load each route's `CONTEXT.md` automatically, which works against scoped,
     per-stage loading. Never add `CONTEXT.md` to that list.
-- **Checker rule:** extend the skill-adapter check so `GEMINI.md`, if present,
-  must hold only the `AGENTS.md` import. That keeps it from becoming a second
-  entry file.
+- **Checker rule:** if `GEMINI.md` exists, it must hold only the `AGENTS.md`
+  import, so it cannot become a second entry file. An instance that drops
+  Gemini support may delete it.
 - **Verify on first use:** `/memory show` in Gemini CLI lists the `AGENTS.md`
   text.
 - **Out of scope:** the repository has no `CLAUDE.md`. Whether to add one is a
@@ -66,9 +69,8 @@ Gemini CLI. The template already credits icm-architect as an influence in
 
 ## Walk test
 
-**Proposal:** adopt an adapted walk test as a manual check for template
-maintenance and for a new instance's setup review. Do not make it a workflow
-stage or a per-change gate.
+**Adopted:** an adapted walk test as a manual check after changes to routing,
+entry, or stage files. It is not a workflow stage or a per-change gate.
 
 icm-architect's test: an agent with no memory must orient, act, and report
 status from the files alone. The parts that fit this template:
@@ -94,7 +96,7 @@ where live status is read from?*
 
 | icm-architect script | What `tools/icm` already does | Proposal |
 |---|---|---|
-| `links.py`: relative links, `@` import pointers, backticked Inputs paths, optional graph | `workspace-check` checks every local markdown link, blocks links that leave the repo (including through symlinks), checks stage reachability, contract markers, frontmatter `context.inputs` targets, and skill adapters | Do not adopt. Port only the `@` import rule, with the `GEMINI.md` change |
+| `links.py`: relative links, `@` import pointers, backticked Inputs paths, optional graph | `workspace-check` checks every local markdown link, blocks links that leave the repo (including through symlinks), checks stage reachability, contract markers, frontmatter `context.inputs` targets, and skill adapters | Not adopted. Its `@` import rule became the `GEMINI.md` pointer check |
 | `quotes.py`: quotes match a raw transcript or page, keep-out phrases | Nothing equivalent. Evidence here cites pinned commits and links, and the paper notes are paraphrased | Do not adopt. It serves knowledge bundles built from transcripts, not this workspace |
 | `index.py`: generated `_index.md` per folder | Routers (`CONTEXT.md`) are short and hand-owned | Do not adopt. No shelf here is large enough to need an index |
 | `viz.py`: interactive graph of the link walk | Nothing equivalent | Park. Useful for a person reading a large instance, but it adds no check and the page loads libraries from a CDN |
@@ -110,8 +112,7 @@ Reasons not to copy the scripts in:
 
 ## Conflicts with current template decisions
 
-None of these is proposed for change. They are listed so nobody adopts them by
-accident.
+None of these changed. They are listed so nobody adopts them by accident.
 
 | icm-architect | This template |
 |---|---|
@@ -133,12 +134,10 @@ accident.
   nearest `CONTEXT.md` or `AGENTS.md`. The template's adaptation notes already
   do this.
 
-## If accepted
+## Verify on first Gemini run
 
-Implement as one bounded PR:
+On the spike VM, before relying on Gemini CLI:
 
-1. Add `GEMINI.md` (`@./AGENTS.md`).
-2. Extend `workspace-check` to require that pointer shape, with a test.
-3. Add the adapted walk test to the template-maintenance notes.
-4. Run the walk and the two `/memory show` and `/skills list` checks in Gemini
-   CLI on the spike VM, and record any mismatch.
+1. `/memory show` lists the `AGENTS.md` text.
+2. `/skills list` shows the canonical skills.
+3. Run the walk test in Gemini CLI and record any mismatch here or on the PR.

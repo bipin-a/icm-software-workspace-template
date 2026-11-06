@@ -77,7 +77,7 @@ npm --prefix tools/icm run context -- AGENTS.md CONTEXT.md _shared/voice.md
 ```
 
 The checker validates stage routes, stage-owned rule selections, local links, living briefs,
-and the canonical human-call skill and its Claude adapter.
+the canonical human-call skill and its Claude adapter, and the `GEMINI.md` pointer.
 Revision comparison includes working and staged decision documents. It detects
 change; it cannot establish human approval or classify editorial wording.
 
@@ -136,6 +136,25 @@ product-specific commands, domain rules, credentials, data, or live-state claims
 Template prompts belong only in setup or optional starters; remove them from
 instantiated decision documents. Structural checks do not evaluate agent judgment.
 
+`AGENTS.md` is the only entry file. Gemini CLI reads `GEMINI.md`, which holds
+only `@./AGENTS.md`; Codex reads `AGENTS.md` directly. All three agents read the
+canonical skills in `.agents/skills/` (Claude through `.claude/skills/` adapters).
+
+### Walk test
+
+Structural checks cannot show that a fresh agent picks the right route. After
+changing routing, entry, or stage files, start each agent you support with no
+history and give it a sample task. Pass when it can, from the files alone:
+
+- Name the route and canonical owner from `AGENTS.md` plus at most two more reads.
+- Name the chosen stage's inputs, job, outputs, and human check.
+- Say where live delivery, approval, and check state is read from, without
+  claiming that state from a file.
+
+While walking, move any content found in a routing file to its owner, and keep
+one home for each decision. Check a selected packet's size with
+`npm --prefix tools/icm run context`.
+
 ## License and attribution
 
 Released under the [MIT License](LICENSE). The workspace builds on
@@ -149,6 +168,6 @@ The optional [Firstmate assessment](_shared/engineering/evidence/firstmate-decis
 records the dated source ideas behind human-call and the mechanisms not adopted.
 Read it when evaluating that design; it is not part of normal agent context.
 
-The optional [icm-architect adoption proposal](_shared/engineering/evidence/icm-architect-adoption-2026-11-06.md)
-compares this template with icm-architect for Gemini CLI use. It is a
-proposal, not a rule, and it is not part of normal agent context.
+The optional [icm-architect assessment](_shared/engineering/evidence/icm-architect-adoption-2026-11-06.md)
+records the dated source ideas behind the `GEMINI.md` pointer and the walk test,
+and the icm-architect mechanisms not adopted. It is not part of normal agent context.
