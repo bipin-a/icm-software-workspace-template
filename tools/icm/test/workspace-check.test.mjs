@@ -248,6 +248,25 @@ test('human-call wiring rejects missing skills, wrong owners, and lost shared ro
 });
 
 
+test('GEMINI.md stays a one-line pointer to AGENTS.md', async (t) => {
+  const root = await mkdtemp(join(tmpdir(), 'icm-entry-pointer-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  await cp(templateRoot, root, { recursive: true, filter: path => !['.git', 'node_modules'].includes(path.split('/').at(-1)) });
+  const pointer = join(root, 'GEMINI.md');
+  const pointerFailure = failures => failures.some(failure => failure.includes('GEMINI.md must contain only @./AGENTS.md'));
+
+  assert.equal((await readFile(pointer, 'utf8')).trim(), '@./AGENTS.md');
+  assert.deepEqual((await checkWorkspace(root)).failures, []);
+  await writeFile(pointer, '@AGENTS.md\n');
+  assert.deepEqual((await checkWorkspace(root)).failures, [], 'the bare import form is equivalent');
+  await writeFile(pointer, '@./AGENTS.md\n\nAlso follow these Gemini-only rules.\n');
+  assert.ok(pointerFailure((await checkWorkspace(root)).failures), 'extra content makes a second entry file');
+  await writeFile(pointer, '@./README.md\n');
+  assert.ok(pointerFailure((await checkWorkspace(root)).failures), 'the pointer must target AGENTS.md');
+  await rm(pointer);
+  assert.equal(pointerFailure((await checkWorkspace(root)).failures), false, 'an instance may drop Gemini support');
+});
+
 test('delivery skill adapters must keep their canonical identity and target', kitOnly, async (t) => {
   const root = await mkdtemp(join(tmpdir(), 'icm-delivery-skills-'));
   t.after(() => rm(root, { recursive: true, force: true }));

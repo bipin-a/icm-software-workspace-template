@@ -475,6 +475,20 @@ async function skillFailures(repositoryRoot, name) {
   return failures;
 }
 
+// Tools that read another entry name get a one-line import of AGENTS.md, never a copy.
+export const ENTRY_POINTERS = { 'GEMINI.md': ['@./AGENTS.md', '@AGENTS.md'] };
+
+async function entryPointerFailures(repositoryRoot) {
+  const failures = [];
+  for (const [path, allowed] of Object.entries(ENTRY_POINTERS)) {
+    const body = await optionalRead(repositoryRoot, path);
+    if (body !== null && !allowed.includes(body.trim())) {
+      failures.push(`${path} must contain only ${allowed[0]}`);
+    }
+  }
+  return failures;
+}
+
 async function rootRouteFailures(repositoryRoot) {
   const failures = [];
   const rootBody = await optionalRead(repositoryRoot, 'CONTEXT.md');
@@ -594,6 +608,7 @@ async function checkWorkspaceInternal(repositoryRoot, { projectSlug, reviewedCom
   const failures = await configurationFailures(repositoryRoot, config, Boolean(configBody));
   failures.push(...await markdownLinkFailures(repositoryRoot));
   failures.push(...await rootRouteFailures(repositoryRoot));
+  failures.push(...await entryPointerFailures(repositoryRoot));
   failures.push(...await sizeFailures(repositoryRoot, config.size));
   failures.push(...await teamBoundaryFailures(repositoryRoot));
   failures.push(...await teamKitRuleFailures(repositoryRoot));
